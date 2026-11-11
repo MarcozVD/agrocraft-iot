@@ -278,7 +278,12 @@ def dashboard(uid, title, panels, tags, desc="", time_from="now-24h", refresh="1
         "annotations": annotations(device_regex),
         "templating": {"list": templating or []},
         "links": [{"title": "AgroCraft", "type": "dashboards", "tags": ["agrocraft"],
-                   "asDropdown": True, "includeVars": False, "keepTime": True}],
+                   "asDropdown": True, "includeVars": False, "keepTime": True},
+                  {"title": "Panel de control (retroceso)", "type": "link", "url": "/iot/",
+                   "icon": "bolt", "targetBlank": True},
+                  {"title": "Mapa del mundo", "type": "link",
+                   "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0", "icon": "external link",
+                   "targetBlank": True}],
         "panels": panels,
     }
 
@@ -362,7 +367,8 @@ def resumen():
         "**Clases:** Real · Digital Twin · API · DataSet\n\n"
         "**Marcas en las gráficas:** naranja = comando de retroceso aceptado; "
         "morado = evento del dispositivo (riego, bomba, cosecha, intruso, alarma).\n\n"
-        "Detalle por dispositivo con promedio, máximo y mínimo: menú *AgroCraft* → *Por dispositivo*."))]
+        "Detalle por dispositivo con promedio, máximo y mínimo: menú *AgroCraft* → *Por dispositivo*.\n\n"
+        "[Panel de control](/iot/) · [Mapa del mundo](/map/?world=minecraft_overworld&zoom=5&x=12&z=0)"))]
     p.append(table("Estado de la flota", g(8, y, 16, 13), fleet_table_query(),
                    desc="Un dispositivo está fuera de línea si no envía datos en 3 intervalos.",
                    overrides=STATE_COLORS))
@@ -582,8 +588,7 @@ def operacion():
     p.append(ts("Celular real (phone-01): batería y aceleración", g(12, y, 12, 8), [
         ("phone-01", "battery_pct", "Batería", GREEN, "percent"),
         ("phone-01", "accel_ms2", "Aceleración", BLUE, "accMS2"),
-        ("phone-01", "lux", "Luz", YELLOW, "lux"),
-    ], axis_right={("phone-01", "accel_ms2"), ("phone-01", "lux")}))
+    ], axis_right={("phone-01", "accel_ms2")}))
     return dashboard("agro-operacion", "AgroCraft · Operación y salud", p, ["operacion"])
 
 

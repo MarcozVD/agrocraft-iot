@@ -188,7 +188,7 @@ services:
       ENFORCE_WHITELIST: "TRUE"
       ENABLE_RCON: "TRUE"                             # solo red interna; el puerto no se publica
       RCON_PASSWORD: ${RCON_PASSWORD}
-      MODRINTH_PROJECTS: bluemap
+      MODRINTH_PROJECTS: squaremap                   # mapa web 2D (MIT); BlueMap exigía declarar licencia de Minecraft
       AGRO_MQTT_URL: tcp://mosquitto:1883
       AGRO_MQTT_USER: mc-bridge
       AGRO_MQTT_PASS: ${MQTT_PASS_MC_BRIDGE}

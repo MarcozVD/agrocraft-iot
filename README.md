@@ -19,6 +19,8 @@ de Bucaramanga (Open-Meteo) gobierna el clima, el secado del suelo y la temperat
 | `/iot/api/ingest/<device>?token=…` | Ingesta HTTPS para dispositivos sin MQTT (celular) |
 | `/iot/api/alert?token=…` | Webhook de Grafana Alerting (puede ejecutar un comando por alerta) |
 | `/mqtt` · `:8883` | MQTT sobre WebSocket / sobre TLS |
+| `/map/` | Mapa web del mundo (squaremap), se actualiza cada 15 s |
+| `:25565` | Servidor de Minecraft (solo IP autorizadas y lista blanca) |
 
 ## Arquitectura
 
@@ -113,7 +115,7 @@ Arranque manual: `.venv\Scripts\pythonw.exe agent.py`. Arranque con Windows:
 
 **Celular (`phone-01`):** app Sensor Logger → Settings → Data Streaming → HTTP Push, URL
 `https://agrocraft.northcentralus.cloudapp.azure.com/iot/api/ingest/phone-01?token=<MQTT_PASS_PHONE_01>`,
-sensores Light, Barometer, Battery, Accelerometer y Microphone. La ubicación se descarta. Para obtener la URL
+sensores Barometer, Battery, Accelerometer y Microphone (Light solo existe en Android). La ubicación se descarta. Para obtener la URL
 completa con su token (Git Bash en el PC):
 `ssh -i ~/Downloads/iot_key.pem mvale@agrocraft.northcentralus.cloudapp.azure.com 'cd ~/agrocraft/platform && echo "https://$(grep ^SITE_HOST= .env | cut -d= -f2)/iot/api/ingest/phone-01?token=$(grep ^MQTT_PASS_PHONE_01= .env | cut -d= -f2)"'`.
 Si el token está mal, `docker compose logs control` muestra "token inválido o ausente".
@@ -134,3 +136,13 @@ bash scripts/build-plugin.sh                             # compila e instala el 
 - Autonomous Greenhouse Challenge 2019, Wageningen University & Research, vía CEAOD:
   https://doi.org/10.4121/uuid:88d22c60-21b3-4ea8-90db-20249a5be2a7
 - UCI Individual Household Electric Power Consumption: https://archive.ics.uci.edu/dataset/235
+
+## Dentro del mundo (plugin 0.2)
+
+- **Tablero** frente al punto de aparición: clima real de Bucaramanga, calidad del aire, celular,
+  PC gateway y salud del servidor, actualizados cada 2 s.
+- **Letrero junto a cada gemelo** con sus lecturas (parcelas, tanque, invernadero, silo, estación, seguridad).
+- **Palancas**: riego A y B, bomba del tanque, ventilas del invernadero y alarma. Moverlas ejecuta el
+  actuador y publica el evento `player_actuator` (retroceso iniciado desde el juego).
+- Cada comando que llega desde la plataforma se anuncia en el chat del juego con su origen
+  (panel, regla, alerta). Entradas y salidas de jugadores se publican como eventos de `mc-server`.

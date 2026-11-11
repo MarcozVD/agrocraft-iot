@@ -25,34 +25,28 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 | Servidor Minecraft (Paper 1.21.11) + plugin `agrocraft-bridge` 0.1.0 | Funcionando, granja construida |
 | Gemelos de Minecraft (8) | **Capturando desde 11 nov 01:05** |
 | Real `gw-pc-01` (agente del PC, MQTT/TLS) | **Capturando desde 11 nov 08:24** · solo mientras el PC esté encendido |
-| Real `phone-01` (celular → HTTPS) | Endpoint listo y probado; falta configurar la app en un celular |
-| Real `esp32-01` | Pendiente (D4: ¿hay hardware?) |
+| Real `phone-01` (iPhone, Sensor Logger → HTTPS) | **Capturando desde 11 nov 14:15** · presión, sonido, aceleración, batería (iOS no expone luz) |
+| Real `esp32-01` | Descartado: no hay hardware (D4) |
 | Copias de seguridad | Diarias 03:30 en la VM (systemd); primera copia ya descargada al PC |
 | Repositorio | https://github.com/MarcozVD/agrocraft-iot (privado) |
-| Mapa web, plugin 0.2, documento | Pendientes |
+| Mapa web `/map/` (squaremap) | Funcionando |
+| Plugin 0.2: letreros en vivo, palancas, anuncios en el chat, eventos de jugadores | Funcionando (palancas sin probar con un jugador) |
+| Documento | Pendiente |
 
-Total: **14 dispositivos con datos** (8 gemelos + 3 API + 2 dataset + 1 real). Las cuatro clases
+Total: **15 dispositivos con datos** (8 gemelos + 3 API + 2 dataset + 2 reales). Las cuatro clases
 cubiertas.
 
 ### Siguientes pasos, en orden
 
-1. ~~**Arranque automático del agente `gw-pc-01`**~~ **Hecho (11 nov):** acceso directo en la carpeta Inicio de Windows. Comando usado:
-   `powershell -ExecutionPolicy Bypass -File devices
-eal\pc-agent\install-autostart.ps1`
-   (lo debe ejecutar el usuario; crea un acceso directo en la carpeta Inicio). Sin esto, el agente
-   se detiene al reiniciar el PC.
-2. **`phone-01`**: instalar Sensor Logger en un celular y configurar HTTP Push (ver `README.md`).
-3. **Canal de notificación humano** para las alertas (Telegram o Discord): agregar un segundo
-   receptor en `platform/grafana/provisioning/alerting/contact-points.yml` (requiere token del bot).
-4. **Mapa web** y acceso al mundo: decidir D8, lista blanca con los nombres de jugador, plugin de
-   inicio de sesión.
-5. **`esp32-01`** si hay hardware (adaptar sketch del Lab 2 al bróker propio, puerto 8883).
-6. **Plugin 0.2**: pantallas con lecturas reales dentro del juego, palanca que enciende el LED del
-   ESP32, eventos de jugadores.
-7. **Experimentos de retroceso** con hora y motivo anotados (sección 9, Fase 5). Se pueden hacer
-   desde el panel `/iot/`; quedan marcados en las gráficas.
-8. **Documento**, análisis con IA, PDF, repositorio público, sustentación. Capturas de los
-   dashboards ya en `docs/evidencias/` (regenerarlas al cierre con más días de datos).
+1. **Lista blanca:** nombre de jugador de TLauncher de cada integrante (y su IP pública para el
+   puerto 25565). Sin esto nadie puede entrar al mundo ni probar las palancas.
+2. **Canal humano de alertas** (Telegram o Discord): requiere token del bot.
+3. **Experimentos de retroceso** con hora y motivo anotados (sección 9, Fase 5), desde el panel
+   `/iot/` y desde las palancas del mundo.
+4. **Documento**, análisis con IA, PDF, repositorio público, sustentación. Capturas en
+   `docs/evidencias/` (regenerarlas al cierre con todos los días de datos).
+5. Opcional: marcadores en el mapa web con el valor actual de cada sensor (API de squaremap);
+   AMQP para `ds-energia`.
 
 Operación diaria (entrar a la VM, ver registros, enviar comandos, desplegar): ver `README.md`.
 
@@ -69,7 +63,7 @@ Operación diaria (entrar a la VM, ver registros, enviar comandos, desplegar): v
 | D5 | URL | **Hecho:** `agrocraft.northcentralus.cloudapp.azure.com` |
 | D6 | Repositorio | **Hecho:** cuenta `MarcozVD`, repo `agrocraft-iot`, privado por ahora; hacerlo público para la entrega |
 | D7 | Entrega | **Lunes 16 o jueves 19 de noviembre** (confirmar con el docente). El cronograma cubre ambos casos |
-| D8 | Mapa web | **Abierta.** BlueMap está instalado pero inactivo: para activarlo hay que declarar en su configuración que se tiene licencia de Minecraft Java, y el grupo no la tiene. Alternativas sin esa condición: squaremap (2D) o Dynmap (vista isométrica) |
+| D8 | Mapa web | **Hecho (11 nov): squaremap 1.3.12 (MIT) en `/map/`; BlueMap retirado.** Antes: BlueMap está instalado pero inactivo: para activarlo hay que declarar en su configuración que se tiene licencia de Minecraft Java, y el grupo no la tiene. Alternativas sin esa condición: squaremap (2D) o Dynmap (vista isométrica) |
 | D9 | Quién entra al mundo | **Abierta:** nombres de jugador para la lista blanca e IP públicas de los integrantes para el puerto 25565 (hoy solo la IP de un integrante) |
 
 ---

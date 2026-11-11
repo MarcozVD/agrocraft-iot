@@ -1,5 +1,8 @@
 package co.agrocraft.bridge;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -15,6 +18,8 @@ final class RealWorld {
     double et0RateMmH = 0.1;
     int weatherCode = 0;
     long updatedMs = 0;
+    /** Última telemetría de cada dispositivo de API y real (para las pantallas del mundo). */
+    final Map<String, JsonObject> latest = new HashMap<>();
 
     void update(String device, String payload) {
         JsonObject data;
@@ -23,6 +28,7 @@ final class RealWorld {
         } catch (RuntimeException error) {
             return;
         }
+        latest.put(device, data);
         switch (device) {
             case "api-clima" -> {
                 tempC = Json.num(data, "temp_c", tempC);

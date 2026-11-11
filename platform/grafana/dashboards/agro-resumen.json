@@ -80,6 +80,20 @@
       "asDropdown": true,
       "includeVars": false,
       "keepTime": true
+    },
+    {
+      "title": "Panel de control (retroceso)",
+      "type": "link",
+      "url": "/iot/",
+      "icon": "bolt",
+      "targetBlank": true
+    },
+    {
+      "title": "Mapa del mundo",
+      "type": "link",
+      "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0",
+      "icon": "external link",
+      "targetBlank": true
     }
   ],
   "panels": [
@@ -95,7 +109,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "### Gemelo digital de una granja en Minecraft\nLos bloques del mundo son **sensores y actuadores IoT**. El clima real de Bucaramanga (Open-Meteo) gobierna lluvia, hora, secado del suelo y temperatura del gemelo.\n\n**Protocolos:** MQTT 3.1.1 (TLS 8883 · WSS 443) · HTTPS REST\n\n**Clases:** Real · Digital Twin · API · DataSet\n\n**Marcas en las gráficas:** naranja = comando de retroceso aceptado; morado = evento del dispositivo (riego, bomba, cosecha, intruso, alarma).\n\nDetalle por dispositivo con promedio, máximo y mínimo: menú *AgroCraft* → *Por dispositivo*."
+        "content": "### Gemelo digital de una granja en Minecraft\nLos bloques del mundo son **sensores y actuadores IoT**. El clima real de Bucaramanga (Open-Meteo) gobierna lluvia, hora, secado del suelo y temperatura del gemelo.\n\n**Protocolos:** MQTT 3.1.1 (TLS 8883 · WSS 443) · HTTPS REST\n\n**Clases:** Real · Digital Twin · API · DataSet\n\n**Marcas en las gráficas:** naranja = comando de retroceso aceptado; morado = evento del dispositivo (riego, bomba, cosecha, intruso, alarma).\n\nDetalle por dispositivo con promedio, máximo y mínimo: menú *AgroCraft* → *Por dispositivo*.\n\n[Panel de control](/iot/) · [Mapa del mundo](/map/?world=minecraft_overworld&zoom=5&x=12&z=0)"
       }
     },
     {

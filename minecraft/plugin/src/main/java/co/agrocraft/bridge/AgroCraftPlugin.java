@@ -33,12 +33,13 @@ import com.google.gson.JsonParser;
  * dispositivos de API. El plugin lleva el modelo, así que el mundo evoluciona sin jugadores.
  */
 public final class AgroCraftPlugin extends JavaPlugin implements Listener {
-    static final String FW = "agrocraft-bridge-0.1.0";
+    static final String FW = "agrocraft-bridge-0.2.0";
 
     Layout layout;
     Mqtt mqtt;
     final RealWorld real = new RealWorld();
     private final Map<String, Twin> twins = new LinkedHashMap<>();
+    private Displays displays;
     private File stateFile;
     private long lastStep;
     private int secondsToSave = 60;
@@ -88,7 +89,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
                     setting("AGRO_MQTT_USER", "mqtt.user", "mc-bridge"),
                     setting("AGRO_MQTT_PASS", "mqtt.password", ""),
                     "agro/twin/mc-server/status",
-                    new String[] {"agro/twin/+/cmd", "agro/api/+/telemetry"},
+                    new String[] {"agro/twin/+/cmd", "agro/api/+/telemetry", "agro/real/+/telemetry"},
                     this::onMqttMessage, this::onMqttConnected, getLogger());
         } catch (MqttException error) {
             getLogger().log(Level.SEVERE, "No se pudo crear el cliente MQTT; el plugin se desactiva", error);
@@ -97,6 +98,9 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         }
 
         Bukkit.getPluginManager().registerEvents(this, this);
+        displays = new Displays(this, ZoneId.of(getConfig().getString("timezone", "America/Bogota")));
+        Bukkit.getPluginManager().registerEvents(displays, this);
+        Bukkit.getScheduler().runTaskTimer(this, displays::update, 60L, 40L);
         lastStep = System.nanoTime();
         Bukkit.getScheduler().runTaskTimer(this, this::tick, 40L, 20L);
         saveState();
@@ -110,6 +114,10 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         if (mqtt != null) {
             mqtt.close(twins.values().stream().map(twin -> twin.topic + "/status").toArray(String[]::new));
         }
+    }
+
+    Twin twin(String id) {
+        return twins.get(id);
     }
 
     private void register(Twin twin) {

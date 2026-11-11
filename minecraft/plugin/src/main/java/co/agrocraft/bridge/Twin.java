@@ -4,8 +4,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
  * Base de un gemelo digital: un dispositivo IoT que vive en el mundo de Minecraft.
@@ -124,12 +129,16 @@ abstract class Twin {
     final void handleCommand(String payload) {
         String cmdId = null;
         String action = null;
+        String source = "plataforma";
         boolean ok = false;
         StringBuilder detail = new StringBuilder();
         try {
             JsonObject command = JsonParser.parseString(payload).getAsJsonObject();
             cmdId = Json.text(command, "cmd_id");
             action = Json.text(command, "action");
+            if (Json.text(command, "source") != null) {
+                source = Json.text(command, "source");
+            }
             JsonObject params = command.has("params") && command.get("params").isJsonObject()
                     ? command.getAsJsonObject("params") : new JsonObject();
             ok = apply(action, params, detail);
@@ -148,7 +157,34 @@ abstract class Twin {
         if (ok) {
             publishState();
             plugin.saveState();
+            Bukkit.broadcast(Component.text("[AgroCraft] " + source + " -> " + id + ": " + detail, NamedTextColor.AQUA));
         }
+    }
+
+    /** Un jugador movió una palanca del mundo: es el retroceso iniciado desde el propio gemelo. */
+    final void playerActuate(String name, boolean value, String player) {
+        StringBuilder detail = new StringBuilder();
+        boolean ok = actuate(name, value, detail);
+        JsonObject data = new JsonObject();
+        data.addProperty("player", player);
+        data.addProperty("name", name);
+        data.addProperty("on", value ? 1 : 0);
+        data.addProperty("ok", ok);
+        data.addProperty("detail", detail.toString());
+        publishEvent("player_actuator", data);
+        if (ok) {
+            publishState();
+            plugin.saveState();
+        }
+        Bukkit.broadcast(Component.text("[AgroCraft] " + player + " -> " + id + ": " + detail,
+                ok ? NamedTextColor.YELLOW : NamedTextColor.RED));
+    }
+
+    /** Configuración y actuadores vigentes (lo mismo que se publica en `state`). */
+    final JsonObject config() {
+        JsonObject out = new JsonObject();
+        writeConfig(out);
+        return out;
     }
 
     private boolean apply(String action, JsonObject params, StringBuilder detail) {

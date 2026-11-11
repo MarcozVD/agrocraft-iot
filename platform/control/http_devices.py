@@ -6,7 +6,8 @@ flota (encender/apagar, intervalo, calibración, reinicio). El dispositivo solo 
 
 phone-01: celular con la app Sensor Logger (Android/iOS) en modo "HTTP Push".
   URL:   https://<host>/iot/api/ingest/phone-01?token=<MQTT_PASS_PHONE_01>
-  Sensores a activar en la app: Light, Barometer, Battery, Accelerometer, Microphone.
+  Sensores a activar en la app: Light (solo Android), Barometer, Battery, Accelerometer, Microphone.
+  En iPhone no hay sensor de luz accesible: llegan presión, altitud relativa, sonido, aceleración y batería.
   La ubicación GPS se descarta a propósito: Grafana es de lectura pública.
 """
 

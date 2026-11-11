@@ -2,10 +2,10 @@
 {$SITE_HOST} {
 	encode zstd gzip
 
-	# Mapa 3D del mundo (BlueMap, dentro del servidor de Minecraft)
+	# Mapa web del mundo (squaremap, dentro del servidor de Minecraft)
 	redir /map /map/
 	handle_path /map/* {
-		reverse_proxy minecraft:8100
+		reverse_proxy minecraft:8080
 	}
 
 	# Servicio de control: panel de retroceso, API REST, ingesta HTTPS y webhook de alertas

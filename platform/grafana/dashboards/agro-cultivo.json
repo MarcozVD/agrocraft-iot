@@ -80,6 +80,20 @@
       "asDropdown": true,
       "includeVars": false,
       "keepTime": true
+    },
+    {
+      "title": "Panel de control (retroceso)",
+      "type": "link",
+      "url": "/iot/",
+      "icon": "bolt",
+      "targetBlank": true
+    },
+    {
+      "title": "Mapa del mundo",
+      "type": "link",
+      "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0",
+      "icon": "external link",
+      "targetBlank": true
     }
   ],
   "panels": [

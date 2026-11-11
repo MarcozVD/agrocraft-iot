@@ -80,6 +80,20 @@
       "asDropdown": true,
       "includeVars": false,
       "keepTime": true
+    },
+    {
+      "title": "Panel de control (retroceso)",
+      "type": "link",
+      "url": "/iot/",
+      "icon": "bolt",
+      "targetBlank": true
+    },
+    {
+      "title": "Mapa del mundo",
+      "type": "link",
+      "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0",
+      "icon": "external link",
+      "targetBlank": true
     }
   ],
   "panels": [
@@ -1131,14 +1145,6 @@
           },
           "refId": "B",
           "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"phone-01\")\n  |> filter(fn: (r) => r._field == \"accel_ms2\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
-        },
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influx-agro"
-          },
-          "refId": "C",
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"phone-01\")\n  |> filter(fn: (r) => r._field == \"lux\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
         }
       ],
       "fieldConfig": {
@@ -1202,33 +1208,6 @@
               {
                 "id": "unit",
                 "value": "accMS2"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "C"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Luz"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#FADE2A"
-                }
-              },
-              {
-                "id": "unit",
-                "value": "lux"
               },
               {
                 "id": "custom.axisPlacement",
