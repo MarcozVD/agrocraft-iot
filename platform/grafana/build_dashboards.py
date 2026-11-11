@@ -573,6 +573,17 @@ def operacion():
                    "properties": [{"id": "custom.width", "value": 150}]},
                   {"matcher": {"id": "byName", "options": "class"},
                    "properties": [{"id": "custom.width", "value": 80}]}]))
+    y += 9
+    p.append(ts("Celular real (phone-01): presión, sonido y movimiento", g(0, y, 12, 8), [
+        ("phone-01", "pressure_hpa", "Presión barométrica", PURPLE, "pressurehpa"),
+        ("phone-01", "sound_dbfs", "Nivel de sonido", ORANGE, "dB"),
+    ], axis_right={("phone-01", "sound_dbfs")},
+        desc="Celular del operario con Sensor Logger, enviando por HTTPS al servicio de control."))
+    p.append(ts("Celular real (phone-01): batería y aceleración", g(12, y, 12, 8), [
+        ("phone-01", "battery_pct", "Batería", GREEN, "percent"),
+        ("phone-01", "accel_ms2", "Aceleración", BLUE, "accMS2"),
+        ("phone-01", "lux", "Luz", YELLOW, "lux"),
+    ], axis_right={("phone-01", "accel_ms2"), ("phone-01", "lux")}))
     return dashboard("agro-operacion", "AgroCraft · Operación y salud", p, ["operacion"])
 
 

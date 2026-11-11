@@ -219,9 +219,12 @@ async def ingest(request):
         log.warning("ingesta %s desde %s: cuerpo no es JSON (%s)", device, peer, request.content_type)
         return web.json_response({"ok": False, "detail": "se esperaba JSON"}, status=400)
     result = proxy.ingest(body)
+    names = sorted({str(i.get("name")) for i in body.get("payload", []) if isinstance(i, dict)})         if isinstance(body, dict) and isinstance(body.get("payload"), list) else []
+    if names and names != request.app.get("seen_" + device):
+        request.app["seen_" + device] = names
+        log.info("ingesta %s: sensores que envía la app: %s", device, names)
     if not result.get("ok"):
-        names = [i.get("name") for i in body.get("payload", [])] if isinstance(body, dict) else []
-        log.warning("ingesta %s: %s; sensores recibidos: %s", device, result.get("detail"), sorted(set(map(str, names))))
+        log.warning("ingesta %s: %s; sensores recibidos: %s", device, result.get("detail"), names)
     elif result.get("detail") == "publicado":
         log.info("ingesta %s: publicado %s", device, result.get("variables"))
     return web.json_response(result, status=200 if result.get("ok") else 422)

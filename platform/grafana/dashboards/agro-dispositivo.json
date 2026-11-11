@@ -135,7 +135,7 @@
   ],
   "panels": [
     {
-      "id": 39,
+      "id": 41,
       "type": "table",
       "title": "Estadísticas del rango elegido: ${device}",
       "description": "Promedio, máximo, mínimo, último valor y número de muestras en el rango de tiempo del selector.",
@@ -193,7 +193,7 @@
       }
     },
     {
-      "id": 40,
+      "id": 42,
       "type": "timeseries",
       "title": "${device}: variables (${fn} por ventana)",
       "datasource": {
@@ -247,7 +247,7 @@
       }
     },
     {
-      "id": 41,
+      "id": 43,
       "type": "table",
       "title": "Comandos y eventos de ${device}",
       "description": "",
