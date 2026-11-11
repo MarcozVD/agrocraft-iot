@@ -38,8 +38,9 @@ cubiertas.
 
 ### Siguientes pasos, en orden
 
-1. **Lista blanca:** nombre de jugador de TLauncher de cada integrante (y su IP pública para el
-   puerto 25565). Sin esto nadie puede entrar al mundo ni probar las palancas.
+1. **Lista blanca:** hecho para `MARCOS_V22` (11 nov). Compañeros: agregar con
+   `docker compose exec minecraft rcon-cli -- "whitelist add <nombre>"` y su IP en la regla
+   `Minecraft` del firewall. Los experimentos de retroceso empiezan cuando el usuario entre al mundo.
 2. **Canal humano de alertas** (Telegram o Discord): requiere token del bot.
 3. **Experimentos de retroceso** con hora y motivo anotados (sección 9, Fase 5), desde el panel
    `/iot/` y desde las palancas del mundo.
@@ -64,7 +65,7 @@ Operación diaria (entrar a la VM, ver registros, enviar comandos, desplegar): v
 | D6 | Repositorio | **Hecho:** cuenta `MarcozVD`, repo `agrocraft-iot`, privado por ahora; hacerlo público para la entrega |
 | D7 | Entrega | **Lunes 16 o jueves 19 de noviembre** (confirmar con el docente). El cronograma cubre ambos casos |
 | D8 | Mapa web | **Hecho (11 nov): squaremap 1.3.12 (MIT) en `/map/`; BlueMap retirado.** Antes: BlueMap está instalado pero inactivo: para activarlo hay que declarar en su configuración que se tiene licencia de Minecraft Java, y el grupo no la tiene. Alternativas sin esa condición: squaremap (2D) o Dynmap (vista isométrica) |
-| D9 | Quién entra al mundo | **Abierta:** nombres de jugador para la lista blanca e IP públicas de los integrantes para el puerto 25565 (hoy solo la IP de un integrante) |
+| D9 | Quién entra al mundo | **En curso:** `MARCOS_V22` en la lista blanca (11 nov). Faltan compañeros. Antes: nombres de jugador para la lista blanca e IP públicas de los integrantes para el puerto 25565 (hoy solo la IP de un integrante) |
 
 ---
 
