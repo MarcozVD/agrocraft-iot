@@ -177,3 +177,22 @@ bash scripts/cmd.sh sim sim-control reset      # iguala la granja simulada a la 
 
 La lluvia simulada se dibuja con partículas solo sobre la granja simulada; el cielo y la hora del
 mundo siguen siendo los reales. Mapa: `/map/?world=minecraft_overworld&zoom=5&x=92&z=0`.
+
+## Ganadería, pronóstico, mapa, notificaciones e IA (plugin 0.5-0.6)
+
+- **Corral automático (`mc-corral`, `sim-corral`):** vacas reales del juego (máx. 12). Comedero que se
+  llena con trigo del silo, bebedero y aspersores con agua del tanque, índice THI con el clima real,
+  bienestar, reproducción y planta de proceso que lleva la carne asada a una cámara. Dashboard
+  *Ganadería*. Alertas: estrés térmico del rebaño (enciende aspersores), bienestar bajo, comedero vacío.
+- **Pronóstico (`api-pronostico`):** previsión horaria de Open-Meteo + modelo del gemelo: horas hasta el
+  próximo riego de cada parcela, agua prevista, lluvia, extremos de temperatura y horas de estrés del
+  rebaño. Panel en *Cultivo y riego*.
+- **Mapa web:** capa "AgroCraft · sensores en vivo" con un círculo por gemelo (verde/naranja/rojo) y sus
+  lecturas al pasar el cursor, en las dos granjas.
+- **Notificaciones:** las alertas (y la acción automática que ejecutaron) y el informe diario van a
+  Telegram y Discord. Variables en `platform/.env`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`,
+  `DISCORD_WEBHOOK_URL`; después `docker compose up -d control`. Prueba: `POST /iot/api/notify/test`.
+- **Analista con IA:** cada día a las 07:00 reúne las estadísticas de 24 h, eventos, alertas, comandos y
+  pronóstico, y Claude (`claude-opus-5-5`) redacta el análisis de comportamiento. Informes en
+  `/iot/reportes/`; a demanda con `POST /iot/api/report?hours=24` (usuario operador). Requiere
+  `ANTHROPIC_API_KEY` en `platform/.env`; sin ella el informe trae solo las estadísticas.

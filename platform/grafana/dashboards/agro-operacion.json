@@ -89,6 +89,13 @@
       "targetBlank": true
     },
     {
+      "title": "Informes IA",
+      "type": "link",
+      "url": "/iot/reportes/",
+      "icon": "doc",
+      "targetBlank": true
+    },
+    {
       "title": "Mapa del mundo",
       "type": "link",
       "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0",
@@ -98,7 +105,7 @@
   ],
   "panels": [
     {
-      "id": 32,
+      "id": 38,
       "type": "timeseries",
       "title": "Gemelo: rendimiento del servidor",
       "description": "",
@@ -235,7 +242,7 @@
       }
     },
     {
-      "id": 33,
+      "id": 39,
       "type": "timeseries",
       "title": "Gateway real (gw-pc-01)",
       "description": "",
@@ -418,7 +425,7 @@
       }
     },
     {
-      "id": 34,
+      "id": 40,
       "type": "timeseries",
       "title": "Seguridad perimetral",
       "description": "",
@@ -601,7 +608,7 @@
       }
     },
     {
-      "id": 35,
+      "id": 41,
       "type": "timeseries",
       "title": "Mensajes perdidos por dispositivo (huecos en seq)",
       "description": "Cada mensaje lleva un contador seq. Un salto mayor que 1 indica mensajes que no llegaron (QoS 1 los reintenta; un reinicio del dispositivo reinicia el contador).",
@@ -664,7 +671,7 @@
       }
     },
     {
-      "id": 36,
+      "id": 42,
       "type": "table",
       "title": "Comandos de retroceso y respuestas",
       "description": "",
@@ -784,7 +791,7 @@
       }
     },
     {
-      "id": 37,
+      "id": 43,
       "type": "table",
       "title": "Eventos de los dispositivos",
       "description": "",
@@ -904,7 +911,7 @@
       }
     },
     {
-      "id": 38,
+      "id": 44,
       "type": "table",
       "title": "Configuración vigente de cada dispositivo (state retenido)",
       "description": "",
@@ -994,7 +1001,7 @@
       }
     },
     {
-      "id": 39,
+      "id": 45,
       "type": "timeseries",
       "title": "Celular real (phone-01): presión, sonido y movimiento",
       "description": "Celular del operario con Sensor Logger, enviando por HTTPS al servicio de control.",
@@ -1115,7 +1122,7 @@
       }
     },
     {
-      "id": 40,
+      "id": 46,
       "type": "timeseries",
       "title": "Celular real (phone-01): batería y aceleración",
       "description": "",

@@ -33,7 +33,7 @@ import com.google.gson.JsonParser;
  * dispositivos de API. El plugin lleva el modelo, así que el mundo evoluciona sin jugadores.
  */
 public final class AgroCraftPlugin extends JavaPlugin implements Listener {
-    static final String FW = "agrocraft-bridge-0.4.0";
+    static final String FW = "agrocraft-bridge-0.6.0";
 
     Layout layout;
     Mqtt mqtt;
@@ -67,6 +67,9 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         }
         realFarm = new Farm("twin", "mc-", layout, real);
         farms.add(realFarm);
+        if (!saved.has("corral")) {
+            layout.buildCorral();
+        }
         buildFarm(realFarm);
         register(realFarm, new StationTwin(this, realFarm, zone));
         register(realFarm, new ServerTwin(this, realFarm));
@@ -83,6 +86,9 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         }
         simFarm = new Farm("sim", "sim-", simLayout, new SimWorld());
         farms.add(simFarm);
+        if (!saved.has("sim_corral")) {
+            simLayout.buildCorral();
+        }
         buildFarm(simFarm);
         register(simFarm, new SimControl(this, simFarm, realFarm, zone));
 
@@ -112,6 +118,9 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
             Displays displays = new Displays(this, farm, zone, farm == realFarm);
             Bukkit.getPluginManager().registerEvents(displays, this);
             Bukkit.getScheduler().runTaskTimer(this, displays::update, 60L, 40L);
+        }
+        if (Bukkit.getPluginManager().isPluginEnabled("squaremap") && new MapMarkers(this, farms).start()) {
+            getLogger().info("Marcadores en vivo publicados en el mapa web");
         }
         lastStep = System.nanoTime();
         Bukkit.getScheduler().runTaskTimer(this, this::tick, 40L, 20L);
@@ -145,6 +154,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
                 Material.WHEAT, 8, 1.0, 1.0, tank, silo));
         register(farm, new PlotTwin(this, farm, "parcela-b", Layout.PLOT_B,
                 new Material[] {Material.CARROTS, Material.POTATOES}, Material.CARROT, 20, 1.25, 0.85, tank, silo));
+        register(farm, new CorralTwin(this, farm, tank, silo));     // bebe y se enfría con agua del tanque
         register(farm, tank);
         register(farm, new GreenhouseTwin(this, farm));
         register(farm, silo);
@@ -261,6 +271,8 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         JsonObject root = new JsonObject();
         root.addProperty("y0", layout.y0);
         root.addProperty("sim_y0", simFarm.layout.y0);
+        root.addProperty("corral", true);
+        root.addProperty("sim_corral", true);
         JsonObject all = new JsonObject();
         for (Twin twin : twins.values()) {
             all.add(twin.id, twin.save());

@@ -6,6 +6,7 @@ import threading
 
 from api_devices import ApiAire, ApiClima, ApiSuelo
 from dataset_devices import DsEnergia, DsInvernadero
+from forecast_device import ApiPronostico
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)-15s %(levelname)s %(message)s")
 
@@ -15,6 +16,7 @@ def main() -> None:
         ApiClima("api-clima"),
         ApiAire("api-aire"),
         ApiSuelo("api-suelo"),
+        ApiPronostico("api-pronostico"),
         DsInvernadero("ds-invernadero"),
         DsEnergia("ds-energia"),
     ]

@@ -7,6 +7,10 @@
   POST /iot/api/rules/<id>         activa o desactiva una regla             (requiere usuario operador)
   POST /iot/api/ingest/<device>    ingesta HTTPS de dispositivos sin MQTT   (token del dispositivo)
   POST /iot/api/alert              webhook de Grafana Alerting              (token de alertas)
+  POST /iot/api/report             genera ya el informe con IA            (requiere usuario operador)
+  GET  /iot/reportes/              informes diarios del analista con IA (Markdown)
+  POST /iot/api/notify/test        mensaje de prueba a Telegram/Discord   (requiere usuario operador)
+  GET  /iot/api/notify/chats       chats que escribieron al bot de Telegram (requiere usuario operador)
   GET  /iot/api/health
 
 Caddy publica este servicio bajo https://<host>/iot/ (Grafana ya ocupa /api/).
@@ -22,6 +26,7 @@ import os
 import threading
 import time
 import uuid
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import paho.mqtt.client as mqtt
@@ -29,6 +34,8 @@ from aiohttp import web
 
 from base import MQTT_HOST, MQTT_PORT, now_ms
 from http_devices import PhoneProxy
+from notifier import Notifier, format_alert
+import report
 from rules import Rules
 
 log = logging.getLogger("control")
@@ -254,8 +261,74 @@ async def alert(request):
                 executed.append({"command": cmd, "ack": ack})
             except (ValueError, KeyError) as error:
                 executed.append({"error": f"agro_cmd inválido: {error}"})
+        text = format_alert(item)
+        if status == "firing" and spec and executed and executed[-1].get("ack", {}).get("ok"):
+            text += f"\n↪ acción automática: {executed[-1]['command'].get('action')} {json.dumps(executed[-1]['command'].get('params', {}), ensure_ascii=False)}"
+        asyncio.ensure_future(request.app["notifier"].send(text))
     log.info("alerta recibida: %s (%d comandos ejecutados)", body.get("status"), len(executed))
     return web.json_response({"ok": True, "executed": executed})
+
+
+@require_operator
+async def make_report(request):
+    hours = int(request.query.get("hours", "24"))
+    result = await report.build_report(max(1, min(hours, 168)))
+    await notify_report(request.app, result)
+    return web.json_response({"ok": True, **result, "url": f"/iot/reportes/{result['name']}"})
+
+
+async def notify_report(app, result):
+    site = os.environ.get("SITE_HOST", "")
+    await app["notifier"].send(f"📊 Informe AgroCraft {result['name']}\n\n{result['summary']}\n\n"
+                               f"Completo: https://{site}/iot/reportes/{result['name']}")
+
+
+async def list_reports(request):
+    items = "".join(f'<li><a href="/iot/reportes/{name}">{name}</a></li>' for name in report.list_reports())
+    return web.Response(content_type="text/html", text=(
+        "<!doctype html><meta charset=utf-8><title>Informes AgroCraft</title>"
+        "<body style='font:15px system-ui;max-width:760px;margin:40px auto;padding:0 16px'>"
+        "<h1>Informes del analista con IA</h1><p>Uno por día a las 07:00 (hora Colombia).</p>"
+        f"<ul>{items or '<li>Aún no hay informes.</li>'}</ul>"))
+
+
+async def show_report(request):
+    name = request.match_info["name"]
+    if name not in report.list_reports():
+        raise web.HTTPNotFound()
+    text = (report.REPORT_DIR / f"{name}.md").read_text(encoding="utf-8")
+    return web.Response(text=text, content_type="text/markdown", charset="utf-8")
+
+
+@require_operator
+async def notify_test(request):
+    notifier = request.app["notifier"]
+    if not notifier.channels:
+        return web.json_response({"ok": False, "detail": "no hay canales configurados en platform/.env"}, status=422)
+    result = await notifier.send("✅ AgroCraft: prueba de notificaciones desde https://"
+                                 + os.environ.get("SITE_HOST", "") + "/iot/")
+    return web.json_response({"ok": all(v == "ok" for v in result.values()), "result": result})
+
+
+@require_operator
+async def notify_chats(request):
+    return web.json_response({"chats": await request.app["notifier"].telegram_chats()})
+
+
+async def daily_reports(app):
+    """Informe diario a las 07:00 hora Colombia."""
+    while True:
+        now = datetime.now(report.TZ)
+        target = now.replace(hour=7, minute=0, second=0, microsecond=0)
+        if target <= now:
+            target += timedelta(days=1)
+        await asyncio.sleep((target - now).total_seconds())
+        try:
+            result = await report.build_report(24)
+            await notify_report(app, result)
+            log.info("informe diario %s generado", result["name"])
+        except Exception as error:          # el informe nunca debe tumbar el servicio
+            log.exception("informe diario fallido: %r", error)
 
 
 async def health(request):
@@ -273,12 +346,17 @@ async def on_startup(app):
     for proxy in proxies.values():
         proxy.start()
     app["hub"], app["proxies"], app["rules"] = hub, proxies, rules
+    app["notifier"] = Notifier()
+    app["daily"] = asyncio.ensure_future(daily_reports(app))
 
 
 async def on_cleanup(app):
     for proxy in app["proxies"].values():
         proxy.shutdown()
     app["hub"].client.loop_stop()
+    app["daily"].cancel()
+    if app["notifier"].session is not None:
+        await app["notifier"].session.close()
 
 
 def main() -> None:
@@ -296,6 +374,12 @@ def main() -> None:
         web.post("/iot/api/ingest/{device}", ingest),
         web.post("/iot/api/alert", alert),
         web.get("/iot/api/health", health),
+        web.post("/iot/api/report", make_report),
+        web.get("/iot/reportes", lambda r: web.HTTPFound("/iot/reportes/")),
+        web.get("/iot/reportes/", list_reports),
+        web.get("/iot/reportes/{name}", show_report),
+        web.post("/iot/api/notify/test", notify_test),
+        web.get("/iot/api/notify/chats", notify_chats),
         web.static("/iot/static", STATIC),
     ])
     web.run_app(app, host="0.0.0.0", port=8080, access_log=None)

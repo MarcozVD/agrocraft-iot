@@ -34,6 +34,9 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 | Granja de simulación acelerada (plugin 0.4): 8 escenarios, hasta 360×, datos en medición aparte | Funcionando (11 nov 15:00) |
 | Pruebas de la simulación: 8 escenarios, 34 criterios (`scripts/sim_test.py`) | **Todas cumplen** (11 nov, `docs/experimentos/sim-tests-corrida*.md`) |
 | Experimentos de retroceso en la granja real (E0-E9) | Hechos y revertidos; registro en `docs/experimentos/experimentos.csv` |
+| Corral automático de vacas (plugin 0.5): comedero del silo, agua del tanque, THI real, reproducción, carne asada | Funcionando (11 nov 17:55); probado en simulación |
+| Pronóstico `api-pronostico`, marcadores en el mapa (plugin 0.6), informes con IA, notificaciones | Funcionando; IA, Telegram y Discord esperan sus claves en `platform/.env` |
+| Incidente: flota caída 17:58-18:02 (archivos CRLF) | Corregido; todo el repo en LF |
 | Documento | Pendiente |
 
 Total: **15 dispositivos con datos** (8 gemelos + 3 API + 2 dataset + 2 reales). Las cuatro clases

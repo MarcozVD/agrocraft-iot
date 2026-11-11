@@ -17,6 +17,10 @@ topic readwrite agro/twin/#
 topic readwrite agro/sim/#
 topic read agro/#
 
+# Pronóstico: además lee la humedad de suelo de las parcelas del gemelo
+user api-pronostico
+topic read agro/twin/#
+
 # Dispositivos: el usuario es el device_id y solo alcanza sus propios temas
 pattern write agro/+/%u/telemetry
 pattern write agro/+/%u/status

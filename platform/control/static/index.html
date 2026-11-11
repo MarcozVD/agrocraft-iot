@@ -75,7 +75,7 @@
 <header>
   <div>
     <h1>Agro<span>Craft</span> · panel de control</h1>
-    <nav><a href="/">Dashboards</a><a href="/d/agro-operacion">Operación</a><a href="/d/agro-dispositivo">Por dispositivo</a></nav>
+    <nav><a href="/">Dashboards</a><a href="/d/agro-operacion">Operación</a><a href="/d/agro-dispositivo">Por dispositivo</a><a href="/d/agro-ganaderia">Ganadería</a><a href="/iot/reportes/">Informes IA</a><a href="/map/?world=minecraft_overworld&zoom=5&x=12&z=0">Mapa</a></nav>
   </div>
   <form class="login" id="login">
     <span class="who" id="who">Solo lectura</span>
@@ -105,11 +105,13 @@ const ACTUATORS = {
   "mc-parcela-a": ["irrigation", "lamp"], "mc-parcela-b": ["irrigation", "lamp"],
   "mc-tanque": ["pump"], "mc-invernadero": ["vent", "heater", "lamp"], "mc-seguridad": ["alarm"],
   "sim-parcela-a": ["irrigation", "lamp"], "sim-parcela-b": ["irrigation", "lamp"],
+  "mc-corral": ["cooling"], "sim-corral": ["cooling"],
   "sim-tanque": ["pump"], "sim-invernadero": ["vent", "heater", "lamp"], "sim-seguridad": ["alarm"],
   "esp32-01": ["led"],
 };
-const LABELS = { irrigation: "Riego", lamp: "Lámpara", pump: "Bomba", vent: "Ventilas", heater: "Calefacción",
-                 alarm: "Alarma", led: "LED", auto: "Automático" };
+const LABELS = { cooling: "Aspersores", irrigation: "Riego", lamp: "Lámpara", pump: "Bomba", vent: "Ventilas", heater: "Calefacción",
+                 alarm: "Alarma", led: "LED", auto: "Automático",
+                 auto_cooling: "Aspersores auto", auto_process: "Proceso auto" };
 const EXPECTED = { real: ["gw-pc-01", "phone-01", "esp32-01"] };
 let auth = sessionStorage.getItem("agro-auth") || "";
 const cards = new Map();
@@ -181,6 +183,15 @@ function controls(d) {
   if ("auto" in s) main.append(toggle(id, "auto", s.auto, "set_config"));
   if (id === "sim-control") return simControls(d);
   if (id === "mc-silo" || id === "sim-silo") main.append(el("button", { onclick: () => send(id, "set_actuator", { name: "discharge", value: 1 }) }, "Descargar silo"));
+  if (id === "mc-corral" || id === "sim-corral") {
+    main.append(
+      el("button", { onclick: () => send(id, "set_actuator", { name: "feeder", value: 1 }) }, "Llenar comedero"),
+      el("button", { onclick: () => send(id, "set_actuator", { name: "water", value: 1 }) }, "Llenar bebedero"),
+      el("button", { onclick: () => send(id, "set_actuator", { name: "process", value: 1 }) }, "Procesar 1 vaca"),
+      el("button", { onclick: () => send(id, "repoblar", { count: 2 }) }, "Agregar 2 vacas"));
+    if ("auto_cooling" in s) main.append(toggle(id, "auto_cooling", s.auto_cooling, "set_config"));
+    if ("auto_process" in s) main.append(toggle(id, "auto_process", s.auto_process, "set_config"));
+  }
   if (id === "mc-seguridad" || id === "sim-seguridad") main.append(
     el("button", { onclick: () => send(id, "set_actuator", { name: "gate", value: 1 }) }, "Abrir portón"),
     el("button", { onclick: () => send(id, "set_actuator", { name: "gate", value: 0 }) }, "Cerrar portón"));

@@ -27,7 +27,7 @@ ENV = dict(line.split("=", 1) for line in (ROOT / "platform/.env").read_text().s
            if "=" in line and not line.startswith("#"))
 SITE = f"https://{ENV['SITE_HOST']}"
 AUTH = base64.b64encode(f"{ENV.get('CONTROL_USER', 'operador')}:{ENV['CONTROL_PASS']}".encode()).decode()
-TWINS = ["sim-parcela-a", "sim-parcela-b", "sim-tanque", "sim-invernadero", "sim-silo", "sim-seguridad"]
+TWINS = ["sim-parcela-a", "sim-parcela-b", "sim-tanque", "sim-invernadero", "sim-silo", "sim-seguridad", "sim-corral"]
 
 SCENARIOS = {          # escenario: horas simuladas
     "actual": 24, "normal": 24, "ola_calor": 24, "sequia": 36, "tormenta": 12,
@@ -104,9 +104,9 @@ def checks(name, s, e, base):
     """Criterios por escenario: (descripción, valor observado, ¿cumple?)."""
     v = lambda dev, f, fn: stat(s, dev, f, fn)
     irrigations = count(e, "sim-parcela-a", "irrigation", on=1) + count(e, "sim-parcela-b", "irrigation", on=1)
-    out = [("Hubo telemetría de los 7 dispositivos simulados",
-            sum(1 for d in TWINS + ["sim-control"] if any(k[0] == d for k in s)), None)]
-    out[-1] = (out[-1][0], out[-1][1], out[-1][1] >= 7)
+    present = sum(1 for d in TWINS + ["sim-control"] if any(k[0] == d for k in s))
+    out = [(f"Hubo telemetría de los {len(TWINS) + 1} dispositivos simulados", present, present >= len(TWINS) + 1),
+           ("El corral simulado tiene vacas", v("sim-corral", "cows_total", "max"), (v("sim-corral", "cows_total", "max") or 0) > 0)]
     t_min, t_max = v("sim-control", "in_temp_c", "min"), v("sim-control", "in_temp_c", "max")
     soil_min = min(x for x in (v("sim-parcela-a", "soil_pct", "min"), v("sim-parcela-b", "soil_pct", "min")) if x is not None)
     if name in ("actual", "normal"):
@@ -120,6 +120,10 @@ def checks(name, s, e, base):
              (irrigations, round(min(v("sim-parcela-a", "soil_pct", "last"), v("sim-parcela-b", "soil_pct", "last")), 1)),
              irrigations > 0 and min(v("sim-parcela-a", "soil_pct", "last"), v("sim-parcela-b", "soil_pct", "last")) >= 33),
         ]
+        out += [
+            ("Corral: nacen terneros", v("sim-corral", "births_total", "last"), (v("sim-corral", "births_total", "last") or 0) > 0),
+            ("Corral: el comedero se recarga del silo", count(e, "sim-corral", "feeder"), count(e, "sim-corral", "feeder") > 0),
+        ]
         if name == "normal":
             out.append(("Temperatura exterior dentro del día típico (17-28 °C)", (round(t_min, 1), round(t_max, 1)),
                         16 <= t_min and t_max <= 29))
@@ -129,6 +133,8 @@ def checks(name, s, e, base):
             ("Invernadero supera 32 °C", round(v("sim-invernadero", "temp_c", "max"), 1), v("sim-invernadero", "temp_c", "max") > 32),
             ("Se abren las ventilas en automático", count(e, "sim-invernadero", "actuator", name="vent", on=1),
              count(e, "sim-invernadero", "actuator", name="vent", on=1) > 0 or v("sim-invernadero", "vent_open", "max") == 1),
+            ("Corral: THI en peligro (> 78)", round(v("sim-corral", "thi", "max"), 1), v("sim-corral", "thi", "max") > 78),
+            ("Corral: se encienden los aspersores", count(e, "sim-corral", "cooling", on=1), count(e, "sim-corral", "cooling", on=1) > 0),
             ("La salud de las plantas cae", (round(v("sim-invernadero", "plant_health_pct", "first"), 1), round(v("sim-invernadero", "plant_health_pct", "last"), 1)),
              v("sim-invernadero", "plant_health_pct", "last") < v("sim-invernadero", "plant_health_pct", "first")),
         ]

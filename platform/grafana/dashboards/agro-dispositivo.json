@@ -140,6 +140,13 @@
       "targetBlank": true
     },
     {
+      "title": "Informes IA",
+      "type": "link",
+      "url": "/iot/reportes/",
+      "icon": "doc",
+      "targetBlank": true
+    },
+    {
       "title": "Mapa del mundo",
       "type": "link",
       "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0",
@@ -149,7 +156,7 @@
   ],
   "panels": [
     {
-      "id": 41,
+      "id": 47,
       "type": "table",
       "title": "Estadísticas del rango elegido: ${device}",
       "description": "Promedio, máximo, mínimo, último valor y número de muestras en el rango de tiempo del selector.",
@@ -207,7 +214,7 @@
       }
     },
     {
-      "id": 42,
+      "id": 48,
       "type": "timeseries",
       "title": "${device}: variables (${fn} por ventana)",
       "datasource": {
@@ -261,7 +268,7 @@
       }
     },
     {
-      "id": 43,
+      "id": 49,
       "type": "table",
       "title": "Comandos y eventos de ${device}",
       "description": "",

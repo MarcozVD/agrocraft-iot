@@ -281,6 +281,8 @@ def dashboard(uid, title, panels, tags, desc="", time_from="now-24h", refresh="1
                    "asDropdown": True, "includeVars": False, "keepTime": True},
                   {"title": "Panel de control (retroceso)", "type": "link", "url": "/iot/",
                    "icon": "bolt", "targetBlank": True},
+                  {"title": "Informes IA", "type": "link", "url": "/iot/reportes/", "icon": "doc",
+                   "targetBlank": True},
                   {"title": "Mapa del mundo", "type": "link",
                    "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0", "icon": "external link",
                    "targetBlank": True}],
@@ -292,13 +294,13 @@ def dashboard(uid, title, panels, tags, desc="", time_from="now-24h", refresh="1
 DEVICES = [
     ("twin", "mc-parcela-a"), ("twin", "mc-parcela-b"), ("twin", "mc-tanque"),
     ("twin", "mc-invernadero"), ("twin", "mc-silo"), ("twin", "mc-seguridad"),
-    ("twin", "mc-estacion"), ("twin", "mc-server"),
-    ("api", "api-clima"), ("api", "api-aire"), ("api", "api-suelo"),
+    ("twin", "mc-estacion"), ("twin", "mc-server"), ("twin", "mc-corral"),
+    ("api", "api-clima"), ("api", "api-aire"), ("api", "api-suelo"), ("api", "api-pronostico"),
     ("dataset", "ds-invernadero"), ("dataset", "ds-energia"),
     ("real", "gw-pc-01"), ("real", "phone-01"), ("real", "esp32-01"),
 ]
 
-INTERVALS = {"mc-silo": 60, "mc-estacion": 60, "api-clima": 300, "api-aire": 600, "api-suelo": 600,
+INTERVALS = {"mc-silo": 60, "mc-corral": 30, "mc-estacion": 60, "api-clima": 300, "api-aire": 600, "api-suelo": 600, "api-pronostico": 900,
              "ds-invernadero": 300, "ds-energia": 60}
 
 
@@ -467,6 +469,17 @@ def cultivo():
         ("mc-silo", "fill_pct", "Llenado", GREEN, "percent"),
         ("mc-silo", "items", "Unidades", YELLOW, "none"),
     ], axis_right={("mc-silo", "items")}, legend_calcs=False))
+    y += 5
+    p += [
+        stat("Próximo riego A (h)", g(0, y, 4, 4), "api-pronostico", "hours_to_irrigation_a", "h", decimals=0,
+             desc="Horas hasta que la parcela A baje de 35 %, proyectando su suelo con la previsión de ET0 y lluvia."),
+        stat("Próximo riego B (h)", g(4, y, 4, 4), "api-pronostico", "hours_to_irrigation_b", "h", decimals=0),
+        stat("Agua para riego, 24 h", g(8, y, 4, 4), "api-pronostico", "water_need_24h_l", "litre", decimals=0),
+        stat("Lluvia prevista, 24 h", g(12, y, 4, 4), "api-pronostico", "rain_next24_mm", "suffix: mm", decimals=1),
+        stat("Máx. prevista, 24 h", g(16, y, 4, 4), "api-pronostico", "tmax_next24_c", "celsius", decimals=1),
+        stat("Horas de estrés del rebaño", g(20, y, 4, 4), "api-pronostico", "thi_stress_hours_24h", "h", decimals=0,
+             thresholds=[{"color": GREEN, "value": None}, {"color": ORANGE, "value": 1}, {"color": RED, "value": 6}]),
+    ]
     return dashboard("agro-cultivo", "AgroCraft · Cultivo y riego", p, ["cultivo"],
                      device_regex="mc-parcela.*|mc-tanque|mc-silo")
 
@@ -651,6 +664,50 @@ def dispositivo():
                      templating=templating, device_regex="${device}")
 
 
+def ganaderia(prefix="mc-", uid="agro-ganaderia", title="AgroCraft · Ganadería (corral automático)"):
+    """Corral de vacas: rebaño, comida, agua, estrés térmico, bienestar y producción de carne asada."""
+    d = prefix + "corral"
+    y = 0
+    p = [
+        stat("Vacas", g(0, y, 4, 4), d, "cows_total", decimals=0),
+        stat("Bienestar", g(4, y, 4, 4), d, "welfare_pct", "percent", decimals=0,
+             thresholds=[{"color": RED, "value": None}, {"color": ORANGE, "value": 40}, {"color": GREEN, "value": 60}]),
+        stat("THI (estrés térmico)", g(8, y, 4, 4), d, "thi", decimals=1,
+             thresholds=[{"color": GREEN, "value": None}, {"color": YELLOW, "value": 72},
+                         {"color": ORANGE, "value": 78}, {"color": RED, "value": 89}]),
+        stat("Comedero", g(12, y, 4, 4), d, "feed_pct", "percent", decimals=0,
+             thresholds=[{"color": RED, "value": None}, {"color": ORANGE, "value": 15}, {"color": GREEN, "value": 30}]),
+        stat("Carne asada en cámara", g(16, y, 4, 4), d, "beef_stored", decimals=0),
+        stat("Carne producida (total)", g(20, y, 4, 4), d, "beef_total", decimals=0),
+    ]
+    y += 4
+    p.append(ts("Rebaño", g(0, y, 12, 9), [
+        (d, "cows_adult", "Adultas", BLUE), (d, "cows_baby", "Terneros", YELLOW),
+        (d, "births_total", "Nacimientos (acum.)", GREEN), (d, "processed_total", "Procesadas (acum.)", ORANGE),
+        (d, "deaths_total", "Muertes (acum.)", RED),
+    ], unit="none", step=True))
+    p.append(ts("Estrés térmico y bienestar", g(12, y, 12, 9), [
+        (d, "thi", "THI", ORANGE, "none"), (d, "welfare_pct", "Bienestar", GREEN, "percent"),
+    ], axis_right={(d, "welfare_pct")},
+        thresholds=[{"color": "transparent", "value": None}, {"color": YELLOW, "value": 72}, {"color": RED, "value": 78}],
+        desc="THI = (1,8T+32) - (0,55 - 0,0055 HR)(1,8T - 26) con el clima exterior. < 72 confort, 72-78 alerta, > 78 peligro."))
+    y += 9
+    p.append(ts("Comedero, bebedero y tanque", g(0, y, 12, 8), [
+        (d, "feed_pct", "Comedero", YELLOW), (d, "water_pct", "Bebedero", BLUE),
+        (prefix + "tanque", "level_pct", "Tanque (agua para el corral)", TEAL),
+    ], unit="percent", min_=0, max_=100))
+    p.append(state_timeline("Actuadores del corral", g(12, y, 12, 8), [
+        (d, "cooling", "Aspersores"), (prefix + "parcela-a", "irrigation", "Riego A (trigo para el comedero)"),
+    ]))
+    y += 8
+    p.append(ts("Cadena de producción: trigo, silo y carne", g(0, y, 24, 8), [
+        (prefix + "parcela-a", "harvests", "Cosechas de trigo", GREEN, "none"),
+        (prefix + "silo", "items", "Silo (unidades)", PURPLE, "none"),
+        (d, "beef_total", "Carne asada producida", ORANGE, "none"),
+    ], step=True, axis_right={(prefix + "silo", "items")}))
+    return dashboard(uid, title, p, ["ganaderia"], device_regex=f"{prefix}corral")
+
+
 def simulacion():
     """Granja de simulación: mismos paneles, pero sobre la medición `simulation` (reloj acelerado)."""
     y = 0
@@ -695,6 +752,10 @@ def simulacion():
         ("sim-parcela-b", "growth_pct", "Crecimiento B", YELLOW, "percent"),
         ("sim-silo", "fill_pct", "Silo", PURPLE, "percent"),
     ]))
+    p.append(ts("Corral (simulación): rebaño, THI y bienestar", g(0, y + 8, 24, 8), [
+        ("sim-corral", "cows_total", "Vacas", BLUE, "none"), ("sim-corral", "thi", "THI", ORANGE, "none"),
+        ("sim-corral", "welfare_pct", "Bienestar", GREEN, "percent"), ("sim-corral", "beef_total", "Carne producida", RED, "none"),
+    ], axis_right={("sim-corral", "welfare_pct")}))
     p.append(ts("Reloj y seguridad", g(12, y, 12, 8), [
         ("sim-control", "sim_hours", "Horas simuladas", BLUE, "h"),
         ("sim-control", "speed", "Velocidad (×)", TEAL, "none"),
@@ -715,7 +776,7 @@ def simulacion():
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for build in (resumen, cultivo, clima, operacion, dispositivo, simulacion):
+    for build in (resumen, cultivo, clima, operacion, dispositivo, ganaderia, simulacion):
         board = build()
         path = OUT / f"{board['uid']}.json"
         path.write_text(json.dumps(board, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

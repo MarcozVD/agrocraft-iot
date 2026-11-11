@@ -22,3 +22,6 @@ hora;id;fase;clase;dispositivo;accion;params;ok;detalle;motivo
 2026-11-11 15:37:41;E1;reversion;api;api-aire;set_enabled;{"enabled":1};ok;enabled=1;Reversión automática de E1 tras 60 min
 2026-11-11 16:32:46;E5;resultado;twin;mc-parcela-a;alerta Suelo seco -> set_config {"auto":1};{"auto":1};ok;suelo 29.6 % -> riego automático 16:32:47;Ciclo cerrado: alerta de Grafana ejecuta el comando y el gemelo vuelve a regar solo
 2026-11-11 16:37:51;E4;reversion;twin;mc-parcela-b;set_config;{"soil_min":35,"soil_max":65};ok;configuración actualizada;Reversión automática de E4 tras 120 min
+2026-11-11 17:55:05;P3;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.5.0;ok;;Instalación de AgroCraft 0.5: corral automático de vacas
+2026-11-11 17:58:00;I1;incidente;api;api-*,ds-*;flota caída;;ok;restablecida 18:02:15;Hueco de ~4 min en API y dataset: la flota no arrancó por falta de la clave MQTT del nuevo dispositivo api-pronostico (archivo con fin de línea CRLF). Corregido
+2026-11-11 18:02:58;P4;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.6.0;ok;;AgroCraft 0.6: marcadores en el mapa, rebaño simulado igual al real

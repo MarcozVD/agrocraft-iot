@@ -213,3 +213,101 @@ groups:
               type: threshold
               expression: B
               conditions: [{ evaluator: { type: lt, params: [15] } }]
+
+      - uid: agro-estres-vacas
+        title: Estrés térmico del rebaño
+        condition: C
+        for: 15m
+        noDataState: OK
+        execErrState: Error
+        labels: { severity: warning }
+        annotations:
+          summary: "THI del corral en {{ printf \"%.1f\" .Values.B.Value }} (peligro > 78): se encienden los aspersores"
+          agro_cmd: '{"class":"twin","device":"mc-corral","action":"set_config","params":{"cooling":1,"auto_cooling":1}}'
+        data:
+          - refId: A
+            relativeTimeRange: { from: 900, to: 0 }
+            datasourceUid: influx-agro
+            model:
+              refId: A
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "telemetry" and r.device == "mc-corral" and r._field == "thi")
+                  |> group(columns: ["device"])
+                  |> keep(columns: ["_time", "_value", "device"])
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: mean }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions: [{ evaluator: { type: gt, params: [78] } }]
+
+      - uid: agro-bienestar-bajo
+        title: Bienestar animal bajo
+        condition: C
+        for: 10m
+        noDataState: OK
+        execErrState: Error
+        labels: { severity: critical }
+        annotations:
+          summary: "Bienestar del rebaño en {{ printf \"%.0f\" .Values.B.Value }} %"
+        data:
+          - refId: A
+            relativeTimeRange: { from: 900, to: 0 }
+            datasourceUid: influx-agro
+            model:
+              refId: A
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "telemetry" and r.device == "mc-corral" and r._field == "welfare_pct")
+                  |> group(columns: ["device"])
+                  |> keep(columns: ["_time", "_value", "device"])
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: mean }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions: [{ evaluator: { type: lt, params: [40] } }]
+
+      - uid: agro-comedero-vacio
+        title: Comedero vacío
+        condition: C
+        for: 10m
+        noDataState: OK
+        execErrState: Error
+        labels: { severity: warning }
+        annotations:
+          summary: "Comedero del corral al {{ printf \"%.0f\" .Values.B.Value }} %: se intenta llenar desde el silo"
+          agro_cmd: '{"class":"twin","device":"mc-corral","action":"set_actuator","params":{"name":"feeder","value":1}}'
+        data:
+          - refId: A
+            relativeTimeRange: { from: 900, to: 0 }
+            datasourceUid: influx-agro
+            model:
+              refId: A
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "telemetry" and r.device == "mc-corral" and r._field == "feed_pct")
+                  |> group(columns: ["device"])
+                  |> keep(columns: ["_time", "_value", "device"])
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions: [{ evaluator: { type: lt, params: [5] } }]

@@ -86,6 +86,9 @@ final class SimControl extends Twin {
             Twin source = real.twins.get(real.prefix + twin.id.substring(farm.prefix.length()));
             if (source != null) {
                 twin.copyFrom(source);
+                if (twin instanceof CorralTwin corral && source instanceof CorralTwin realCorral) {
+                    corral.matchHerd(realCorral.adults(), realCorral.babies());
+                }
                 twin.publishState();
             }
         }

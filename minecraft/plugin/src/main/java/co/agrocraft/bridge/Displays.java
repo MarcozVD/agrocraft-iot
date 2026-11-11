@@ -54,7 +54,8 @@ final class Displays implements Listener {
             new Lever("parcela-b", "irrigation", new Spot(21, 13)),
             new Lever("tanque", "pump", new Spot(7, -5)),
             new Lever("invernadero", "vent", new Spot(19, -5)),
-            new Lever("seguridad", "alarm", new Spot(3, 3)));
+            new Lever("seguridad", "alarm", new Spot(3, 3)),
+            new Lever("corral", "cooling", new Spot(-3, -5)));
 
     static {
         DEVICE_SIGNS.put("parcela-a", new Spot(8, 13));
@@ -64,6 +65,7 @@ final class Displays implements Listener {
         DEVICE_SIGNS.put("silo", new Spot(14, 9));
         DEVICE_SIGNS.put("estacion", new Spot(0, 1));
         DEVICE_SIGNS.put("seguridad", new Spot(2, 3));
+        DEVICE_SIGNS.put("corral", new Spot(-1, -5));
         for (int x = 9; x <= 19; x += 2) {          // tablero frente al punto de aparición (14, 16)
             BOARD.add(new Spot(x, 15));
         }
@@ -158,6 +160,10 @@ final class Displays implements Listener {
             case "seguridad" -> new String[] {
                 "Seguridad", "Hostiles " + f(v.get("hostiles_near"), 0),
                 "Personas " + f(v.get("players_in_zone"), 0), "Alarma " + onOff(v.get("alarm"))};
+            case "corral" -> new String[] {
+                "Corral " + f(v.get("cows_total"), 0) + " vacas", "Bienestar " + f(v.get("welfare_pct"), 0) + " %",
+                "THI " + f(v.get("thi"), 0) + " Com " + f(v.get("feed_pct"), 0) + "%",
+                "Carne " + f(v.get("beef_stored"), 0) + " (" + f(v.get("beef_total"), 0) + ")"};
             default -> new String[] {suffix, "", "", ""};
         };
     }

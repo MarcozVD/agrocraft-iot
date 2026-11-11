@@ -145,6 +145,41 @@ final class Layout {
         }
     }
 
+    /** Corral de vacas y planta de proceso (se agregó en la versión 0.5 a granjas ya construidas). */
+    void buildCorral() {
+        Box c = CorralTwin.CORRAL;
+        List<Block> fences = new ArrayList<>();
+        for (int x = c.x1(); x <= c.x2(); x++) {
+            for (int z = c.z1(); z <= c.z2(); z++) {
+                at(x, 0, z).setType(Material.GRASS_BLOCK, false);
+                Block above = at(x, 1, z);
+                if (c.border(x, z)) {
+                    fences.add(above);
+                    above.setType(Material.SPRUCE_FENCE, false);
+                } else {
+                    above.setType(Material.AIR, false);
+                }
+            }
+        }
+        for (Block fence : fences) {
+            if (fence.getBlockData() instanceof MultipleFacing data) {
+                for (BlockFace side : new BlockFace[] {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST}) {
+                    data.setFace(side, fence.getRelative(side).getType() == Material.SPRUCE_FENCE);
+                }
+                fence.setBlockData(data, false);
+            }
+        }
+        at(CorralTwin.FEEDER[0], 1, CorralTwin.FEEDER[1]).setType(Material.COMPOSTER, false);
+        at(CorralTwin.TROUGH[0], 1, CorralTwin.TROUGH[1]).setType(Material.WATER_CAULDRON, false);
+        for (int x = -4; x <= 2; x++) {                     // piso de la planta de proceso
+            for (int z = -4; z <= -1; z++) {
+                at(x, 0, z).setType(Material.SMOOTH_STONE, false);
+            }
+        }
+        at(CorralTwin.SMOKER[0], 1, CorralTwin.SMOKER[1]).setType(Material.SMOKER, false);
+        at(CorralTwin.COLD_ROOM[0], 1, CorralTwin.COLD_ROOM[1]).setType(Material.BARREL, false);
+    }
+
     private void soil(Box plot) {
         for (int x = plot.x1(); x <= plot.x2(); x++) {
             for (int z = plot.z1(); z <= plot.z2(); z++) {

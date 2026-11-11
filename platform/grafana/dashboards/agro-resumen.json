@@ -89,6 +89,13 @@
       "targetBlank": true
     },
     {
+      "title": "Informes IA",
+      "type": "link",
+      "url": "/iot/reportes/",
+      "icon": "doc",
+      "targetBlank": true
+    },
+    {
       "title": "Mapa del mundo",
       "type": "link",
       "url": "/map/?world=minecraft_overworld&zoom=5&x=12&z=0",
@@ -134,7 +141,7 @@
             "uid": "influx-agro"
           },
           "refId": "A",
-          "query": "import \"array\"\nimport \"join\"\ndevices = array.from(rows: [\n  {clase: \"twin\", device: \"mc-parcela-a\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-parcela-b\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-tanque\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-invernadero\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-silo\", intervalo: 60},\n  {clase: \"twin\", device: \"mc-seguridad\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-estacion\", intervalo: 60},\n  {clase: \"twin\", device: \"mc-server\", intervalo: 30},\n  {clase: \"api\", device: \"api-clima\", intervalo: 300},\n  {clase: \"api\", device: \"api-aire\", intervalo: 600},\n  {clase: \"api\", device: \"api-suelo\", intervalo: 600},\n  {clase: \"dataset\", device: \"ds-invernadero\", intervalo: 300},\n  {clase: \"dataset\", device: \"ds-energia\", intervalo: 60},\n  {clase: \"real\", device: \"gw-pc-01\", intervalo: 30},\n  {clase: \"real\", device: \"phone-01\", intervalo: 30},\n  {clase: \"real\", device: \"esp32-01\", intervalo: 30}\n])\nlast = from(bucket: \"telemetry\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"seq\")\n  |> group(columns: [\"device\"])\n  |> last()\n  |> group()\n  |> map(fn: (r) => ({device: r.device, ultima: r._time, muestras: r._value,\n                      hace_s: (uint(v: now()) - uint(v: r._time)) / uint(v: 1000000000)}))\njoin.left(\n  left: devices,\n  right: last,\n  on: (l, r) => l.device == r.device,\n  as: (l, r) => ({clase: l.clase, dispositivo: l.device, ultima: r.ultima, hace_s: r.hace_s,\n                  muestras: r.muestras,\n                  estado: if not exists r.hace_s then \"sin datos\"\n                          else if int(v: r.hace_s) > 3 * l.intervalo then \"fuera de línea\"\n                          else \"en línea\"}),\n)\n  |> keep(columns: [\"clase\", \"dispositivo\", \"estado\", \"ultima\", \"hace_s\", \"muestras\"])"
+          "query": "import \"array\"\nimport \"join\"\ndevices = array.from(rows: [\n  {clase: \"twin\", device: \"mc-parcela-a\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-parcela-b\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-tanque\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-invernadero\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-silo\", intervalo: 60},\n  {clase: \"twin\", device: \"mc-seguridad\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-estacion\", intervalo: 60},\n  {clase: \"twin\", device: \"mc-server\", intervalo: 30},\n  {clase: \"twin\", device: \"mc-corral\", intervalo: 30},\n  {clase: \"api\", device: \"api-clima\", intervalo: 300},\n  {clase: \"api\", device: \"api-aire\", intervalo: 600},\n  {clase: \"api\", device: \"api-suelo\", intervalo: 600},\n  {clase: \"api\", device: \"api-pronostico\", intervalo: 900},\n  {clase: \"dataset\", device: \"ds-invernadero\", intervalo: 300},\n  {clase: \"dataset\", device: \"ds-energia\", intervalo: 60},\n  {clase: \"real\", device: \"gw-pc-01\", intervalo: 30},\n  {clase: \"real\", device: \"phone-01\", intervalo: 30},\n  {clase: \"real\", device: \"esp32-01\", intervalo: 30}\n])\nlast = from(bucket: \"telemetry\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"seq\")\n  |> group(columns: [\"device\"])\n  |> last()\n  |> group()\n  |> map(fn: (r) => ({device: r.device, ultima: r._time, muestras: r._value,\n                      hace_s: (uint(v: now()) - uint(v: r._time)) / uint(v: 1000000000)}))\njoin.left(\n  left: devices,\n  right: last,\n  on: (l, r) => l.device == r.device,\n  as: (l, r) => ({clase: l.clase, dispositivo: l.device, ultima: r.ultima, hace_s: r.hace_s,\n                  muestras: r.muestras,\n                  estado: if not exists r.hace_s then \"sin datos\"\n                          else if int(v: r.hace_s) > 3 * l.intervalo then \"fuera de línea\"\n                          else \"en línea\"}),\n)\n  |> keep(columns: [\"clase\", \"dispositivo\", \"estado\", \"ultima\", \"hace_s\", \"muestras\"])"
         }
       ],
       "fieldConfig": {

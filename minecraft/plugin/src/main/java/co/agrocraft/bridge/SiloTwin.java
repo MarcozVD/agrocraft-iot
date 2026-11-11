@@ -46,6 +46,25 @@ final class SiloTwin extends Twin {
         return inventory.getSize() * 64;
     }
 
+    /** Saca hasta `amount` unidades de un producto (el comedero del corral toma trigo); devuelve cuántas había. */
+    int take(Material item, int amount) {
+        if (amount <= 0) {
+            return 0;
+        }
+        Inventory inventory = inventory();
+        int available = 0;
+        for (ItemStack stack : inventory.getContents()) {
+            if (stack != null && stack.getType() == item) {
+                available += stack.getAmount();
+            }
+        }
+        int got = Math.min(amount, available);
+        if (got > 0) {
+            inventory.removeItem(new ItemStack(item, got));
+        }
+        return got;
+    }
+
     /** Guarda la cosecha de una parcela; devuelve cuánto cupo. */
     int deposit(Material item, int amount) {
         Inventory inventory = inventory();
