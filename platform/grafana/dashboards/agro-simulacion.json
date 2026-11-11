@@ -58,7 +58,7 @@
           "type": "influxdb",
           "uid": "influx-agro"
         },
-        "enable": true,
+        "enable": false,
         "iconColor": "#B877D9",
         "target": {
           "refId": "Anno",

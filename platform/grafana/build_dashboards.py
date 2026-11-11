@@ -705,7 +705,11 @@ def simulacion():
     for panel in board["panels"]:
         for target in panel.get("targets", []):
             target["query"] = target["query"].replace('_measurement == "telemetry"', '_measurement == "simulation"')
-    # las anotaciones siguen leyendo la medición events (comandos y eventos de sim-*)
+    # Las anotaciones leen la medición events de sim-*. A 360× hay cientos de eventos: se ocultan por
+    # defecto (interruptor "Eventos" arriba) y quedan visibles solo los comandos.
+    for anno in board["annotations"]["list"]:
+        if anno.get("name") == "Eventos":
+            anno["enable"] = False
     return board
 
 

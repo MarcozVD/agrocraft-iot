@@ -1,0 +1,24 @@
+hora;id;fase;clase;dispositivo;accion;params;ok;detalle;motivo
+2026-11-11 14:37:24;E0;inicio;twin;mc-invernadero;set_config;{"auto":1};ok;configuración actualizada;Corrección: la alerta de estrés térmico de las 11:14 dejó el invernadero en manual con ventilas abiertas; se devuelve a automático
+2026-11-11 14:37:38;E1;inicio;api;api-aire;set_enabled;{"enabled":0};ok;enabled=0;Apagar el sensor de calidad del aire 60 min: hueco esperado en la gráfica y alerta Dispositivo sin datos a los 30 min
+2026-11-11 14:37:39;E2;inicio;dataset;ds-invernadero;calibrate;{"variable":"temp_c","offset":3};ok;temp_c: offset=3.0 gain=1.0;Descalibrar +3 °C la temperatura del invernadero de referencia durante 30 min: escalón visible
+2026-11-11 14:37:40;E3;inicio;twin;mc-parcela-a;set_interval;{"interval_s":5};ok;interval_s=5;Subir la frecuencia de muestreo de 30 s a 5 s durante 15 min: más puntos por minuto
+2026-11-11 14:37:42;E4;inicio;twin;mc-parcela-b;set_config;{"soil_min":60,"soil_max":75};ok;configuración actualizada;Subir los umbrales de riego de B (35/65 a 60/75) por 2 h: el riego arranca de inmediato y baja el tanque
+2026-11-11 14:37:43;E5;inicio;twin;mc-parcela-a;set_config;{"auto":0};ok;configuración actualizada;Sacar el riego de A de automático: el suelo baja de 30 %, debe dispararse la alerta Suelo seco y su comando devolverlo a automático. Reversión de seguridad a las 6 h
+2026-11-11 14:37:44;E6;inicio;twin;mc-estacion;set_weather;{"weather":"thunder"};ok;weather=thunder sync_weather=0;Forzar tormenta en el mundo 20 min (desacople del clima real); luego volver a sincronizar
+2026-11-11 14:37:45;E7;inicio;twin;mc-seguridad;set_actuator;{"name":"alarm","value":1};ok;alarm=1 auto=0;Encender la alarma por comando 5 min (lámpara roja y campana en el mundo)
+2026-11-11 14:37:47;E8;inicio;twin;mc-seguridad;set_actuator;{"name":"gate","value":1};ok;gate=1;Abrir el portón por comando 5 min
+2026-11-11 14:39:08;E9;inicio;twin;mc-invernadero;palanca (jugador MARCOS_V22);{"name":"vent","value":0};ok;vent=0 auto=0;Retroceso iniciado desde el juego: el jugador cierra las ventilas con la palanca
+2026-11-11 14:39:30;E9;inicio;twin;mc-invernadero;palanca (jugador MARCOS_V22);{"name":"vent","value":1};ok;vent=1 auto=0;Retroceso iniciado desde el juego: el jugador abre las ventilas con la palanca
+2026-11-11 14:39:52;E9;reversion;twin;mc-invernadero;set_config;{"auto":1};ok;configuración actualizada;Fin de E9: el invernadero vuelve a control automático
+2026-11-11 14:43:06;E8;reversion;twin;mc-seguridad;set_actuator;{"name":"gate","value":0};ok;gate=0;Reversión automática de E8 tras 5 min
+2026-11-11 14:43:06;E7;reversion;twin;mc-seguridad;set_config;{"alarm":0,"auto":1};ok;gate=0;Reversión automática de E7 tras 5 min
+2026-11-11 14:43:58;P1;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.3.0;ok;;Instalación de AgroCraft 0.3: techo del invernadero por temperatura, salud de plantas, vapor en ventilas
+2026-11-11 14:52:50;E3;reversion;twin;mc-parcela-a;set_interval;{"interval_s":30};ok;interval_s=30;Reversión automática de E3 tras 15 min
+2026-11-11 14:55:22;P2;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.4.0;ok;;Instalación de AgroCraft 0.4: granja de simulación acelerada
+2026-11-11 14:57:58;E6;reversion;twin;mc-estacion;set_config;{"sync_weather":1};ok;configuración actualizada;Reversión automática de E6 tras 20 min
+2026-11-11 14:59:34;S1;inicio;sim;sim-control;start;{"scenario":"actual","speed":120,"hours":24};ok;escenario=actual x120.0 durante 24.0 h simuladas desde las 15.0 h;Simulación: el día de hoy desde el estado real, 24 h en 12 min
+2026-11-11 15:07:41;E2;reversion;dataset;ds-invernadero;calibrate;{"reset":true};ok;calibración borrada;Reversión automática de E2 tras 30 min
+2026-11-11 15:37:41;E1;reversion;api;api-aire;set_enabled;{"enabled":1};ok;enabled=1;Reversión automática de E1 tras 60 min
+2026-11-11 16:32:46;E5;resultado;twin;mc-parcela-a;alerta Suelo seco -> set_config {"auto":1};{"auto":1};ok;suelo 29.6 % -> riego automático 16:32:47;Ciclo cerrado: alerta de Grafana ejecuta el comando y el gemelo vuelve a regar solo
+2026-11-11 16:37:51;E4;reversion;twin;mc-parcela-b;set_config;{"soil_min":35,"soil_max":65};ok;configuración actualizada;Reversión automática de E4 tras 120 min

@@ -32,6 +32,8 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 | Mapa web `/map/` (squaremap) | Funcionando |
 | Plugin 0.2: letreros en vivo, palancas, anuncios en el chat, eventos de jugadores | Funcionando (palancas sin probar con un jugador) |
 | Granja de simulación acelerada (plugin 0.4): 8 escenarios, hasta 360×, datos en medición aparte | Funcionando (11 nov 15:00) |
+| Pruebas de la simulación: 8 escenarios, 34 criterios (`scripts/sim_test.py`) | **Todas cumplen** (11 nov, `docs/experimentos/sim-tests-corrida*.md`) |
+| Experimentos de retroceso en la granja real (E0-E9) | Hechos y revertidos; registro en `docs/experimentos/experimentos.csv` |
 | Documento | Pendiente |
 
 Total: **15 dispositivos con datos** (8 gemelos + 3 API + 2 dataset + 2 reales). Las cuatro clases

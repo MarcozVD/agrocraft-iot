@@ -1,0 +1,69 @@
+[
+  {
+    "scenario": "actual",
+    "hours": 24,
+    "speed": 360,
+    "from": "2026-11-11T21:57:48Z",
+    "to": "2026-11-11T22:01:58Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Ciclo diario de temperatura (amplitud > 8 °C)",
+        "value": "11.0",
+        "ok": true
+      },
+      {
+        "check": "Radiación 0 de noche y > 600 W/m² de día",
+        "value": "(0.0, 806.762)",
+        "ok": true
+      },
+      {
+        "check": "El riego automático actúa y el suelo termina ≥ 33 %",
+        "value": "(3, 48.8)",
+        "ok": true
+      }
+    ],
+    "events": 19
+  },
+  {
+    "scenario": "normal",
+    "hours": 24,
+    "speed": 360,
+    "from": "2026-11-11T22:01:58Z",
+    "to": "2026-11-11T22:06:07Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Ciclo diario de temperatura (amplitud > 8 °C)",
+        "value": "11.0",
+        "ok": true
+      },
+      {
+        "check": "Radiación 0 de noche y > 600 W/m² de día",
+        "value": "(0.0, 806.001)",
+        "ok": true
+      },
+      {
+        "check": "El riego automático actúa y el suelo termina ≥ 33 %",
+        "value": "(4, 66.1)",
+        "ok": true
+      },
+      {
+        "check": "Temperatura exterior dentro del día típico (17-28 °C)",
+        "value": "(17.0, 28.0)",
+        "ok": true
+      }
+    ],
+    "events": 25
+  }
+]

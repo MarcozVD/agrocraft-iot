@@ -4,7 +4,8 @@
 # Anotación agro_cmd: comando que el servicio de control ejecuta cuando la alerta se dispara. Usa set_config
 # (no set_actuator) para mover el actuador sin sacar al gemelo de control automático: así el propio
 # gemelo lo apaga al volver al rango (lección del 11 nov: las ventilas quedaron abiertas en manual).
-# En archivos de provisioning "$" se interpola desde el entorno; por eso las plantillas usan "$$".
+# Plantillas con .Labels / .Values (sin "$": en provisioning "$" se interpola desde el entorno y "$$"
+# no se des-escapa en esta versión; lección del 11 nov).
 apiVersion: 1
 
 groups:
@@ -21,8 +22,8 @@ groups:
         execErrState: Error
         labels: { severity: warning }
         annotations:
-          summary: "Humedad del suelo de {{ $$labels.device }} por debajo de 30 %: {{ $$values.B.Value | printf \"%.1f\" }} %"
-          agro_cmd: '{"class":"twin","device":"{{ $$labels.device }}","action":"set_config","params":{"auto":1}}'
+          summary: "Humedad del suelo de {{ .Labels.device }} por debajo de 30 %: {{ printf \"%.1f\" .Values.B.Value }} %"
+          agro_cmd: '{"class":"twin","device":"{{ .Labels.device }}","action":"set_config","params":{"auto":1}}'
         data:
           - refId: A
             relativeTimeRange: { from: 600, to: 0 }
@@ -55,7 +56,7 @@ groups:
         execErrState: Error
         labels: { severity: critical }
         annotations:
-          summary: "Invernadero a {{ $$values.B.Value | printf \"%.1f\" }} °C (umbral 32 °C): se abren las ventilas"
+          summary: "Invernadero a {{ printf \"%.1f\" .Values.B.Value }} °C (umbral 32 °C): se abren las ventilas"
           agro_cmd: '{"class":"twin","device":"mc-invernadero","action":"set_config","params":{"vent":1,"auto":1}}'
         data:
           - refId: A
@@ -88,7 +89,7 @@ groups:
         execErrState: Error
         labels: { severity: warning }
         annotations:
-          summary: "Tanque al {{ $$values.B.Value | printf \"%.1f\" }} % (umbral 20 %): se enciende la bomba"
+          summary: "Tanque al {{ printf \"%.1f\" .Values.B.Value }} % (umbral 20 %): se enciende la bomba"
           agro_cmd: '{"class":"twin","device":"mc-tanque","action":"set_config","params":{"pump":1,"auto":1}}'
         data:
           - refId: A
@@ -121,7 +122,7 @@ groups:
         execErrState: Error
         labels: { severity: critical }
         annotations:
-          summary: "{{ $$values.B.Value | printf \"%.0f\" }} criatura(s) hostil(es) dentro de la cerca"
+          summary: "{{ printf \"%.0f\" .Values.B.Value }} criatura(s) hostil(es) dentro de la cerca"
         data:
           - refId: A
             relativeTimeRange: { from: 120, to: 0 }
@@ -153,7 +154,7 @@ groups:
         execErrState: Error
         labels: { severity: warning }
         annotations:
-          summary: "{{ $$labels.device }} no envía datos hace {{ $$values.B.Value | printf \"%.0f\" }} s"
+          summary: "{{ .Labels.device }} no envía datos hace {{ printf \"%.0f\" .Values.B.Value }} s"
         data:
           - refId: A
             relativeTimeRange: { from: 172800, to: 0 }
@@ -189,7 +190,7 @@ groups:
         execErrState: Error
         labels: { severity: critical }
         annotations:
-          summary: "El servidor del gemelo corre a {{ $$values.B.Value | printf \"%.1f\" }} TPS (normal: 20)"
+          summary: "El servidor del gemelo corre a {{ printf \"%.1f\" .Values.B.Value }} TPS (normal: 20)"
         data:
           - refId: A
             relativeTimeRange: { from: 300, to: 0 }

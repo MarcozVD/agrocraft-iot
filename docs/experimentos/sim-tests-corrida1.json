@@ -1,0 +1,275 @@
+[
+  {
+    "scenario": "actual",
+    "hours": 24,
+    "speed": 360,
+    "from": "2026-11-11T21:22:10Z",
+    "to": "2026-11-11T21:26:19Z",
+    "ok": false,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Ciclo diario de temperatura (amplitud > 8 °C)",
+        "value": "11.0",
+        "ok": true
+      },
+      {
+        "check": "Radiación 0 de noche y > 600 W/m² de día",
+        "value": "(0.0, 807.027)",
+        "ok": true
+      },
+      {
+        "check": "El riego automático mantiene el suelo cerca o por encima de 35 % (mín. > 30 %)",
+        "value": "29.8",
+        "ok": false
+      }
+    ],
+    "events": 18
+  },
+  {
+    "scenario": "normal",
+    "hours": 24,
+    "speed": 360,
+    "from": "2026-11-11T21:26:20Z",
+    "to": "2026-11-11T21:30:29Z",
+    "ok": false,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Ciclo diario de temperatura (amplitud > 8 °C)",
+        "value": "11.0",
+        "ok": true
+      },
+      {
+        "check": "Radiación 0 de noche y > 600 W/m² de día",
+        "value": "(0.0, 807.396)",
+        "ok": true
+      },
+      {
+        "check": "El riego automático mantiene el suelo cerca o por encima de 35 % (mín. > 30 %)",
+        "value": "29.6",
+        "ok": false
+      },
+      {
+        "check": "Temperatura exterior dentro del día típico (17-28 °C)",
+        "value": "(17.0, 28.0)",
+        "ok": true
+      }
+    ],
+    "events": 25
+  },
+  {
+    "scenario": "ola_calor",
+    "hours": 24,
+    "speed": 360,
+    "from": "2026-11-11T21:30:30Z",
+    "to": "2026-11-11T21:34:39Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Exterior supera 34 °C",
+        "value": "35.0",
+        "ok": true
+      },
+      {
+        "check": "Invernadero supera 32 °C",
+        "value": "40.3",
+        "ok": true
+      },
+      {
+        "check": "Se abren las ventilas en automático",
+        "value": "3",
+        "ok": true
+      },
+      {
+        "check": "La salud de las plantas cae",
+        "value": "(67.2, 0.0)",
+        "ok": true
+      }
+    ],
+    "events": 31
+  },
+  {
+    "scenario": "sequia",
+    "hours": 36,
+    "speed": 360,
+    "from": "2026-11-11T21:34:39Z",
+    "to": "2026-11-11T21:40:49Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "ET0 máxima mayor a la del día normal (×1.8)",
+        "value": "(1.93, 0.64)",
+        "ok": true
+      },
+      {
+        "check": "Sin lluvia",
+        "value": "0.0",
+        "ok": true
+      },
+      {
+        "check": "Más riegos que en el día normal (por hora)",
+        "value": "(12, 0.20833333333333334)",
+        "ok": true
+      },
+      {
+        "check": "El tanque termina más bajo de lo que empezó",
+        "value": "(73.2, 58.2)",
+        "ok": true
+      }
+    ],
+    "events": 52
+  },
+  {
+    "scenario": "tormenta",
+    "hours": 12,
+    "speed": 360,
+    "from": "2026-11-11T21:40:50Z",
+    "to": "2026-11-11T21:42:58Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Lluvia fuerte (≥ 18 mm/h)",
+        "value": "18.0",
+        "ok": true
+      },
+      {
+        "check": "Entra agua al tanque por lluvia",
+        "value": "12.0",
+        "ok": true
+      },
+      {
+        "check": "El suelo se moja (> 90 %)",
+        "value": "100.0",
+        "ok": true
+      },
+      {
+        "check": "Sin riegos mientras llueve",
+        "value": "0",
+        "ok": true
+      }
+    ],
+    "events": 8
+  },
+  {
+    "scenario": "helada",
+    "hours": 24,
+    "speed": 360,
+    "from": "2026-11-11T21:42:59Z",
+    "to": "2026-11-11T21:47:08Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Exterior baja de 3 °C",
+        "value": "2.0",
+        "ok": true
+      },
+      {
+        "check": "Se enciende la calefacción",
+        "value": "10",
+        "ok": true
+      },
+      {
+        "check": "El invernadero queda por encima del exterior (mín.)",
+        "value": "(8.0, 2.0)",
+        "ok": true
+      }
+    ],
+    "events": 35
+  },
+  {
+    "scenario": "falla_bomba",
+    "hours": 48,
+    "speed": 360,
+    "from": "2026-11-11T21:47:09Z",
+    "to": "2026-11-11T21:55:22Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "La falla queda registrada (pump_failure = 1)",
+        "value": "1.0",
+        "ok": true
+      },
+      {
+        "check": "El tanque se vacía (< 5 %)",
+        "value": "0.0",
+        "ok": true
+      },
+      {
+        "check": "La bomba se ordena pero no entra agua",
+        "value": "(1.0, 1.33)",
+        "ok": true
+      },
+      {
+        "check": "Sin agua, el suelo cae por debajo de 30 %",
+        "value": "0.0",
+        "ok": true
+      }
+    ],
+    "events": 45
+  },
+  {
+    "scenario": "intrusion",
+    "hours": 12,
+    "speed": 360,
+    "from": "2026-11-11T21:55:22Z",
+    "to": "2026-11-11T21:57:31Z",
+    "ok": true,
+    "checks": [
+      {
+        "check": "Hubo telemetría de los 7 dispositivos simulados",
+        "value": "7",
+        "ok": true
+      },
+      {
+        "check": "Aparece un intruso",
+        "value": "6",
+        "ok": true
+      },
+      {
+        "check": "Se detecta (hostiles_near > 0)",
+        "value": "1.0",
+        "ok": true
+      },
+      {
+        "check": "Suena la alarma en automático",
+        "value": "6",
+        "ok": true
+      }
+    ],
+    "events": 25
+  }
+]
