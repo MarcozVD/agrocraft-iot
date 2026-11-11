@@ -120,8 +120,8 @@ final class Displays implements Listener {
                 "Tanque", "Nivel " + f(v.get("level_pct"), 0) + " %", f(v.get("volume_l"), 0) + " L",
                 "Bomba " + onOff(v.get("pump"))};
             case "mc-invernadero" -> new String[] {
-                "Invernadero", "T " + f(v.get("temp_c"), 1) + " C", "HR " + f(v.get("hum_pct"), 0) + " %",
-                "Ventilas " + onOff(v.get("vent_open"))};
+                "Invernadero", "T " + f(v.get("temp_c"), 1) + "C HR " + f(v.get("hum_pct"), 0) + "%",
+                "Plantas " + f(v.get("plant_health_pct"), 0) + " %", "Ventilas " + onOff(v.get("vent_open"))};
             case "mc-silo" -> new String[] {
                 "Silo", "Lleno " + f(v.get("fill_pct"), 0) + " %", f(v.get("items"), 0) + " unid.",
                 "Enviado " + f(v.get("dispatched_total"), 0)};

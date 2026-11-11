@@ -165,7 +165,7 @@ un usuario por dispositivo con ACL que solo le deja sus propios temas, secretos 
 | `mc-parcela-a` | Parcela de trigo | `soil_pct` 0…100 · `growth_pct` 0…100 · `mature_count` 0…72 · `light_lvl` 0…15 · `irrigation` · `lamp` · `harvests` | Sonda capacitiva de humedad · BH1750 | Riego, lámpara; `auto`, `soil_min` (35), `soil_max` (65) |
 | `mc-parcela-b` | Parcela de zanahoria y papa (se seca 25 % más rápido, crece 15 % más lento) | igual | igual | igual |
 | `mc-tanque` | Tanque de 2000 L con nivel visible | `level_pct` · `volume_l` · `outflow_lpm` · `inflow_lpm` · `pump` | Ultrasónico JSN-SR04T · caudalímetro YF-S201 | Bomba; `auto`, `level_min` (25), `level_max` (90) |
-| `mc-invernadero` | Invernadero de vidrio | `temp_c` · `hum_pct` · `light_lvl` · `vent_open` · `heater` · `lamp` | SHT31 · BH1750 | Ventilas, calefacción, lámparas; `auto` y cuatro umbrales |
+| `mc-invernadero` | Invernadero de vidrio; el techo cambia de color con la temperatura y tiene arbustos de bayas dentro | `temp_c` · `hum_pct` · `light_lvl` · `vent_open` · `heater` · `lamp` · `plant_health_pct` (desde 0.3) | SHT31 · BH1750 | Ventilas, calefacción, lámparas; `auto` y cuatro umbrales |
 | `mc-silo` | Barril de cosecha | `fill_pct` · `items` · `comparator_lvl` 0…15 · `received_total` · `dispatched_total` | Celda de carga | Descarga; `auto`, `dispatch_at` (80) |
 | `mc-seguridad` | Perímetro cercado | `hostiles_near` · `players_in_zone` · `gate_open` · `alarm` · `intruders_total` | PIR · contacto de puerta | Alarma, portón; `auto`, `simulate` |
 | `mc-estacion` | Estación meteorológica del mundo | `raining` · `thundering` · `daylight_lvl` 0…15 · `time_ticks` | Pluviómetro · piranómetro | `set_weather`, `set_time`; `sync_weather`, `sync_time` |

@@ -2,6 +2,11 @@ package co.agrocraft.bridge;
 
 import java.util.Map;
 
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.block.data.Ageable;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.Openable;
@@ -20,6 +25,11 @@ final class GreenhouseTwin extends Twin {
 
     private double temp = 24;
     private double hum = 70;
+    private double plantHealth = 80;             // salud del cultivo interior (arbustos de bayas), 0-100
+    private double particleTimer;
+    private int shownBand = -1;
+    private int shownAge = -1;
+    private int bushRefresh;
 
     private boolean vent;
     private boolean heater;
@@ -61,6 +71,17 @@ final class GreenhouseTwin extends Twin {
 
         double humTarget = Json.clamp(real.humPct + (vent ? 2 : 12) - 2.0 * (temp - real.tempC), 30, 100);
         hum += (humTarget - hum) * (1 - Math.exp(-dt / 1200.0));
+        plantHealth = Json.clamp(plantHealth + healthRate() * dt / 3600.0, 0, 100);
+        if (vent) {                                     // vapor que escapa por las ventilas abiertas
+            particleTimer += dt;
+            if (particleTimer >= 2) {
+                particleTimer = 0;
+                for (int x = Layout.GREENHOUSE.x1() + 1; x < Layout.GREENHOUSE.x2(); x += 2) {
+                    Location top = layout.at(x, Layout.GREENHOUSE_ROOF + 1, Layout.VENT_Z).getLocation().add(0.5, 0.2, 0.5);
+                    layout.world.spawnParticle(Particle.CLOUD, top, 3, 0.2, 0.3, 0.2, 0.01);
+                }
+            }
+        }
         render();
     }
 
@@ -83,7 +104,74 @@ final class GreenhouseTwin extends Twin {
         publishState();
     }
 
+    /** Puntos de salud por hora: crece en confort (18-28 °C, HR 50-90 %) y cae con calor, frío o aire seco. */
+    private double healthRate() {
+        double rate;
+        if (temp > 32) {
+            rate = -25;
+        } else if (temp > 28) {
+            rate = -6;
+        } else if (temp < 12) {
+            rate = -15;
+        } else if (temp < 18) {
+            rate = -3;
+        } else {
+            rate = 12;
+        }
+        if (hum < 40) {
+            rate -= 8;
+        } else if (hum > 95) {
+            rate -= 4;
+        }
+        return rate;
+    }
+
+    /** Color del techo según la temperatura: frío, confort, tibio, caliente, estrés. */
+    private int band() {
+        return temp < 18 ? 0 : temp < 27 ? 1 : temp < 30 ? 2 : temp < 32 ? 3 : 4;
+    }
+
+    private static final Material[] ROOF = {Material.LIGHT_BLUE_STAINED_GLASS, Material.GLASS,
+        Material.YELLOW_STAINED_GLASS, Material.ORANGE_STAINED_GLASS, Material.RED_STAINED_GLASS};
+    private static final int[] BUSH_X = {17, 18, 19, 21, 22, 23};
+    private static final int[] BUSH_Z = {-8, -10};
+
+    private void renderPlants() {
+        int band = band();
+        if (band != shownBand) {
+            for (int x = Layout.GREENHOUSE.x1(); x <= Layout.GREENHOUSE.x2(); x++) {
+                for (int z = Layout.GREENHOUSE.z1(); z <= Layout.GREENHOUSE.z2(); z++) {
+                    boolean ventCell = z == Layout.VENT_Z && x > Layout.GREENHOUSE.x1() && x < Layout.GREENHOUSE.x2();
+                    if (!ventCell) {
+                        layout.at(x, Layout.GREENHOUSE_ROOF, z).setType(ROOF[band], false);
+                    }
+                }
+            }
+            shownBand = band;
+        }
+        int age = plantHealth > 75 ? 3 : plantHealth > 50 ? 2 : plantHealth > 25 ? 1 : 0;
+        if (age != shownAge || --bushRefresh <= 0) {     // repone también lo que un jugador coseche o rompa
+            bushRefresh = 60;
+            for (int x : BUSH_X) {
+                for (int z : BUSH_Z) {
+                    Block bush = layout.at(x, 1, z);
+                    Material want = plantHealth <= 5 ? Material.DEAD_BUSH : Material.SWEET_BERRY_BUSH;
+                    if (bush.getType() != want) {
+                        layout.at(x, 0, z).setType(Material.GRASS_BLOCK, false);
+                        bush.setType(want, false);
+                    }
+                    if (bush.getBlockData() instanceof Ageable data && data.getAge() != age) {
+                        data.setAge(age);
+                        bush.setBlockData(data, false);
+                    }
+                }
+            }
+            shownAge = age;
+        }
+    }
+
     private void render() {
+        renderPlants();
         if (shownVent == null || shownVent != vent) {
             for (int x = Layout.GREENHOUSE.x1() + 1; x < Layout.GREENHOUSE.x2(); x++) {
                 Block trapdoor = layout.at(x, Layout.GREENHOUSE_ROOF, Layout.VENT_Z);
@@ -117,6 +205,7 @@ final class GreenhouseTwin extends Twin {
         out.put("vent_open", vent ? 1.0 : 0.0);
         out.put("heater", heater ? 1.0 : 0.0);
         out.put("lamp", lamp ? 1.0 : 0.0);
+        out.put("plant_health_pct", plantHealth);
     }
 
     @Override
@@ -172,11 +261,13 @@ final class GreenhouseTwin extends Twin {
     void writeModel(JsonObject out) {
         out.addProperty("temp", temp);
         out.addProperty("hum", hum);
+        out.addProperty("plant_health", plantHealth);
     }
 
     @Override
     void readModel(JsonObject in) {
         temp = Json.num(in, "temp", temp);
         hum = Json.num(in, "hum", hum);
+        plantHealth = Json.clamp(Json.num(in, "plant_health", plantHealth), 0, 100);
     }
 }

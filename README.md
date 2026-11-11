@@ -137,11 +137,15 @@ bash scripts/build-plugin.sh                             # compila e instala el 
   https://doi.org/10.4121/uuid:88d22c60-21b3-4ea8-90db-20249a5be2a7
 - UCI Individual Household Electric Power Consumption: https://archive.ics.uci.edu/dataset/235
 
-## Dentro del mundo (plugin 0.2)
+## Dentro del mundo (plugin 0.3)
 
 - **Tablero** frente al punto de aparición: clima real de Bucaramanga, calidad del aire, celular,
   PC gateway y salud del servidor, actualizados cada 2 s.
 - **Letrero junto a cada gemelo** con sus lecturas (parcelas, tanque, invernadero, silo, estación, seguridad).
+- **Invernadero visible**: el techo cambia de color con la temperatura (azul < 18 °C, transparente
+  18-27, amarillo 27-30, naranja 30-32, rojo > 32); los arbustos de bayas reflejan `plant_health_pct`
+  (con frutos si están sanos, sin frutos o secos si sufren calor, frío o aire seco); sale vapor por las
+  ventilas abiertas y humo de la calefacción.
 - **Palancas**: riego A y B, bomba del tanque, ventilas del invernadero y alarma. Moverlas ejecuta el
   actuador y publica el evento `player_actuator` (retroceso iniciado desde el juego).
 - Cada comando que llega desde la plataforma se anuncia en el chat del juego con su origen
