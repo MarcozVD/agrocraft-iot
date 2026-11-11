@@ -20,6 +20,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 abstract class Twin {
     protected final AgroCraftPlugin plugin;
     protected final Layout layout;
+    protected final Farm farm;
+    /** Entradas del modelo: clima real (granja real) o escenario simulado (granja de simulación). */
+    protected final RealWorld in;
     final String id;
     final String topic;
     private final int defaultIntervalS;
@@ -30,11 +33,13 @@ abstract class Twin {
     private final Map<String, double[]> calibration = new HashMap<>();   // variable -> {offset, ganancia}
     private long lastSlot = -1;
 
-    Twin(AgroCraftPlugin plugin, String id, int defaultIntervalS) {
+    Twin(AgroCraftPlugin plugin, Farm farm, String suffix, int defaultIntervalS) {
         this.plugin = plugin;
-        this.layout = plugin.layout;
-        this.id = id;
-        this.topic = "agro/twin/" + id;
+        this.farm = farm;
+        this.layout = farm.layout;
+        this.in = farm.inputs;
+        this.id = farm.prefix + suffix;
+        this.topic = "agro/" + farm.cls + "/" + id;
         this.defaultIntervalS = defaultIntervalS;
         this.intervalS = defaultIntervalS;
     }
@@ -178,6 +183,16 @@ abstract class Twin {
         }
         Bukkit.broadcast(Component.text("[AgroCraft] " + player + " -> " + id + ": " + detail,
                 ok ? NamedTextColor.YELLOW : NamedTextColor.RED));
+    }
+
+    /** Copia el estado del modelo y la configuración de otro gemelo (la simulación parte de la granja real). */
+    final void copyFrom(Twin other) {
+        JsonObject state = other.save();
+        state.addProperty("seq", seq);
+        state.addProperty("enabled", true);
+        state.addProperty("interval_s", intervalS);
+        state.remove("calibration");
+        load(state);
     }
 
     /** Configuración y actuadores vigentes (lo mismo que se publica en `state`). */

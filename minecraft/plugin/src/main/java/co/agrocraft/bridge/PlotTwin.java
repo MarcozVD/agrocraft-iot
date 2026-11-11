@@ -47,9 +47,9 @@ final class PlotTwin extends Twin {
     private Boolean shownIrrigation;
     private Boolean shownLamp;
 
-    PlotTwin(AgroCraftPlugin plugin, String id, Layout.Box box, Material[] crops, Material produce, int lampX,
+    PlotTwin(AgroCraftPlugin plugin, Farm farm, String id, Layout.Box box, Material[] crops, Material produce, int lampX,
              double dryFactor, double growFactor, TankTwin tank, SiloTwin silo) {
-        super(plugin, id, 30);
+        super(plugin, farm, id, farm.simulated() ? 5 : 30);
         this.box = box;
         this.crops = crops;
         this.produce = produce;
@@ -62,7 +62,7 @@ final class PlotTwin extends Twin {
 
     @Override
     void step(double dt) {
-        RealWorld real = plugin.real;
+        RealWorld real = in;
         double hours = dt / 3600.0;
 
         if (auto) {     // control local con histéresis; los umbrales se ajustan por comando
@@ -96,7 +96,7 @@ final class PlotTwin extends Twin {
     }
 
     private int light() {
-        return layout.at(box.x1() + 2, 1, box.z1() + 2).getLightLevel();
+        return in.light(layout.at(box.x1() + 2, 1, box.z1() + 2));
     }
 
     private void setIrrigation(boolean on, String reason) {

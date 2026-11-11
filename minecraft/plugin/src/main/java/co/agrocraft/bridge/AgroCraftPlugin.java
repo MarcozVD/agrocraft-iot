@@ -33,13 +33,16 @@ import com.google.gson.JsonParser;
  * dispositivos de API. El plugin lleva el modelo, así que el mundo evoluciona sin jugadores.
  */
 public final class AgroCraftPlugin extends JavaPlugin implements Listener {
-    static final String FW = "agrocraft-bridge-0.3.0";
+    static final String FW = "agrocraft-bridge-0.4.0";
 
     Layout layout;
     Mqtt mqtt;
     final RealWorld real = new RealWorld();
     private final Map<String, Twin> twins = new LinkedHashMap<>();
-    private Displays displays;
+    static final int SIM_OFFSET = 80;
+    private final java.util.List<Farm> farms = new java.util.ArrayList<>();
+    Farm realFarm;
+    Farm simFarm;
     private File stateFile;
     private long lastStep;
     private int secondsToSave = 60;
@@ -51,6 +54,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         stateFile = new File(getDataFolder(), "state.json");
         JsonObject saved = readState();
 
+        ZoneId zone = ZoneId.of(getConfig().getString("timezone", "America/Bogota"));
         int ox = getConfig().getInt("origin.x", 0);
         int oz = getConfig().getInt("origin.z", 0);
         boolean built = saved.has("y0");
@@ -58,23 +62,29 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         layout = new Layout(world, ox, y0, oz);
         layout.keepLoaded(this);
         if (!built) {
-            layout.build();
+            layout.build(true);
             getLogger().info("Granja construida en x=" + ox + " y=" + y0 + " z=" + oz);
         }
+        realFarm = new Farm("twin", "mc-", layout, real);
+        farms.add(realFarm);
+        buildFarm(realFarm);
+        register(realFarm, new StationTwin(this, realFarm, zone));
+        register(realFarm, new ServerTwin(this, realFarm));
 
-        TankTwin tank = new TankTwin(this);
-        SiloTwin silo = new SiloTwin(this);
-        // Las parcelas van antes que el tanque: primero piden agua y luego el tanque hace su balance
-        register(new PlotTwin(this, "mc-parcela-a", Layout.PLOT_A, new Material[] {Material.WHEAT},
-                Material.WHEAT, 8, 1.0, 1.0, tank, silo));
-        register(new PlotTwin(this, "mc-parcela-b", Layout.PLOT_B, new Material[] {Material.CARROTS, Material.POTATOES},
-                Material.CARROT, 20, 1.25, 0.85, tank, silo));
-        register(tank);
-        register(new GreenhouseTwin(this));
-        register(silo);
-        register(new SecurityTwin(this));
-        register(new StationTwin(this, ZoneId.of(getConfig().getString("timezone", "America/Bogota"))));
-        register(new ServerTwin(this));
+        // Granja de simulación: copia de la granja a SIM_OFFSET bloques al este, con reloj acelerado
+        int sx = ox + getConfig().getInt("simulation.offset_x", SIM_OFFSET);
+        boolean simBuilt = saved.has("sim_y0");
+        int sy0 = simBuilt ? saved.get("sim_y0").getAsInt() : world.getHighestBlockYAt(sx, oz);
+        Layout simLayout = new Layout(world, sx, sy0, oz);
+        simLayout.keepLoaded(this);
+        if (!simBuilt) {
+            simLayout.build(false);
+            getLogger().info("Granja de simulación construida en x=" + sx + " y=" + sy0 + " z=" + oz);
+        }
+        simFarm = new Farm("sim", "sim-", simLayout, new SimWorld());
+        farms.add(simFarm);
+        buildFarm(simFarm);
+        register(simFarm, new SimControl(this, simFarm, realFarm, zone));
 
         JsonObject savedTwins = saved.has("twins") ? saved.getAsJsonObject("twins") : new JsonObject();
         for (Twin twin : twins.values()) {
@@ -89,7 +99,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
                     setting("AGRO_MQTT_USER", "mqtt.user", "mc-bridge"),
                     setting("AGRO_MQTT_PASS", "mqtt.password", ""),
                     "agro/twin/mc-server/status",
-                    new String[] {"agro/twin/+/cmd", "agro/api/+/telemetry", "agro/real/+/telemetry"},
+                    new String[] {"agro/twin/+/cmd", "agro/sim/+/cmd", "agro/api/+/telemetry", "agro/real/+/telemetry"},
                     this::onMqttMessage, this::onMqttConnected, getLogger());
         } catch (MqttException error) {
             getLogger().log(Level.SEVERE, "No se pudo crear el cliente MQTT; el plugin se desactiva", error);
@@ -98,9 +108,11 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         }
 
         Bukkit.getPluginManager().registerEvents(this, this);
-        displays = new Displays(this, ZoneId.of(getConfig().getString("timezone", "America/Bogota")));
-        Bukkit.getPluginManager().registerEvents(displays, this);
-        Bukkit.getScheduler().runTaskTimer(this, displays::update, 60L, 40L);
+        for (Farm farm : farms) {
+            Displays displays = new Displays(this, farm, zone, farm == realFarm);
+            Bukkit.getPluginManager().registerEvents(displays, this);
+            Bukkit.getScheduler().runTaskTimer(this, displays::update, 60L, 40L);
+        }
         lastStep = System.nanoTime();
         Bukkit.getScheduler().runTaskTimer(this, this::tick, 40L, 20L);
         saveState();
@@ -120,8 +132,32 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         return twins.get(id);
     }
 
-    private void register(Twin twin) {
+    private void register(Farm farm, Twin twin) {
         twins.put(twin.id, twin);
+        farm.twins.put(twin.id, twin);
+    }
+
+    /** Gemelos de una granja. Las parcelas van antes que el tanque: primero piden agua y luego el tanque hace su balance. */
+    private void buildFarm(Farm farm) {
+        TankTwin tank = new TankTwin(this, farm);
+        SiloTwin silo = new SiloTwin(this, farm);
+        register(farm, new PlotTwin(this, farm, "parcela-a", Layout.PLOT_A, new Material[] {Material.WHEAT},
+                Material.WHEAT, 8, 1.0, 1.0, tank, silo));
+        register(farm, new PlotTwin(this, farm, "parcela-b", Layout.PLOT_B,
+                new Material[] {Material.CARROTS, Material.POTATOES}, Material.CARROT, 20, 1.25, 0.85, tank, silo));
+        register(farm, tank);
+        register(farm, new GreenhouseTwin(this, farm));
+        register(farm, silo);
+        register(farm, new SecurityTwin(this, farm));
+    }
+
+    boolean inAnyFarm(org.bukkit.block.Block block) {
+        for (Farm farm : farms) {
+            if (farm.layout.inFarm(block)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String setting(String env, String path, String fallback) {
@@ -137,17 +173,41 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
             return;
         }
         lastStep = now;
-        for (Twin twin : twins.values()) {
-            try {
-                twin.step(dt);
-                twin.maybePublish();
-            } catch (RuntimeException error) {
-                getLogger().log(Level.WARNING, "Fallo en " + twin.id, error);
+        for (Twin twin : realFarm.twins.values()) {
+            runTwin(twin, dt, true);
+        }
+        SimWorld sim = (SimWorld) simFarm.inputs;
+        double simDt = sim.advance(dt);
+        while (simDt > 1e-6) {
+            double part = Math.min(60, simDt);
+            simDt -= part;
+            for (Twin twin : simFarm.twins.values()) {
+                if (!(twin instanceof SimControl)) {
+                    runTwin(twin, part, false);
+                }
+            }
+        }
+        for (Twin twin : simFarm.twins.values()) {
+            if (twin instanceof SimControl) {
+                runTwin(twin, dt, true);             // el control mide tiempo real y publica siempre
+            } else if (sim.running) {
+                twin.maybePublish();                 // la granja simulada solo publica mientras corre
             }
         }
         if (--secondsToSave <= 0) {
             secondsToSave = 60;
             saveState();
+        }
+    }
+
+    private void runTwin(Twin twin, double dt, boolean publish) {
+        try {
+            twin.step(dt);
+            if (publish) {
+                twin.maybePublish();
+            }
+        } catch (RuntimeException error) {
+            getLogger().log(Level.WARNING, "Fallo en " + twin.id, error);
         }
     }
 
@@ -162,7 +222,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
             if (parts.length != 4) {
                 return;
             }
-            if (parts[1].equals("twin") && parts[3].equals("cmd")) {
+            if ((parts[1].equals("twin") || parts[1].equals("sim")) && parts[3].equals("cmd")) {
                 Twin twin = twins.get(parts[2]);
                 if (twin != null) {
                     twin.handleCommand(payload);
@@ -200,6 +260,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
     void saveState() {
         JsonObject root = new JsonObject();
         root.addProperty("y0", layout.y0);
+        root.addProperty("sim_y0", simFarm.layout.y0);
         JsonObject all = new JsonObject();
         for (Twin twin : twins.values()) {
             all.add(twin.id, twin.save());
@@ -217,28 +278,28 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
     // ------------------------------------------------- el juego no altera lo que lleva el modelo
     @EventHandler(ignoreCancelled = true)
     public void onGrow(BlockGrowEvent event) {
-        if (layout.inFarm(event.getBlock())) {
+        if (inAnyFarm(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onMoisture(MoistureChangeEvent event) {
-        if (layout.inFarm(event.getBlock())) {
+        if (inAnyFarm(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onFade(BlockFadeEvent event) {
-        if (event.getBlock().getType() == Material.FARMLAND && layout.inFarm(event.getBlock())) {
+        if (event.getBlock().getType() == Material.FARMLAND && inAnyFarm(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onTrample(EntityChangeBlockEvent event) {
-        if (event.getBlock().getType() == Material.FARMLAND && layout.inFarm(event.getBlock())) {
+        if (event.getBlock().getType() == Material.FARMLAND && inAnyFarm(event.getBlock())) {
             event.setCancelled(true);
         }
     }
@@ -246,7 +307,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onStep(PlayerInteractEvent event) {
         if (event.getAction() == Action.PHYSICAL && event.getClickedBlock() != null
-                && event.getClickedBlock().getType() == Material.FARMLAND && layout.inFarm(event.getClickedBlock())) {
+                && event.getClickedBlock().getType() == Material.FARMLAND && inAnyFarm(event.getClickedBlock())) {
             event.setCancelled(true);
         }
     }

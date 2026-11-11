@@ -651,9 +651,67 @@ def dispositivo():
                      templating=templating, device_regex="${device}")
 
 
+def simulacion():
+    """Granja de simulación: mismos paneles, pero sobre la medición `simulation` (reloj acelerado)."""
+    y = 0
+    p = [text("Simulación acelerada", g(0, y, 6, 8), (
+        "Copia de la granja, **80 bloques al este** en el mundo, que parte del estado real y avanza "
+        "hasta **360×** más rápido bajo un escenario: como está ahora, día típico, ola de calor, sequía, "
+        "tormenta, helada, falla de la bomba o intrusiones.\n\n"
+        "Se maneja desde el [panel de control](/iot/). Sus datos van a la medición `simulation`: "
+        "no se mezclan con la captura real ni disparan alertas.\n\n"
+        "El eje X es tiempo real; *Horas simuladas* indica cuánto avanzó el reloj del modelo."))]
+    p.append(ts("Entradas del escenario: temperatura y humedad", g(6, y, 9, 8), [
+        ("sim-control", "in_temp_c", "Temperatura exterior simulada", ORANGE, "celsius"),
+        ("sim-control", "in_hum_pct", "Humedad exterior simulada", BLUE, "percent"),
+    ], axis_right={("sim-control", "in_hum_pct")}))
+    p.append(ts("Entradas del escenario: radiación, lluvia y ET0", g(15, y, 9, 8), [
+        ("sim-control", "in_radiation_wm2", "Radiación", YELLOW, "W/m²"),
+        ("sim-control", "in_rain_mmh", "Lluvia (mm/h)", BLUE, "none"),
+        ("sim-control", "in_et0_mmh", "ET0 (mm/h)", ORANGE, "none"),
+    ], axis_right={("sim-control", "in_rain_mmh"), ("sim-control", "in_et0_mmh")}))
+    y += 8
+    p.append(ts("Agua: suelo de las parcelas y tanque", g(0, y, 12, 9), [
+        ("sim-parcela-a", "soil_pct", "Suelo A", GREEN), ("sim-parcela-b", "soil_pct", "Suelo B", YELLOW),
+        ("sim-tanque", "level_pct", "Tanque", BLUE),
+    ], unit="percent", min_=0, max_=100,
+        thresholds=[{"color": "transparent", "value": None}, {"color": RED, "value": 30}]))
+    p.append(ts("Invernadero: temperatura y salud de las plantas", g(12, y, 12, 9), [
+        ("sim-invernadero", "temp_c", "Temperatura interior", RED, "celsius"),
+        ("sim-invernadero", "hum_pct", "Humedad interior", BLUE, "percent"),
+        ("sim-invernadero", "plant_health_pct", "Salud de las plantas", GREEN, "percent"),
+    ], axis_right={("sim-invernadero", "hum_pct"), ("sim-invernadero", "plant_health_pct")},
+        thresholds=[{"color": "transparent", "value": None}, {"color": RED, "value": 32}]))
+    y += 9
+    p.append(state_timeline("Actuadores (simulación)", g(0, y, 24, 7), [
+        ("sim-parcela-a", "irrigation", "Riego A"), ("sim-parcela-b", "irrigation", "Riego B"),
+        ("sim-tanque", "pump", "Bomba"), ("sim-control", "pump_failure", "Bomba averiada"),
+        ("sim-invernadero", "vent_open", "Ventilas"), ("sim-invernadero", "heater", "Calefacción"),
+        ("sim-seguridad", "alarm", "Alarma"), ("sim-control", "running", "Simulación en marcha"),
+    ]))
+    y += 7
+    p.append(ts("Cultivo, cosechas y silo", g(0, y, 12, 8), [
+        ("sim-parcela-a", "growth_pct", "Crecimiento A", GREEN, "percent"),
+        ("sim-parcela-b", "growth_pct", "Crecimiento B", YELLOW, "percent"),
+        ("sim-silo", "fill_pct", "Silo", PURPLE, "percent"),
+    ]))
+    p.append(ts("Reloj y seguridad", g(12, y, 12, 8), [
+        ("sim-control", "sim_hours", "Horas simuladas", BLUE, "h"),
+        ("sim-control", "speed", "Velocidad (×)", TEAL, "none"),
+        ("sim-seguridad", "hostiles_near", "Intrusos", RED, "none"),
+    ], step=True, axis_right={("sim-control", "speed"), ("sim-seguridad", "hostiles_near")}))
+    board = dashboard("agro-simulacion", "AgroCraft · Simulación acelerada", p, ["simulacion"],
+                      time_from="now-30m", refresh="10s", device_regex="sim-.*")
+    for panel in board["panels"]:
+        for target in panel.get("targets", []):
+            target["query"] = target["query"].replace('_measurement == "telemetry"', '_measurement == "simulation"')
+    # las anotaciones siguen leyendo la medición events (comandos y eventos de sim-*)
+    return board
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for build in (resumen, cultivo, clima, operacion, dispositivo):
+    for build in (resumen, cultivo, clima, operacion, dispositivo, simulacion):
         board = build()
         path = OUT / f"{board['uid']}.json"
         path.write_text(json.dumps(board, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

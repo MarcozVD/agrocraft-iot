@@ -3,6 +3,9 @@ package co.agrocraft.bridge;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.World;
+import org.bukkit.block.Block;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -10,7 +13,7 @@ import com.google.gson.JsonParser;
  * Condiciones del mundo real, leídas de la telemetría de los dispositivos de API.
  * Son la entrada del modelo: el gemelo llueve, se seca y se calienta según Bucaramanga.
  */
-final class RealWorld {
+class RealWorld {
     double tempC = 24;
     double humPct = 70;
     double rainRateMmH = 0;
@@ -20,6 +23,20 @@ final class RealWorld {
     long updatedMs = 0;
     /** Última telemetría de cada dispositivo de API y real (para las pantallas del mundo). */
     final Map<String, JsonObject> latest = new HashMap<>();
+    /** Escenarios de simulación: bomba averiada y frecuencia de intrusiones (1 = normal). */
+    boolean pumpFailure = false;
+    double intrusionBoost = 1;
+
+    /** Luz que recibe un bloque (0-15). En la granja real es la del mundo. */
+    int light(Block block) {
+        return block.getLightLevel();
+    }
+
+    /** ¿Es de noche para el modelo? En la granja real, según el reloj del mundo (sincronizado con Colombia). */
+    boolean night(World world) {
+        long time = world.getTime();
+        return time >= 13000 && time <= 23000;
+    }
 
     void update(String device, String payload) {
         JsonObject data;

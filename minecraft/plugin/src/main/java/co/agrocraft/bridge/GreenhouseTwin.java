@@ -44,13 +44,13 @@ final class GreenhouseTwin extends Twin {
     private Boolean shownHeater;
     private Boolean shownLamp;
 
-    GreenhouseTwin(AgroCraftPlugin plugin) {
-        super(plugin, "mc-invernadero", 30);
+    GreenhouseTwin(AgroCraftPlugin plugin, Farm farm) {
+        super(plugin, farm, "invernadero", farm.simulated() ? 5 : 30);
     }
 
     @Override
     void step(double dt) {
-        RealWorld real = plugin.real;
+        RealWorld real = in;
         if (auto) {
             if (!vent && temp > ventOpenAt) {
                 set("vent", true, "auto");
@@ -86,7 +86,7 @@ final class GreenhouseTwin extends Twin {
     }
 
     private int light() {
-        return layout.at(DOOR_X, 2, Layout.VENT_Z).getLightLevel();
+        return in.light(layout.at(DOOR_X, 2, Layout.VENT_Z));
     }
 
     private void set(String name, boolean on, String reason) {

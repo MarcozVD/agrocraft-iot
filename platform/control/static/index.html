@@ -89,6 +89,10 @@
     y muestra el <code>ack</code> del dispositivo. Los comandos quedan marcados en las gráficas de Grafana.</p>
   <section><h2>Reglas en la nube</h2><div class="rules" id="rules"></div></section>
   <section><h2>Gemelos digitales (Minecraft)</h2><div class="grid" id="twin"></div></section>
+  <section><h2>Simulación acelerada (granja copia, 80 bloques al este)</h2>
+    <p class="hint">Parte del estado actual de la granja real y avanza hasta 360 veces más rápido. Sus datos se guardan
+      aparte (medición <code>simulation</code>) y nunca se mezclan con la captura real. Dashboard: <a href="/d/agro-simulacion">Simulación</a>.</p>
+    <div class="grid" id="sim"></div></section>
   <section><h2>Reales</h2><div class="grid" id="real"></div></section>
   <section><h2>API</h2><div class="grid" id="api"></div></section>
   <section><h2>DataSet</h2><div class="grid" id="dataset"></div></section>
@@ -100,6 +104,8 @@ const API = "/iot/api";
 const ACTUATORS = {
   "mc-parcela-a": ["irrigation", "lamp"], "mc-parcela-b": ["irrigation", "lamp"],
   "mc-tanque": ["pump"], "mc-invernadero": ["vent", "heater", "lamp"], "mc-seguridad": ["alarm"],
+  "sim-parcela-a": ["irrigation", "lamp"], "sim-parcela-b": ["irrigation", "lamp"],
+  "sim-tanque": ["pump"], "sim-invernadero": ["vent", "heater", "lamp"], "sim-seguridad": ["alarm"],
   "esp32-01": ["led"],
 };
 const LABELS = { irrigation: "Riego", lamp: "Lámpara", pump: "Bomba", vent: "Ventilas", heater: "Calefacción",
@@ -173,8 +179,9 @@ function controls(d) {
       `Envío: ${Number(s.enabled ?? 1) === 1 ? "ON" : "OFF"}`));
   for (const name of ACTUATORS[id] ?? []) main.append(toggle(id, name, s[name]));
   if ("auto" in s) main.append(toggle(id, "auto", s.auto, "set_config"));
-  if (id === "mc-silo") main.append(el("button", { onclick: () => send(id, "set_actuator", { name: "discharge", value: 1 }) }, "Descargar silo"));
-  if (id === "mc-seguridad") main.append(
+  if (id === "sim-control") return simControls(d);
+  if (id === "mc-silo" || id === "sim-silo") main.append(el("button", { onclick: () => send(id, "set_actuator", { name: "discharge", value: 1 }) }, "Descargar silo"));
+  if (id === "mc-seguridad" || id === "sim-seguridad") main.append(
     el("button", { onclick: () => send(id, "set_actuator", { name: "gate", value: 1 }) }, "Abrir portón"),
     el("button", { onclick: () => send(id, "set_actuator", { name: "gate", value: 0 }) }, "Cerrar portón"));
   parts.push(main);
@@ -210,6 +217,25 @@ function controls(d) {
   return parts;
 }
 
+const SCENARIOS = { actual: "Como está ahora (clima real del momento)", normal: "Día típico", ola_calor: "Ola de calor",
+  sequia: "Sequía", tormenta: "Tormenta", helada: "Helada", falla_bomba: "Falla de la bomba", intrusion: "Intrusiones" };
+function simControls(d) {
+  const s = d.state || {};
+  const scenario = el("select", {}, Object.entries(SCENARIOS).map(([k, v]) => el("option", { value: k, selected: k === (s.scenario || "actual") }, v)));
+  const speed = el("input", { type: "number", min: 1, max: 360, value: s.speed ?? 60, title: "veces más rápido" });
+  const hours = el("input", { type: "number", min: 0.5, max: 240, step: "0.5", value: s.hours ?? 24, title: "horas simuladas" });
+  return [
+    el("div", { class: "row" }, el("label", {}, "Escenario"), scenario),
+    el("div", { class: "row" }, el("label", {}, "Velocidad ×"), speed, el("label", {}, "Horas"), hours,
+      el("span", { class: "hint" }, `≈ ${Math.round((Number(hours.value) * 3600 / Number(speed.value)) / 60 * 10) / 10} min reales`)),
+    el("div", { class: "row" },
+      el("button", { class: "primary", onclick: () => send("sim-control", "start", { scenario: scenario.value, speed: Number(speed.value), hours: Number(hours.value) }) }, "Iniciar desde el estado real"),
+      el("button", { onclick: () => send("sim-control", "set_speed", { speed: Number(speed.value) }) }, "Cambiar velocidad"),
+      el("button", { onclick: () => send("sim-control", "stop") }, "Pausar"),
+      el("button", { onclick: () => send("sim-control", "reset") }, "Igualar a la granja real")),
+  ];
+}
+
 function card(d) {
   const telemetry = Object.entries(d.telemetry || {}).slice(0, 9);
   const ack = d.last_ack;
@@ -226,7 +252,7 @@ function card(d) {
 
 function render(devices) {
   const open = new Set([...document.querySelectorAll("details[open]")].map(x => x.closest(".card")?.dataset.device));
-  const byClass = { twin: [], real: [], api: [], dataset: [] };
+  const byClass = { twin: [], sim: [], real: [], api: [], dataset: [] };
   const seen = new Set(devices.map(d => d.device));
   for (const id of EXPECTED.real) if (!seen.has(id)) devices.push({ device: id, class: "real", status: "offline", state: {}, telemetry: {} });
   for (const d of devices) byClass[d.class]?.push(d);

@@ -20,8 +20,8 @@ final class SiloTwin extends Twin {
     private long received;
     private long dispatched;
 
-    SiloTwin(AgroCraftPlugin plugin) {
-        super(plugin, "mc-silo", 60);
+    SiloTwin(AgroCraftPlugin plugin, Farm farm) {
+        super(plugin, farm, "silo", farm.simulated() ? 5 : 60);
     }
 
     private Inventory inventory() {

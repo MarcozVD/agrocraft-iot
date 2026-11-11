@@ -11,9 +11,10 @@ topic read $SYS/#
 user operator
 topic readwrite agro/#
 
-# Plugin de Minecraft: publica por todos los gemelos mc-* y lee el resto (clima y lecturas reales)
+# Plugin de Minecraft: publica por los gemelos mc-* (granja real) y sim-* (granja de simulación); lee el resto
 user mc-bridge
 topic readwrite agro/twin/#
+topic readwrite agro/sim/#
 topic read agro/#
 
 # Dispositivos: el usuario es el device_id y solo alcanza sus propios temas

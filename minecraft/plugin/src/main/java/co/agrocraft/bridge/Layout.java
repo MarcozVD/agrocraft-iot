@@ -82,7 +82,7 @@ final class Layout {
         lamp.setBlockData(data, false);
     }
 
-    void build() {
+    void build(boolean setSpawn) {
         List<Block> fences = new ArrayList<>();
         for (int x = FARM.x1(); x <= FARM.x2(); x++) {
             fences.add(at(x, 1, FARM.z1()));
@@ -140,7 +140,9 @@ final class Layout {
         lamp(8, 4, CHANNEL_Z, 5, false);                            // lámparas de crecimiento
         lamp(20, 4, CHANNEL_Z, 5, false);
 
-        world.setSpawnLocation(ox + GATE_X, y0 + 1, oz + FARM.z2() - 2);
+        if (setSpawn) {
+            world.setSpawnLocation(ox + GATE_X, y0 + 1, oz + FARM.z2() - 2);
+        }
     }
 
     private void soil(Box plot) {

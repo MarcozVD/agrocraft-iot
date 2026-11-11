@@ -27,8 +27,8 @@ final class TankTwin extends Twin {
 
     private int shownLayers = -1;
 
-    TankTwin(AgroCraftPlugin plugin) {
-        super(plugin, "mc-tanque", 30);
+    TankTwin(AgroCraftPlugin plugin, Farm farm) {
+        super(plugin, farm, "tanque", farm.simulated() ? 5 : 30);
     }
 
     double volume() {
@@ -56,7 +56,8 @@ final class TankTwin extends Twin {
                 setPump(false, "auto");
             }
         }
-        double in = (pump ? PUMP_LPM * dt / 60.0 : 0) + RAIN_L_PER_MM * plugin.real.rainRateMmH * dt / 3600.0;
+        double in = (pump && !this.in.pumpFailure ? PUMP_LPM * dt / 60.0 : 0)
+                + RAIN_L_PER_MM * this.in.rainRateMmH * dt / 3600.0;
         in = Math.min(in, CAPACITY_L - volume);
         volume += in;
         inflowLpm = in / dt * 60;

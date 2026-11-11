@@ -21,15 +21,15 @@ final class StationTwin extends Twin {
     private boolean forcedRain;
     private boolean forcedThunder;
 
-    StationTwin(AgroCraftPlugin plugin, ZoneId zone) {
-        super(plugin, "mc-estacion", 60);
+    StationTwin(AgroCraftPlugin plugin, Farm farm, ZoneId zone) {
+        super(plugin, farm, "estacion", 60);
         this.zone = zone;
     }
 
     @Override
     void step(double dt) {
         World world = layout.world;
-        RealWorld real = plugin.real;
+        RealWorld real = in;
         if (syncTime) {
             double hours = LocalTime.now(zone).toSecondOfDay() / 3600.0;
             world.setTime(Math.floorMod(Math.round((hours - 6) * 1000), 24000L));   // tick 0 = 06:00

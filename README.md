@@ -137,7 +137,7 @@ bash scripts/build-plugin.sh                             # compila e instala el 
   https://doi.org/10.4121/uuid:88d22c60-21b3-4ea8-90db-20249a5be2a7
 - UCI Individual Household Electric Power Consumption: https://archive.ics.uci.edu/dataset/235
 
-## Dentro del mundo (plugin 0.3)
+## Dentro del mundo (plugin 0.4)
 
 - **Tablero** frente al punto de aparición: clima real de Bucaramanga, calidad del aire, celular,
   PC gateway y salud del servidor, actualizados cada 2 s.
@@ -150,3 +150,30 @@ bash scripts/build-plugin.sh                             # compila e instala el 
   actuador y publica el evento `player_actuator` (retroceso iniciado desde el juego).
 - Cada comando que llega desde la plataforma se anuncia en el chat del juego con su origen
   (panel, regla, alerta). Entradas y salidas de jugadores se publican como eventos de `mc-server`.
+
+## Simulación acelerada (plugin 0.4)
+
+Hay **dos granjas** en el mundo:
+
+| | Granja real (x = 0) | Granja de simulación (x = 80) |
+|---|---|---|
+| Dispositivos | `mc-*` (clase `twin`) | `sim-*` (clase `sim`) + `sim-control` |
+| Reloj | tiempo real | acelerado, 1 a 360 veces |
+| Entradas del modelo | clima real (Open-Meteo) | escenario sintético |
+| Datos | medición `telemetry` (captura del informe, alertas) | medición `simulation` (dashboard *Simulación*) |
+
+Escenarios: `actual` (parte del clima real de ese momento), `normal` (día típico de Bucaramanga),
+`ola_calor`, `sequia`, `tormenta`, `helada`, `falla_bomba`, `intrusion`. Cada inicio copia primero el
+estado de la granja real, así la simulación responde a "¿qué pasaría desde aquí si...?".
+
+Desde el panel `/iot/` (sección *Simulación*), o por línea de comandos:
+
+```bash
+bash scripts/cmd.sh sim sim-control start '{"scenario":"sequia","speed":240,"hours":48}'
+bash scripts/cmd.sh sim sim-control set_speed '{"speed":60}'
+bash scripts/cmd.sh sim sim-control stop
+bash scripts/cmd.sh sim sim-control reset      # iguala la granja simulada a la real
+```
+
+La lluvia simulada se dibuja con partículas solo sobre la granja simulada; el cielo y la hora del
+mundo siguen siendo los reales. Mapa: `/map/?world=minecraft_overworld&zoom=5&x=92&z=0`.

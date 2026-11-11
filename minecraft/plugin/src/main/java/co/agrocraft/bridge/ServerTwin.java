@@ -6,8 +6,8 @@ import org.bukkit.Bukkit;
 
 /** Salud del gemelo: equivale al monitoreo del gateway. Si el servidor se degrada, los demás datos pierden valor. */
 final class ServerTwin extends Twin {
-    ServerTwin(AgroCraftPlugin plugin) {
-        super(plugin, "mc-server", 30);
+    ServerTwin(AgroCraftPlugin plugin, Farm farm) {
+        super(plugin, farm, "server", 30);
     }
 
     @Override

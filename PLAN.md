@@ -31,6 +31,7 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 | Repositorio | https://github.com/MarcozVD/agrocraft-iot (privado) |
 | Mapa web `/map/` (squaremap) | Funcionando |
 | Plugin 0.2: letreros en vivo, palancas, anuncios en el chat, eventos de jugadores | Funcionando (palancas sin probar con un jugador) |
+| Granja de simulación acelerada (plugin 0.4): 8 escenarios, hasta 360×, datos en medición aparte | Funcionando (11 nov 15:00) |
 | Documento | Pendiente |
 
 Total: **15 dispositivos con datos** (8 gemelos + 3 API + 2 dataset + 2 reales). Las cuatro clases

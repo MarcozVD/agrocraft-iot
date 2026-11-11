@@ -50,20 +50,20 @@ final class Displays implements Listener {
     private static final Map<String, Spot> DEVICE_SIGNS = new LinkedHashMap<>();
     private static final List<Spot> BOARD = new ArrayList<>();
     private static final List<Lever> LEVERS = List.of(
-            new Lever("mc-parcela-a", "irrigation", new Spot(9, 13)),
-            new Lever("mc-parcela-b", "irrigation", new Spot(21, 13)),
-            new Lever("mc-tanque", "pump", new Spot(7, -5)),
-            new Lever("mc-invernadero", "vent", new Spot(19, -5)),
-            new Lever("mc-seguridad", "alarm", new Spot(3, 3)));
+            new Lever("parcela-a", "irrigation", new Spot(9, 13)),
+            new Lever("parcela-b", "irrigation", new Spot(21, 13)),
+            new Lever("tanque", "pump", new Spot(7, -5)),
+            new Lever("invernadero", "vent", new Spot(19, -5)),
+            new Lever("seguridad", "alarm", new Spot(3, 3)));
 
     static {
-        DEVICE_SIGNS.put("mc-parcela-a", new Spot(8, 13));
-        DEVICE_SIGNS.put("mc-parcela-b", new Spot(20, 13));
-        DEVICE_SIGNS.put("mc-tanque", new Spot(6, -5));
-        DEVICE_SIGNS.put("mc-invernadero", new Spot(18, -5));
-        DEVICE_SIGNS.put("mc-silo", new Spot(14, 9));
-        DEVICE_SIGNS.put("mc-estacion", new Spot(0, 1));
-        DEVICE_SIGNS.put("mc-seguridad", new Spot(2, 3));
+        DEVICE_SIGNS.put("parcela-a", new Spot(8, 13));
+        DEVICE_SIGNS.put("parcela-b", new Spot(20, 13));
+        DEVICE_SIGNS.put("tanque", new Spot(6, -5));
+        DEVICE_SIGNS.put("invernadero", new Spot(18, -5));
+        DEVICE_SIGNS.put("silo", new Spot(14, 9));
+        DEVICE_SIGNS.put("estacion", new Spot(0, 1));
+        DEVICE_SIGNS.put("seguridad", new Spot(2, 3));
         for (int x = 9; x <= 19; x += 2) {          // tablero frente al punto de aparición (14, 16)
             BOARD.add(new Spot(x, 15));
         }
@@ -71,31 +71,41 @@ final class Displays implements Listener {
 
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
 
+    private static final Spot SIM_SIGN = new Spot(14, 15);
+
     private final AgroCraftPlugin plugin;
+    private final Farm farm;
+    private final boolean main;
     private final Layout layout;
     private final ZoneId zone;
     private final Map<Spot, String> shown = new HashMap<>();
 
-    Displays(AgroCraftPlugin plugin, ZoneId zone) {
+    Displays(AgroCraftPlugin plugin, Farm farm, ZoneId zone, boolean main) {
         this.plugin = plugin;
-        this.layout = plugin.layout;
+        this.farm = farm;
+        this.main = main;
+        this.layout = farm.layout;
         this.zone = zone;
     }
 
     // ----------------------------------------------------------------------------- refresco
     void update() {
         for (Map.Entry<String, Spot> entry : DEVICE_SIGNS.entrySet()) {
-            Twin twin = plugin.twin(entry.getKey());
+            Twin twin = farm.twin(entry.getKey());
             if (twin != null) {
-                sign(entry.getValue(), deviceLines(twin));
+                sign(entry.getValue(), deviceLines(entry.getKey(), twin));
             }
         }
-        List<String[]> board = boardLines();
-        for (int i = 0; i < BOARD.size() && i < board.size(); i++) {
-            sign(BOARD.get(i), board.get(i));
+        if (main) {
+            List<String[]> board = boardLines();
+            for (int i = 0; i < BOARD.size() && i < board.size(); i++) {
+                sign(BOARD.get(i), board.get(i));
+            }
+        } else if (farm.twin("control") != null) {
+            sign(SIM_SIGN, simLines(values(farm.twin("control"))));
         }
         for (Lever lever : LEVERS) {
-            Twin twin = plugin.twin(lever.twin());
+            Twin twin = farm.twin(lever.twin());
             if (twin != null) {
                 lever(lever.spot(), Json.flag(twin.config(), lever.actuator(), false));
             }
@@ -108,30 +118,47 @@ final class Displays implements Listener {
         return out;
     }
 
-    private String[] deviceLines(Twin twin) {
+    private String[] simLines(Map<String, Double> v) {
+        int code = (int) num(v.get("scenario_code"));
+        String scenario = code < SimWorld.SCENARIOS.size() ? SimWorld.SCENARIOS.get(code) : "?";
+        double clock = num(v.get("sim_clock_h"));
+        return new String[] {"SIMULACION", num(v.get("running")) > 0 ? scenario + " x" + f(v.get("speed"), 0) : "en pausa",
+            "Hora " + String.format(Locale.ROOT, "%02d:%02d", (int) clock, (int) ((clock % 1) * 60)),
+            f(v.get("sim_hours"), 1) + " h simuladas"};
+    }
+
+    private String[] deviceLines(String suffix, Twin twin) {
+        String[] lines = baseLines(suffix, twin);
+        if (farm.simulated()) {
+            lines[0] = "SIM " + lines[0];
+        }
+        return lines;
+    }
+
+    private String[] baseLines(String suffix, Twin twin) {
         Map<String, Double> v = values(twin);
-        return switch (twin.id) {
-            case "mc-parcela-a", "mc-parcela-b" -> new String[] {
-                twin.id.endsWith("a") ? "Parcela A" : "Parcela B",
+        return switch (suffix) {
+            case "parcela-a", "parcela-b" -> new String[] {
+                suffix.endsWith("a") ? "Parcela A" : "Parcela B",
                 "Suelo " + f(v.get("soil_pct"), 0) + " %",
                 "Cultivo " + f(v.get("growth_pct"), 0) + " %",
                 "Riego " + onOff(v.get("irrigation"))};
-            case "mc-tanque" -> new String[] {
+            case "tanque" -> new String[] {
                 "Tanque", "Nivel " + f(v.get("level_pct"), 0) + " %", f(v.get("volume_l"), 0) + " L",
                 "Bomba " + onOff(v.get("pump"))};
-            case "mc-invernadero" -> new String[] {
+            case "invernadero" -> new String[] {
                 "Invernadero", "T " + f(v.get("temp_c"), 1) + "C HR " + f(v.get("hum_pct"), 0) + "%",
                 "Plantas " + f(v.get("plant_health_pct"), 0) + " %", "Ventilas " + onOff(v.get("vent_open"))};
-            case "mc-silo" -> new String[] {
+            case "silo" -> new String[] {
                 "Silo", "Lleno " + f(v.get("fill_pct"), 0) + " %", f(v.get("items"), 0) + " unid.",
                 "Enviado " + f(v.get("dispatched_total"), 0)};
-            case "mc-estacion" -> new String[] {
+            case "estacion" -> new String[] {
                 "Estacion", "Lluvia " + (num(v.get("raining")) > 0 ? "SI" : "NO"),
                 "Luz " + f(v.get("daylight_lvl"), 0) + "/15", LocalTime.now(zone).format(CLOCK)};
-            case "mc-seguridad" -> new String[] {
+            case "seguridad" -> new String[] {
                 "Seguridad", "Hostiles " + f(v.get("hostiles_near"), 0),
                 "Personas " + f(v.get("players_in_zone"), 0), "Alarma " + onOff(v.get("alarm"))};
-            default -> new String[] {twin.id, "", "", ""};
+            default -> new String[] {suffix, "", "", ""};
         };
     }
 
@@ -231,7 +258,7 @@ final class Displays implements Listener {
             return false;
         }
         Spot spot = new Spot(block.getX() - layout.ox, block.getZ() - layout.oz);
-        return DEVICE_SIGNS.containsValue(spot) || BOARD.contains(spot)
+        return DEVICE_SIGNS.containsValue(spot) || (main ? BOARD.contains(spot) : spot.equals(SIM_SIGN))
                 || LEVERS.stream().anyMatch(lever -> lever.spot().equals(spot));
     }
 
@@ -247,7 +274,10 @@ final class Displays implements Listener {
             return;
         }
         event.setCancelled(true);       // el estado lo decide el gemelo; la palanca solo lo refleja
-        Twin twin = plugin.twin(lever.twin());
+        Twin twin = farm.twin(lever.twin());
+        if (twin == null) {
+            return;
+        }
         boolean on = Json.flag(twin.config(), lever.actuator(), false);
         twin.playerActuate(lever.actuator(), !on, event.getPlayer().getName());
         lever(lever.spot(), Json.flag(twin.config(), lever.actuator(), false));
@@ -263,6 +293,9 @@ final class Displays implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        if (!main) {
+            return;
+        }
         playerEvent("player_join", event.getPlayer().getName());
         event.getPlayer().sendMessage(Component.text(
                 "AgroCraft: este mundo es un gemelo digital IoT. Las palancas de la granja mandan comandos reales.",
@@ -271,6 +304,9 @@ final class Displays implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        if (!main) {
+            return;
+        }
         playerEvent("player_quit", event.getPlayer().getName());
     }
 

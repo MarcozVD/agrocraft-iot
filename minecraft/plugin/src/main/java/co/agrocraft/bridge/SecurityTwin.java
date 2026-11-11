@@ -39,8 +39,8 @@ final class SecurityTwin extends Twin {
     private Boolean shownAlarm;
     private double bellTimer;
 
-    SecurityTwin(AgroCraftPlugin plugin) {
-        super(plugin, "mc-seguridad", 30);
+    SecurityTwin(AgroCraftPlugin plugin, Farm farm) {
+        super(plugin, farm, "seguridad", farm.simulated() ? 5 : 30);
     }
 
     private Block gate() {
@@ -94,10 +94,9 @@ final class SecurityTwin extends Twin {
             }
             return;
         }
-        long time = layout.world.getTime();
-        boolean night = time >= 13000 && time <= 23000;
+        boolean night = in.night(layout.world) || in.intrusionBoost > 1;
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        if (!simulate || !night || random.nextDouble() >= dt / MEAN_SECONDS_BETWEEN_INTRUSIONS) {
+        if (!simulate || !night || random.nextDouble() >= dt * in.intrusionBoost / MEAN_SECONDS_BETWEEN_INTRUSIONS) {
             return;
         }
         int x = random.nextInt(Layout.FARM.x1() + 2, Layout.FARM.x2() - 1);
@@ -105,6 +104,7 @@ final class SecurityTwin extends Twin {
         Zombie zombie = layout.world.spawn(where, Zombie.class);
         zombie.setRemoveWhenFarAway(false);
         zombie.setCanPickupItems(false);
+        zombie.setShouldBurnInDay(false);     // en simulación puede ser "de noche" con sol en el mundo
         intruder = zombie.getUniqueId();
         intruderUntil = now + random.nextInt(4, 9) * 60_000L;
         intruders++;
