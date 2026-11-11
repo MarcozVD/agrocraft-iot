@@ -1,0 +1,55 @@
+# Secretos: nunca en el repo
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.h
+**/passwd
+**/password_file
+
+# Datos y respaldos
+data/
+devices/datasets/*
+!devices/datasets/README.md
+!devices/datasets/fetch.py
+backups/
+*.sqlite
+*.db
+
+# Servidor de Minecraft: datos generados en ejecución
+minecraft/server/data/
+minecraft/server/logs/
+minecraft/server/cache/
+minecraft/world/*
+!minecraft/world/README.md
+
+# Plugin (Gradle / Java)
+.gradle/
+.gradle-home/
+build/
+out/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Arduino
+*.bin
+*.elf
+
+# Editor y sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini

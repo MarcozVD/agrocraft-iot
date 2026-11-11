@@ -1,0 +1,7 @@
+name: AgroCraft
+version: '0.1.0'
+main: co.agrocraft.bridge.AgroCraftPlugin
+api-version: '1.21'
+description: Gemelo digital IoT. Publica los sensores del mundo por MQTT y recibe comandos de la plataforma.
+libraries:
+  - org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5

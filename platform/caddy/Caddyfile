@@ -1,0 +1,20 @@
+# Entrada pública de AgroCraft. Caddy obtiene y renueva el certificado TLS por su cuenta.
+{$SITE_HOST} {
+	encode zstd gzip
+
+	# Mapa 3D del mundo (BlueMap, dentro del servidor de Minecraft)
+	redir /map /map/
+	handle_path /map/* {
+		reverse_proxy minecraft:8100
+	}
+
+	# MQTT sobre WebSocket: el TLS termina aquí y sigue en claro por la red interna
+	handle /mqtt {
+		reverse_proxy mosquitto:9001
+	}
+
+	# Grafana
+	handle {
+		reverse_proxy grafana:3000
+	}
+}

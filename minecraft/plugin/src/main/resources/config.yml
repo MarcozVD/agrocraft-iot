@@ -1,0 +1,16 @@
+# AgroCraft: configuración del gemelo digital.
+
+# Esquina de referencia de la granja (coordenadas del mundo). La altura se toma del terreno.
+origin:
+  x: 0
+  z: 0
+
+# Zona horaria usada para sincronizar la hora del mundo con la hora real.
+timezone: America/Bogota
+
+# Conexión al bróker. Las variables de entorno AGRO_MQTT_URL, AGRO_MQTT_USER y AGRO_MQTT_PASS
+# tienen prioridad; la clave nunca se escribe en este archivo dentro del repositorio.
+mqtt:
+  url: tcp://mosquitto:1883
+  user: mc-bridge
+  password: ''

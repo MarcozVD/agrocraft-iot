@@ -1,0 +1,185 @@
+# AgroCraft - plataforma IoT a la medida sobre una VM de Azure.
+#   dispositivos -> MQTT (Mosquitto) -> Telegraf -> InfluxDB 2 -> Grafana, con Caddy como entrada HTTPS.
+# Preparar:  bash ../scripts/setup.sh     (genera .env y las credenciales del bróker)
+# Levantar:  docker compose up -d --build
+
+name: agrocraft
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+services:
+  # --- Entrada pública: HTTPS automático (Let's Encrypt) y proxy inverso -------------------------
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_HOST: ${SITE_HOST}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../data/caddy:/data
+      - caddy-config:/config
+    mem_limit: 128m
+    logging: *logging
+
+  # --- Bróker MQTT ---------------------------------------------------------------------------------
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    ports:
+      - "8883:8883"                    # MQTT sobre TLS para dispositivos externos
+      - "127.0.0.1:1883:1883"          # solo local, para pruebas desde la VM
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl:/mosquitto/config/acl:ro
+      - ../data/mosquitto/auth:/mosquitto/auth:ro
+      - ../data/mosquitto/conf.d:/mosquitto/config/conf.d:ro
+      - ../data/mosquitto/certs:/mosquitto/certs:ro
+      - mosquitto-data:/mosquitto/data
+    environment:
+      MQTT_HC_PASS: ${MQTT_PASS_TELEGRAF}
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -u telegraf -P $$MQTT_HC_PASS -t '$$SYS/broker/uptime' -C 1 -W 5"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    mem_limit: 128m
+    logging: *logging
+
+  # --- Series de tiempo ----------------------------------------------------------------------------
+  influxdb:
+    image: influxdb:2.7
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_ADMIN_PASS}
+      DOCKER_INFLUXDB_INIT_ORG: agrocraft
+      DOCKER_INFLUXDB_INIT_BUCKET: telemetry          # sin retención: los datos de la captura no caducan
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
+      INFLUXD_REPORTING_DISABLED: "true"
+      INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE: "268435456"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    mem_limit: 768m
+    logging: *logging
+
+  # --- Ingesta: suscriptor MQTT que escribe en InfluxDB ----------------------------------------------
+  telegraf:
+    image: telegraf:1.35
+    restart: unless-stopped
+    depends_on:
+      mosquitto: { condition: service_healthy }
+      influxdb: { condition: service_healthy }
+    environment:
+      MQTT_PASS_TELEGRAF: ${MQTT_PASS_TELEGRAF}
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    mem_limit: 192m
+    logging: *logging
+
+  # --- Visualización, alertas ------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana-oss:12.1.1
+    restart: unless-stopped
+    depends_on:
+      influxdb: { condition: service_healthy }
+    environment:
+      GF_SERVER_ROOT_URL: https://${SITE_HOST}/
+      GF_SERVER_DOMAIN: ${SITE_HOST}
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASS}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"               # lectura sin login para el docente
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_PANELS_DISABLE_SANITIZE_HTML: "true"         # permite incrustar el mapa 3D en un panel
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: America/Bogota
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    mem_limit: 384m
+    logging: *logging
+
+  # --- Dispositivos virtuales: 3 de API y 2 de dataset, un cliente MQTT por dispositivo --------------
+  fleet:
+    build: ../devices/fleet
+    restart: unless-stopped
+    depends_on:
+      mosquitto: { condition: service_healthy }
+    env_file: .env
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      TZ: America/Bogota
+    volumes:
+      - ../data/fleet:/state
+      - ../data/datasets:/datasets:ro
+    mem_limit: 256m
+    logging: *logging
+
+  # --- Gemelo digital: servidor de Minecraft (Paper) con el plugin agrocraft-bridge y BlueMap --------
+  minecraft:
+    image: itzg/minecraft-server:java21
+    restart: unless-stopped
+    stop_grace_period: 60s
+    depends_on:
+      mosquitto: { condition: service_healthy }
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      TYPE: PAPER
+      VERSION: "1.21.11"
+      MEMORY: 1536M
+      TZ: America/Bogota
+      MOTD: "AgroCraft - gemelo digital IoT"
+      LEVEL: agrocraft
+      LEVEL_TYPE: FLAT
+      GENERATE_STRUCTURES: "FALSE"
+      MODE: creative
+      DIFFICULTY: easy
+      SPAWN_PROTECTION: "0"
+      VIEW_DISTANCE: "6"
+      SIMULATION_DISTANCE: "4"
+      MAX_PLAYERS: "8"
+      ALLOW_NETHER: "FALSE"
+      PAUSE_WHEN_EMPTY_SECONDS: "-1"                  # el mundo sigue corriendo sin jugadores
+      ONLINE_MODE: "FALSE"                            # sin verificación de cuentas: ver PLAN.md, sección 6
+      ENFORCE_SECURE_PROFILE: "FALSE"
+      ENABLE_WHITELIST: "TRUE"
+      ENFORCE_WHITELIST: "TRUE"
+      ENABLE_RCON: "TRUE"                             # solo red interna; el puerto no se publica
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      MODRINTH_PROJECTS: bluemap
+      AGRO_MQTT_URL: tcp://mosquitto:1883
+      AGRO_MQTT_USER: mc-bridge
+      AGRO_MQTT_PASS: ${MQTT_PASS_MC_BRIDGE}
+    volumes:
+      - ../data/minecraft:/data
+    mem_limit: 2500m
+    logging: *logging
+
+volumes:
+  caddy-config:
+  mosquitto-data:
+  influxdb-data:
+  influxdb-config:
+  grafana-data:

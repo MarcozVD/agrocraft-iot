@@ -1,0 +1,25 @@
+# Temas: agro/<clase>/<device_id>/<canal>
+#   clase: real | twin | api | dataset
+#   canal: telemetry | status | state | event | ack  (dispositivo -> nube)   cmd  (nube -> dispositivo)
+
+# Ingesta: solo lectura
+user telegraf
+topic read agro/#
+topic read $SYS/#
+
+# Operación (Node-RED, herramientas): envía comandos y lee todo
+user operator
+topic readwrite agro/#
+
+# Plugin de Minecraft: publica por todos los gemelos mc-* y lee el resto (clima y lecturas reales)
+user mc-bridge
+topic readwrite agro/twin/#
+topic read agro/#
+
+# Dispositivos: el usuario es el device_id y solo alcanza sus propios temas
+pattern write agro/+/%u/telemetry
+pattern write agro/+/%u/status
+pattern write agro/+/%u/state
+pattern write agro/+/%u/event
+pattern write agro/+/%u/ack
+pattern read agro/+/%u/cmd
