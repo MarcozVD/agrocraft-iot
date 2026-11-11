@@ -36,7 +36,7 @@ cubiertas.
 
 ### Siguientes pasos, en orden
 
-1. **Arranque automático del agente `gw-pc-01`** al iniciar sesión en Windows:
+1. ~~**Arranque automático del agente `gw-pc-01`**~~ **Hecho (11 nov):** acceso directo en la carpeta Inicio de Windows. Comando usado:
    `powershell -ExecutionPolicy Bypass -File devices
 eal\pc-agent\install-autostart.ps1`
    (lo debe ejecutar el usuario; crea un acceso directo en la carpeta Inicio). Sin esto, el agente
@@ -342,7 +342,7 @@ Captura iniciada el miércoles 11 a la 01:05. Cuatro días completos se cumplen 
   plugin, comandos de retroceso, clima y hora reales dentro del juego.
 
 ### Fase 3 — Reales y operación · miércoles 11 y jueves 12
-- [x] `gw-pc-01` publicando (11 nov 08:24). - [ ] Arranque automático con Windows.
+- [x] `gw-pc-01` publicando (11 nov 08:24). - [x] Arranque automático con Windows.
 - [x] Copia de seguridad diaria (systemd, 03:30).
 - [x] Servicio de control con usuario operador: ingesta HTTP, comandos por REST, panel `/iot/` (reemplaza a Node-RED).
 - [ ] `phone-01`; `esp32-01` si hay hardware.
