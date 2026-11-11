@@ -204,16 +204,26 @@ async def toggle_rule(request):
 
 async def ingest(request):
     proxies: dict = request.app["proxies"]
-    proxy = proxies.get(request.match_info["device"])
+    device = request.match_info["device"]
+    peer = request.headers.get("X-Forwarded-For", request.remote)
+    proxy = proxies.get(device)
     if proxy is None:
+        log.warning("ingesta %s desde %s: dispositivo sin ingesta HTTP", device, peer)
         return web.json_response({"ok": False, "detail": "dispositivo sin ingesta HTTP"}, status=404)
     if not token_ok(request, proxy.token):
+        log.warning("ingesta %s desde %s: token inválido o ausente", device, peer)
         return web.json_response({"ok": False, "detail": "token inválido"}, status=401)
     try:
         body = await request.json()
     except ValueError:
+        log.warning("ingesta %s desde %s: cuerpo no es JSON (%s)", device, peer, request.content_type)
         return web.json_response({"ok": False, "detail": "se esperaba JSON"}, status=400)
     result = proxy.ingest(body)
+    if not result.get("ok"):
+        names = [i.get("name") for i in body.get("payload", [])] if isinstance(body, dict) else []
+        log.warning("ingesta %s: %s; sensores recibidos: %s", device, result.get("detail"), sorted(set(map(str, names))))
+    elif result.get("detail") == "publicado":
+        log.info("ingesta %s: publicado %s", device, result.get("variables"))
     return web.json_response(result, status=200 if result.get("ok") else 422)
 
 

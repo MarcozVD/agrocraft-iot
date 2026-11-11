@@ -65,7 +65,7 @@ Operación diaria (entrar a la VM, ver registros, enviar comandos, desplegar): v
 | D1 | Cuenta de Minecraft | **Decidido:** clientes con TLauncher, sin cuenta oficial → `online-mode=false` con las protecciones de la sección 7 |
 | D2 | Tamaño de VM | **Hecho:** `Standard_B2als_v2` (4 GiB), US$0.0376/h ≈ US$0.90/día. Uso medido: 2.4 GB. Volver a `B2ats_v2` tras la sustentación |
 | D3 | Versión del servidor | **Hecho:** Paper 1.21.11 (los clientes deben usar 1.21.11) |
-| D4 | Hardware real | **Abierta:** ¿hay ESP32 físico con sensores? Sin él, los reales son PC y celular |
+| D4 | Hardware real | **Decidido (11 nov):** no hay ESP32 físico. Clase Real = `gw-pc-01` (PC) + `phone-01` (celular). `esp32-01` queda fuera; su usuario MQTT se conserva por si aparece hardware |
 | D5 | URL | **Hecho:** `agrocraft.northcentralus.cloudapp.azure.com` |
 | D6 | Repositorio | **Hecho:** cuenta `MarcozVD`, repo `agrocraft-iot`, privado por ahora; hacerlo público para la entrega |
 | D7 | Entrega | **Lunes 16 o jueves 19 de noviembre** (confirmar con el docente). El cronograma cubre ambos casos |

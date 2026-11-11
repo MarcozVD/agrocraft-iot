@@ -113,7 +113,10 @@ Arranque manual: `.venv\Scripts\pythonw.exe agent.py`. Arranque con Windows:
 
 **Celular (`phone-01`):** app Sensor Logger → Settings → Data Streaming → HTTP Push, URL
 `https://agrocraft.northcentralus.cloudapp.azure.com/iot/api/ingest/phone-01?token=<MQTT_PASS_PHONE_01>`,
-sensores Light, Barometer, Battery, Accelerometer y Microphone. La ubicación se descarta.
+sensores Light, Barometer, Battery, Accelerometer y Microphone. La ubicación se descarta. Para obtener la URL
+completa con su token (Git Bash en el PC):
+`ssh -i ~/Downloads/iot_key.pem mvale@agrocraft.northcentralus.cloudapp.azure.com 'cd ~/agrocraft/platform && echo "https://$(grep ^SITE_HOST= .env | cut -d= -f2)/iot/api/ingest/phone-01?token=$(grep ^MQTT_PASS_PHONE_01= .env | cut -d= -f2)"'`.
+Si el token está mal, `docker compose logs control` muestra "token inválido o ausente".
 
 Instalación desde cero en una VM nueva (Debian 12 con Docker):
 
