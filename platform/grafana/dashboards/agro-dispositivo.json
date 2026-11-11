@@ -1,0 +1,364 @@
+{
+  "uid": "agro-dispositivo",
+  "title": "AgroCraft · Por dispositivo",
+  "description": "",
+  "tags": [
+    "agrocraft",
+    "dispositivo"
+  ],
+  "timezone": "America/Bogota",
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 41,
+  "version": 1,
+  "refresh": "1m",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "1h"
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "name": "Comandos (ack)",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influx-agro"
+        },
+        "enable": true,
+        "iconColor": "#FF9830",
+        "target": {
+          "refId": "Anno",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"events\" and r.channel == \"ack\")\n  |> filter(fn: (r) => r.device =~ /${device}/)\n  |> group()\n  |> map(fn: (r) => ({_time: r._time, text: r.device + \": \" + r._value, tags: r.device}))"
+        }
+      },
+      {
+        "name": "Eventos",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influx-agro"
+        },
+        "enable": true,
+        "iconColor": "#B877D9",
+        "target": {
+          "refId": "Anno",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"events\" and r.channel == \"event\")\n  |> filter(fn: (r) => r.device =~ /${device}/)\n  |> group()\n  |> map(fn: (r) => ({_time: r._time, text: r.device + \": \" + r._value, tags: r.device}))"
+        }
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "device",
+        "label": "Dispositivo",
+        "type": "query",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influx-agro"
+        },
+        "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"telemetry\", tag: \"device\", predicate: (r) => r._measurement == \"telemetry\", start: -30d)",
+        "definition": "tagValues device",
+        "refresh": 1,
+        "sort": 1,
+        "current": {
+          "text": "mc-invernadero",
+          "value": "mc-invernadero"
+        },
+        "includeAll": false
+      },
+      {
+        "name": "fn",
+        "label": "Agregación",
+        "type": "custom",
+        "query": "mean,max,min,last",
+        "current": {
+          "text": "mean",
+          "value": "mean"
+        },
+        "options": [
+          {
+            "text": "mean",
+            "value": "mean",
+            "selected": true
+          },
+          {
+            "text": "max",
+            "value": "max",
+            "selected": false
+          },
+          {
+            "text": "min",
+            "value": "min",
+            "selected": false
+          },
+          {
+            "text": "last",
+            "value": "last",
+            "selected": false
+          }
+        ]
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "AgroCraft",
+      "type": "dashboards",
+      "tags": [
+        "agrocraft"
+      ],
+      "asDropdown": true,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "panels": [
+    {
+      "id": 39,
+      "type": "table",
+      "title": "Estadísticas del rango elegido: ${device}",
+      "description": "Promedio, máximo, mínimo, último valor y número de muestras en el rango de tiempo del selector.",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "data = from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"${device}\" and r._field != \"seq\")\n  |> group(columns: [\"_field\"])\nmean = data |> mean() |> set(key: \"stat\", value: \"promedio\")\nmax = data |> max() |> set(key: \"stat\", value: \"máximo\")\nmin = data |> min() |> set(key: \"stat\", value: \"mínimo\")\nlast = data |> last() |> set(key: \"stat\", value: \"último\")\ncount = data |> count() |> toFloat() |> set(key: \"stat\", value: \"muestras\")\nunion(tables: [mean, max, min, last, count])\n  |> keep(columns: [\"_field\", \"stat\", \"_value\"])\n  |> group()\n  |> pivot(rowKey: [\"_field\"], columnKey: [\"stat\"], valueColumn: \"_value\")\n  |> rename(columns: {_field: \"variable\"})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "muestras"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 40,
+      "type": "timeseries",
+      "title": "${device}: variables (${fn} por ventana)",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 12
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"${device}\" and r._field != \"seq\")\n  |> aggregateWindow(every: v.windowPeriod, fn: ${fn}, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 6,
+            "showPoints": "never",
+            "lineInterpolation": "smooth",
+            "spanNulls": 600000
+          },
+          "displayName": "${__field.labels._field}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 41,
+      "type": "table",
+      "title": "Comandos y eventos de ${device}",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"events\" and (r.channel == \"cmd\" or r.channel == \"ack\" or r.channel == \"event\") and r.device == \"${device}\")\n  |> group()\n  |> keep(columns: [\"_time\", \"class\", \"device\", \"channel\", \"_value\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 200)\n  |> rename(columns: {_value: \"mensaje\"})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "_time"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "hora"
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsLocal"
+              },
+              {
+                "id": "custom.width",
+                "value": 170
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "channel"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "canal"
+              },
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "class"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "clase"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "device"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "dispositivo"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      }
+    }
+  ]
+}

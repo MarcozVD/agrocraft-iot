@@ -53,3 +53,11 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Agente del PC
+*.log
+*.log.*
+devices/real/pc-agent/state/
+
+# Herramientas locales
+.playwright-cli/

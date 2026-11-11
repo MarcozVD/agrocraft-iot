@@ -11,6 +11,12 @@ if [ -z "$src" ]; then
   exit 1
 fi
 
+if [ -f ../data/mosquitto/conf.d/tls.conf ] \
+   && sudo cmp -s "$src/$SITE_HOST.crt" ../data/mosquitto/certs/fullchain.pem; then
+  echo "certificado sin cambios; Mosquitto no se reinicia"
+  exit 0
+fi
+
 sudo install -o 1883 -g 1883 -m 644 "$src/$SITE_HOST.crt" ../data/mosquitto/certs/fullchain.pem
 sudo install -o 1883 -g 1883 -m 600 "$src/$SITE_HOST.key" ../data/mosquitto/certs/privkey.pem
 

@@ -106,6 +106,7 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: "true"               # lectura sin login para el docente
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
       GF_PANELS_DISABLE_SANITIZE_HTML: "true"         # permite incrustar el mapa 3D en un panel
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/agro-resumen.json
       GF_DATE_FORMATS_DEFAULT_TIMEZONE: America/Bogota
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"

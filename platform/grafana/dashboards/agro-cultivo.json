@@ -1,0 +1,1350 @@
+{
+  "uid": "agro-cultivo",
+  "title": "AgroCraft · Cultivo y riego",
+  "description": "",
+  "tags": [
+    "agrocraft",
+    "cultivo"
+  ],
+  "timezone": "America/Bogota",
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 41,
+  "version": 1,
+  "refresh": "1m",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "1h"
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "name": "Comandos (ack)",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influx-agro"
+        },
+        "enable": true,
+        "iconColor": "#FF9830",
+        "target": {
+          "refId": "Anno",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"events\" and r.channel == \"ack\")\n  |> filter(fn: (r) => r.device =~ /mc-parcela.*|mc-tanque|mc-silo/)\n  |> group()\n  |> map(fn: (r) => ({_time: r._time, text: r.device + \": \" + r._value, tags: r.device}))"
+        }
+      },
+      {
+        "name": "Eventos",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influx-agro"
+        },
+        "enable": true,
+        "iconColor": "#B877D9",
+        "target": {
+          "refId": "Anno",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"events\" and r.channel == \"event\")\n  |> filter(fn: (r) => r.device =~ /mc-parcela.*|mc-tanque|mc-silo/)\n  |> group()\n  |> map(fn: (r) => ({_time: r._time, text: r.device + \": \" + r._value, tags: r.device}))"
+        }
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "AgroCraft",
+      "type": "dashboards",
+      "tags": [
+        "agrocraft"
+      ],
+      "asDropdown": true,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "panels": [
+    {
+      "id": 12,
+      "type": "gauge",
+      "title": "Suelo A",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-a\" and r._field == \"soil_pct\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "displayName": "Suelo A",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#F2495C",
+                "value": null
+              },
+              {
+                "color": "#73BF69",
+                "value": 35
+              },
+              {
+                "color": "#5794F2",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 13,
+      "type": "gauge",
+      "title": "Suelo B",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-b\" and r._field == \"soil_pct\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "displayName": "Suelo B",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#F2495C",
+                "value": null
+              },
+              {
+                "color": "#73BF69",
+                "value": 35
+              },
+              {
+                "color": "#5794F2",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 14,
+      "type": "gauge",
+      "title": "Cultivo A",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-a\" and r._field == \"growth_pct\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "displayName": "Cultivo A",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#FADE2A",
+                "value": null
+              },
+              {
+                "color": "#73BF69",
+                "value": 85
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 15,
+      "type": "gauge",
+      "title": "Cultivo B",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-b\" and r._field == \"growth_pct\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "displayName": "Cultivo B",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#FADE2A",
+                "value": null
+              },
+              {
+                "color": "#73BF69",
+                "value": 85
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 16,
+      "type": "gauge",
+      "title": "Tanque",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-tanque\" and r._field == \"level_pct\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "displayName": "Tanque",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#F2495C",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 20
+              },
+              {
+                "color": "#5794F2",
+                "value": 30
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 17,
+      "type": "gauge",
+      "title": "Silo",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-silo\" and r._field == \"fill_pct\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "displayName": "Silo",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#73BF69",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 18,
+      "type": "timeseries",
+      "title": "Humedad del suelo",
+      "description": "Líneas punteadas: umbrales de riego automático (35 % enciende, 65 % apaga).",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-a\")\n  |> filter(fn: (r) => r._field == \"soil_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-b\")\n  |> filter(fn: (r) => r._field == \"soil_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 600000,
+            "stacking": {
+              "mode": "none"
+            },
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "displayName": "${__field.labels._field} · ${__field.labels.device}",
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "#F2495C",
+                "value": 35
+              },
+              {
+                "color": "#5794F2",
+                "value": 65
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Parcela A · trigo"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Parcela B · zanahoria y papa"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FADE2A"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "type": "timeseries",
+      "title": "Desarrollo del cultivo y cosechas",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-a\")\n  |> filter(fn: (r) => r._field == \"growth_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-b\")\n  |> filter(fn: (r) => r._field == \"growth_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "C",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-a\")\n  |> filter(fn: (r) => r._field == \"harvests\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "D",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-b\")\n  |> filter(fn: (r) => r._field == \"harvests\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 600000,
+            "stacking": {
+              "mode": "none"
+            },
+            "axisBorderShow": false
+          },
+          "displayName": "${__field.labels._field} · ${__field.labels.device}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Crecimiento A"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Crecimiento B"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FADE2A"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Cosechas A"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Cosechas B"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B877D9"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "Tanque: nivel y caudales",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-tanque\")\n  |> filter(fn: (r) => r._field == \"level_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-tanque\")\n  |> filter(fn: (r) => r._field == \"outflow_lpm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "C",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-tanque\")\n  |> filter(fn: (r) => r._field == \"inflow_lpm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 600000,
+            "stacking": {
+              "mode": "none"
+            },
+            "axisBorderShow": false
+          },
+          "displayName": "${__field.labels._field} · ${__field.labels.device}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Nivel"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Salida a riego"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "L/min"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Entrada (bomba + lluvia)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#64C8C8"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "L/min"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Clima real que gobierna el riego",
+      "description": "ET0 seca las parcelas del gemelo; la lluvia las moja y recarga el tanque.",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"api-suelo\")\n  |> filter(fn: (r) => r._field == \"et0_mm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"api-clima\")\n  |> filter(fn: (r) => r._field == \"precip_mm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "C",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"api-suelo\")\n  |> filter(fn: (r) => r._field == \"soil_moist_m3m3\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 600000,
+            "stacking": {
+              "mode": "none"
+            },
+            "axisBorderShow": false
+          },
+          "displayName": "${__field.labels._field} · ${__field.labels.device}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Evapotranspiración ET0 (mm/15 min)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "suffix: mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Precipitación (mm/15 min)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "suffix: mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Humedad de suelo real (m³/m³)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": "state-timeline",
+      "title": "Riego y bomba",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 12,
+        "h": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-a\" and r._field == \"irrigation\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-parcela-b\" and r._field == \"irrigation\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "C",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-tanque\" and r._field == \"pump\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#3a3f47",
+                "value": null
+              },
+              {
+                "color": "#73BF69",
+                "value": 0.5
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Apagado",
+                  "color": "#3a3f47",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Encendido",
+                  "color": "#73BF69",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 0
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Riego A"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Riego B"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Bomba"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showValue": "never",
+        "mergeValues": true,
+        "rowHeight": 0.8,
+        "legend": {
+          "showLegend": false
+        },
+        "alignValue": "center"
+      }
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "Silo de cosecha",
+      "description": "",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-agro"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 25,
+        "w": 12,
+        "h": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "A",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-silo\")\n  |> filter(fn: (r) => r._field == \"fill_pct\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-agro"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r.device == \"mc-silo\")\n  |> filter(fn: (r) => r._field == \"items\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"device\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 600000,
+            "stacking": {
+              "mode": "none"
+            },
+            "axisBorderShow": false
+          },
+          "displayName": "${__field.labels._field} · ${__field.labels.device}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Llenado"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unidades"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FADE2A"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    }
+  ]
+}
