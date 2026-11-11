@@ -779,7 +779,7 @@ def main() -> None:
     for build in (resumen, cultivo, clima, operacion, dispositivo, ganaderia, simulacion):
         board = build()
         path = OUT / f"{board['uid']}.json"
-        path.write_text(json.dumps(board, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        path.write_text(json.dumps(board, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
         print(f"{path.name}: {len(board['panels'])} paneles")
 
 
