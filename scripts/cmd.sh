@@ -18,5 +18,5 @@ docker compose exec -T mosquitto mosquitto_sub -u operator -P "$MQTT_PASS_OPERAT
   -t "$topic/ack" -C 1 -W 10 &
 sleep 1
 docker compose exec -T mosquitto mosquitto_pub -u operator -P "$MQTT_PASS_OPERATOR" -q 1 \
-  -t "$topic/cmd" -m "{\"cmd_id\":\"$cmd_id\",\"action\":\"$action\",\"params\":$params}"
+  -t "$topic/cmd" -m "{\"cmd_id\":\"$cmd_id\",\"source\":\"${SOURCE:-cli}\",\"action\":\"$action\",\"params\":$params}"
 wait

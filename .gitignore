@@ -61,3 +61,6 @@ devices/real/pc-agent/state/
 
 # Herramientas locales
 .playwright-cli/
+
+# Registro de experimentos (se copia a docs/ al cerrar)
+experiments/

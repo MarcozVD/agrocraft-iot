@@ -1,7 +1,9 @@
 # Reglas de alerta de AgroCraft (Grafana Alerting).
 # Patrón de cada regla: A = serie temporal por dispositivo (columnas _time, _value y etiqueta device),
 # B = Reduce a un número por dispositivo, C = umbral. Así una regla genera una alerta por dispositivo.
-# Anotación agro_cmd: comando que el servicio de control ejecuta cuando la alerta se dispara.
+# Anotación agro_cmd: comando que el servicio de control ejecuta cuando la alerta se dispara. Usa set_config
+# (no set_actuator) para mover el actuador sin sacar al gemelo de control automático: así el propio
+# gemelo lo apaga al volver al rango (lección del 11 nov: las ventilas quedaron abiertas en manual).
 # En archivos de provisioning "$" se interpola desde el entorno; por eso las plantillas usan "$$".
 apiVersion: 1
 
@@ -54,7 +56,7 @@ groups:
         labels: { severity: critical }
         annotations:
           summary: "Invernadero a {{ $$values.B.Value | printf \"%.1f\" }} °C (umbral 32 °C): se abren las ventilas"
-          agro_cmd: '{"class":"twin","device":"mc-invernadero","action":"set_actuator","params":{"name":"vent","value":1}}'
+          agro_cmd: '{"class":"twin","device":"mc-invernadero","action":"set_config","params":{"vent":1,"auto":1}}'
         data:
           - refId: A
             relativeTimeRange: { from: 300, to: 0 }
@@ -87,7 +89,7 @@ groups:
         labels: { severity: warning }
         annotations:
           summary: "Tanque al {{ $$values.B.Value | printf \"%.1f\" }} % (umbral 20 %): se enciende la bomba"
-          agro_cmd: '{"class":"twin","device":"mc-tanque","action":"set_actuator","params":{"name":"pump","value":1}}'
+          agro_cmd: '{"class":"twin","device":"mc-tanque","action":"set_config","params":{"pump":1,"auto":1}}'
         data:
           - refId: A
             relativeTimeRange: { from: 300, to: 0 }
