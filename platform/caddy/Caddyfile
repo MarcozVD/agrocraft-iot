@@ -8,6 +8,11 @@
 		reverse_proxy minecraft:8100
 	}
 
+	# Servicio de control: panel de retroceso, API REST, ingesta HTTPS y webhook de alertas
+	handle /iot* {
+		reverse_proxy control:8080
+	}
+
 	# MQTT sobre WebSocket: el TLS termina aquí y sigue en claro por la red interna
 	handle /mqtt {
 		reverse_proxy mosquitto:9001

@@ -1,0 +1,5 @@
+# El contexto es la raíz del repo: solo entra lo que usa la imagen (data/ y backups/ quedan fuera)
+*
+!devices/fleet/base.py
+!platform/control/
+platform/control/__pycache__

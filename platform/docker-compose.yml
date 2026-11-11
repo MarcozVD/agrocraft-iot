@@ -112,6 +112,7 @@ services:
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_NEWS_NEWS_FEED_ENABLED: "false"
       INFLUX_TOKEN: ${INFLUX_TOKEN}
+      ALERT_TOKEN: ${ALERT_TOKEN}
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
@@ -134,6 +135,24 @@ services:
       - ../data/fleet:/state
       - ../data/datasets:/datasets:ro
     mem_limit: 256m
+    logging: *logging
+
+  # --- Control: API REST de comandos, panel /iot/, ingesta HTTPS, reglas y webhook de alertas ----
+  control:
+    build:
+      context: ..
+      dockerfile: platform/control/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mosquitto: { condition: service_healthy }
+    env_file: .env
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      TZ: America/Bogota
+    volumes:
+      - ../data/control:/state
+    mem_limit: 160m
     logging: *logging
 
   # --- Gemelo digital: servidor de Minecraft (Paper) con el plugin agrocraft-bridge y BlueMap --------

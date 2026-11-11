@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgroCraft · Control</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #181b22; --panel-2: #1f232c; --line: #2a2f3a; --text: #d8dde6;
+    --muted: #8a93a3; --accent: #6cbf5b; --accent-2: #5794f2; --warn: #ff9830; --bad: #f2495c;
+    --radius: 10px; --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between;
+           padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel);
+           position: sticky; top: 0; z-index: 5; }
+  h1 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: .2px; }
+  h1 span { color: var(--accent); }
+  header nav a { color: var(--muted); text-decoration: none; margin-right: 14px; }
+  header nav a:hover { color: var(--text); }
+  .login { display: flex; gap: 8px; align-items: center; }
+  .login .who { color: var(--muted); }
+  input, select, button { font: inherit; color: var(--text); background: var(--panel-2);
+                          border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; }
+  input:focus, select:focus { outline: 2px solid var(--accent-2); outline-offset: -1px; }
+  input[type=number] { width: 84px; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: #2c4a26; border-color: #3e6b35; }
+  button.on { background: #2c4a26; border-color: var(--accent); color: #dff5d8; }
+  button.danger:hover { border-color: var(--bad); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  main { padding: 18px 20px 60px; max-width: 1500px; margin: 0 auto; }
+  section > h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px;
+                 color: var(--muted); margin: 26px 0 10px; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+          padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .card.off { opacity: .72; }
+  .head { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.online { background: var(--accent); box-shadow: 0 0 0 3px #6cbf5b22; }
+  .dot.offline { background: var(--bad); }
+  .name { font-weight: 650; font-family: var(--mono); font-size: 13.5px; }
+  .badge { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 1px 8px; }
+  .age { margin-left: auto; color: var(--muted); font-size: 12px; }
+  .values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .value { background: var(--panel-2); border-radius: 7px; padding: 6px 8px; min-width: 0; }
+  .value b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .value small { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden;
+                 text-overflow: ellipsis; display: block; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .row label { color: var(--muted); font-size: 12px; }
+  details { border-top: 1px solid var(--line); padding-top: 8px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+  details .row { margin-top: 8px; }
+  .ack { font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap;
+         overflow: hidden; text-overflow: ellipsis; }
+  .ack.ok { color: #9bd68f; } .ack.bad { color: #ff8a96; }
+  .rules { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+  .rule { display: flex; gap: 12px; align-items: flex-start; }
+  .rule p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+  #toast { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 8px;
+           max-width: min(460px, calc(100vw - 36px)); z-index: 10; }
+  .toast { background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+           border-radius: 8px; padding: 9px 12px; font-size: 13px; box-shadow: 0 6px 24px #0008; }
+  .toast.bad { border-left-color: var(--bad); }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+  @media (max-width: 520px) { .rules { grid-template-columns: 1fr; } .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Agro<span>Craft</span> · panel de control</h1>
+    <nav><a href="/">Dashboards</a><a href="/d/agro-operacion">Operación</a><a href="/d/agro-dispositivo">Por dispositivo</a></nav>
+  </div>
+  <form class="login" id="login">
+    <span class="who" id="who">Solo lectura</span>
+    <input id="user" placeholder="usuario" autocomplete="username" size="9">
+    <input id="pass" type="password" placeholder="clave" autocomplete="current-password" size="12">
+    <button class="primary" id="enter">Entrar</button>
+  </form>
+</header>
+<main>
+  <p class="hint">Cada botón publica un comando MQTT en <code>agro/&lt;clase&gt;/&lt;dispositivo&gt;/cmd</code>
+    y muestra el <code>ack</code> del dispositivo. Los comandos quedan marcados en las gráficas de Grafana.</p>
+  <section><h2>Reglas en la nube</h2><div class="rules" id="rules"></div></section>
+  <section><h2>Gemelos digitales (Minecraft)</h2><div class="grid" id="twin"></div></section>
+  <section><h2>Reales</h2><div class="grid" id="real"></div></section>
+  <section><h2>API</h2><div class="grid" id="api"></div></section>
+  <section><h2>DataSet</h2><div class="grid" id="dataset"></div></section>
+</main>
+<div id="toast"></div>
+<script>
+"use strict";
+const API = "/iot/api";
+const ACTUATORS = {
+  "mc-parcela-a": ["irrigation", "lamp"], "mc-parcela-b": ["irrigation", "lamp"],
+  "mc-tanque": ["pump"], "mc-invernadero": ["vent", "heater", "lamp"], "mc-seguridad": ["alarm"],
+  "esp32-01": ["led"],
+};
+const LABELS = { irrigation: "Riego", lamp: "Lámpara", pump: "Bomba", vent: "Ventilas", heater: "Calefacción",
+                 alarm: "Alarma", led: "LED", auto: "Automático" };
+const EXPECTED = { real: ["gw-pc-01", "phone-01", "esp32-01"] };
+let auth = sessionStorage.getItem("agro-auth") || "";
+const cards = new Map();
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key.startsWith("on")) node.addEventListener(key.slice(2), value);
+    else if (value !== undefined && value !== null && value !== false) node.setAttribute(key, value);
+  }
+  for (const child of children.flat()) node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  return node;
+}
+
+function toast(text, bad = false) {
+  const node = el("div", { class: "toast" + (bad ? " bad" : "") }, text);
+  document.getElementById("toast").append(node);
+  setTimeout(() => node.remove(), 6000);
+}
+
+function fmt(value) {
+  if (typeof value !== "number") return String(value);
+  if (Number.isInteger(value)) return String(value);
+  const abs = Math.abs(value);
+  return abs >= 1000 ? value.toFixed(0) : abs >= 100 ? value.toFixed(1) : abs >= 1 ? value.toFixed(2).replace(/\.?0+$/, "") : value.toPrecision(2);
+}
+
+function ago(ms) {
+  if (!ms) return "sin datos";
+  const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  return s < 90 ? `hace ${s} s` : s < 5400 ? `hace ${Math.round(s / 60)} min` : `hace ${Math.round(s / 3600)} h`;
+}
+
+async function send(device, action, params = {}) {
+  if (!auth) { toast("Ingrese usuario y clave de operador para enviar comandos.", true); return; }
+  const card = cards.get(device);
+  card?.querySelectorAll("button").forEach(b => b.disabled = true);
+  try {
+    const response = await fetch(`${API}/cmd`, { method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Basic " + auth },
+      body: JSON.stringify({ device, action, params }) });
+    const ack = await response.json();
+    if (response.status === 401) { logout(); toast(ack.detail, true); return; }
+    toast(`${device} · ${action}: ${ack.ok ? "ok" : "rechazado"} — ${ack.detail ?? ""}`, !ack.ok);
+    refresh();
+  } catch (error) {
+    toast(`${device}: ${error}`, true);
+  } finally {
+    card?.querySelectorAll("button").forEach(b => b.disabled = false);
+  }
+}
+
+function toggle(device, name, current, action = "set_actuator") {
+  const on = Number(current) === 1;
+  return el("button", { class: on ? "on" : "", title: on ? "Encendido: clic para apagar" : "Apagado: clic para encender",
+    onclick: () => action === "set_actuator"
+      ? send(device, "set_actuator", { name, value: on ? 0 : 1 })
+      : send(device, "set_config", { [name]: on ? 0 : 1 }) },
+    `${LABELS[name] ?? name}: ${on ? "ON" : "OFF"}`);
+}
+
+function controls(d) {
+  const s = d.state || {}, id = d.device, parts = [];
+  const main = el("div", { class: "row" },
+    el("button", { class: Number(s.enabled ?? 1) === 1 ? "on" : "",
+      onclick: () => send(id, "set_enabled", { enabled: Number(s.enabled ?? 1) === 1 ? 0 : 1 }) },
+      `Envío: ${Number(s.enabled ?? 1) === 1 ? "ON" : "OFF"}`));
+  for (const name of ACTUATORS[id] ?? []) main.append(toggle(id, name, s[name]));
+  if ("auto" in s) main.append(toggle(id, "auto", s.auto, "set_config"));
+  if (id === "mc-silo") main.append(el("button", { onclick: () => send(id, "set_actuator", { name: "discharge", value: 1 }) }, "Descargar silo"));
+  if (id === "mc-seguridad") main.append(
+    el("button", { onclick: () => send(id, "set_actuator", { name: "gate", value: 1 }) }, "Abrir portón"),
+    el("button", { onclick: () => send(id, "set_actuator", { name: "gate", value: 0 }) }, "Cerrar portón"));
+  parts.push(main);
+
+  if (id === "mc-estacion") parts.push(el("div", { class: "row" },
+    el("label", {}, "Clima:"),
+    ...["clear", "rain", "thunder"].map(w => el("button", { onclick: () => send(id, "set_weather", { weather: w }) },
+      { clear: "Despejado", rain: "Lluvia", thunder: "Tormenta" }[w])),
+    el("button", { class: Number(s.sync_weather) === 1 ? "on" : "",
+      onclick: () => send(id, "set_config", { sync_weather: 1, sync_time: 1 }) }, "Sincronizar con el clima real")));
+
+  if (d.class === "dataset") {
+    const speed = el("input", { type: "number", min: 0, max: 120, step: "0.5", value: s.speed ?? 1 });
+    parts.push(el("div", { class: "row" }, el("label", {}, "Velocidad ×"), speed,
+      el("button", { onclick: () => send(id, "set_speed", { speed: Number(speed.value) }) }, "Aplicar"),
+      el("button", { onclick: () => send(id, "restart") }, "Reiniciar reproducción")));
+  }
+
+  const interval = el("input", { type: "number", min: 5, max: 3600, value: s.interval_s ?? "" });
+  const variables = Object.keys(d.telemetry || {});
+  const variable = el("select", {}, variables.map(v => el("option", { value: v }, v)));
+  const offset = el("input", { type: "number", step: "any", value: 0, title: "offset" });
+  const gain = el("input", { type: "number", step: "any", value: 1, title: "ganancia" });
+  const calibration = Object.entries(s.calibration || {}).map(([v, c]) => `${v}: +${c.offset} ×${c.gain}`).join(" · ");
+  parts.push(el("details", {}, el("summary", {}, "Ajustes: intervalo, calibración, reinicio" + (calibration ? ` (calibrado: ${calibration})` : "")),
+    el("div", { class: "row" }, el("label", {}, "Intervalo (s)"), interval,
+      el("button", { onclick: () => send(id, "set_interval", { interval_s: Number(interval.value) }) }, "Aplicar")),
+    el("div", { class: "row" }, el("label", {}, "Calibrar"), variable, el("label", {}, "offset"), offset,
+      el("label", {}, "ganancia"), gain,
+      el("button", { onclick: () => send(id, "calibrate", { variable: variable.value, offset: Number(offset.value), gain: Number(gain.value) }) }, "Aplicar"),
+      el("button", { onclick: () => send(id, "calibrate", { reset: true }) }, "Borrar calibración")),
+    el("div", { class: "row" }, el("button", { class: "danger", onclick: () => confirm(`¿Reiniciar ${id} con la configuración de fábrica?`) && send(id, "reboot") }, "Reiniciar dispositivo"))));
+  return parts;
+}
+
+function card(d) {
+  const telemetry = Object.entries(d.telemetry || {}).slice(0, 9);
+  const ack = d.last_ack;
+  return el("div", { class: "card" + (d.status === "online" ? "" : " off") },
+    el("div", { class: "head" }, el("span", { class: "dot " + d.status, title: d.status }),
+      el("span", { class: "name" }, d.device), el("span", { class: "badge" }, d.class),
+      el("span", { class: "age" }, ago(d.telemetry_ts))),
+    telemetry.length ? el("div", { class: "values" }, telemetry.map(([k, v]) => el("div", { class: "value" }, el("b", {}, fmt(v)), el("small", { title: k }, k))))
+                     : el("p", { class: "hint" }, d.device === "phone-01" ? "Esperando datos del celular (Sensor Logger → HTTP Push)." : "Sin datos todavía."),
+    controls(d),
+    ack ? el("div", { class: "ack " + (ack.ok ? "ok" : "bad"), title: JSON.stringify(ack) },
+      `último ack: ${ack.action ?? "?"} → ${ack.ok ? "ok" : "rechazado"} ${ack.detail ?? ""}`) : "");
+}
+
+function render(devices) {
+  const open = new Set([...document.querySelectorAll("details[open]")].map(x => x.closest(".card")?.dataset.device));
+  const byClass = { twin: [], real: [], api: [], dataset: [] };
+  const seen = new Set(devices.map(d => d.device));
+  for (const id of EXPECTED.real) if (!seen.has(id)) devices.push({ device: id, class: "real", status: "offline", state: {}, telemetry: {} });
+  for (const d of devices) byClass[d.class]?.push(d);
+  for (const [cls, list] of Object.entries(byClass)) {
+    const box = document.getElementById(cls);
+    if (box.contains(document.activeElement) && document.activeElement.tagName !== "BUTTON") continue;   // no pisar lo que se está escribiendo
+    box.replaceChildren(...list.map(d => {
+      const node = card(d);
+      node.dataset.device = d.device;
+      if (open.has(d.device)) node.querySelector("details").open = true;
+      cards.set(d.device, node);
+      return node;
+    }));
+  }
+}
+
+async function refresh() {
+  try {
+    const [devices, rules] = await Promise.all([fetch(`${API}/devices`).then(r => r.json()), fetch(`${API}/rules`).then(r => r.json())]);
+    render(devices.devices);
+    document.getElementById("rules").replaceChildren(...rules.rules.map(r => el("div", { class: "card rule" },
+      el("button", { class: r.enabled ? "on" : "", onclick: () => setRule(r.id, !r.enabled) }, r.enabled ? "Activa" : "Inactiva"),
+      el("div", {}, el("span", { class: "name" }, r.id), r.last ? el("span", { class: "badge", style: "margin-left:8px" }, "última decisión: " + r.last) : "",
+        el("p", {}, r.description)))));
+  } catch (error) { toast("No se pudo leer el estado: " + error, true); }
+}
+
+async function setRule(id, enabled) {
+  if (!auth) { toast("Ingrese usuario y clave de operador.", true); return; }
+  const response = await fetch(`${API}/rules/${id}`, { method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Basic " + auth }, body: JSON.stringify({ enabled }) });
+  if (response.status === 401) { logout(); toast("Clave incorrecta", true); }
+  refresh();
+}
+
+function showLogin() {
+  const logged = Boolean(auth);
+  document.getElementById("who").textContent = logged ? "Operador conectado" : "Solo lectura";
+  document.getElementById("user").hidden = logged;
+  document.getElementById("pass").hidden = logged;
+  document.getElementById("enter").textContent = logged ? "Salir" : "Entrar";
+}
+function logout() { auth = ""; sessionStorage.removeItem("agro-auth"); showLogin(); }
+document.getElementById("login").addEventListener("submit", event => {
+  event.preventDefault();
+  if (auth) { logout(); return; }
+  auth = btoa(unescape(encodeURIComponent(`${document.getElementById("user").value}:${document.getElementById("pass").value}`)));
+  sessionStorage.setItem("agro-auth", auth);
+  document.getElementById("pass").value = "";
+  showLogin();
+  toast("Credenciales guardadas para esta pestaña; se validan con el primer comando.");
+});
+showLogin();
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

@@ -6,8 +6,19 @@ Un mundo de Minecraft alojado en una VM de Azure funciona como gemelo digital de
 bloques son sensores y actuadores que publican telemetría por MQTT y obedecen comandos. El clima real
 de Bucaramanga (Open-Meteo) gobierna el clima, el secado del suelo y la temperatura del gemelo.
 
-- **URL:** https://agrocraft.northcentralus.cloudapp.azure.com (Grafana, lectura sin login)
+- **Dashboards (Grafana, lectura sin login):** https://agrocraft.northcentralus.cloudapp.azure.com
+- **Panel de control (retroceso):** https://agrocraft.northcentralus.cloudapp.azure.com/iot/
+  (lectura pública; los comandos piden usuario `operador` y la clave `CONTROL_PASS` de `platform/.env` en la VM)
 - **Plan y estado del proyecto:** [PLAN.md](PLAN.md)
+
+| Ruta | Servicio |
+|---|---|
+| `/` | Grafana: 5 dashboards (Resumen, Cultivo y riego, Clima, Operación y salud, Por dispositivo) y 6 alertas |
+| `/iot/` | Panel de control: comandos a cualquier dispositivo, reglas en la nube |
+| `/iot/api/devices` · `/iot/api/cmd` · `/iot/api/rules` | API REST del servicio de control |
+| `/iot/api/ingest/<device>?token=…` | Ingesta HTTPS para dispositivos sin MQTT (celular) |
+| `/iot/api/alert?token=…` | Webhook de Grafana Alerting (puede ejecutar un comando por alerta) |
+| `/mqtt` · `:8883` | MQTT sobre WebSocket / sobre TLS |
 
 ## Arquitectura
 
@@ -22,15 +33,17 @@ dispositivos ── MQTT 3.1.1 (TLS 8883 / WSS 443 / red interna) ──> Mosqui
 | Gemelos (`twin`) | `mc-parcela-a`, `mc-parcela-b`, `mc-tanque`, `mc-invernadero`, `mc-silo`, `mc-seguridad`, `mc-estacion`, `mc-server` | Plugin `agrocraft-bridge` dentro del servidor Paper |
 | API (`api`) | `api-clima`, `api-aire`, `api-suelo` | Contenedor `fleet` (consulta HTTPS a Open-Meteo) |
 | DataSet (`dataset`) | `ds-invernadero`, `ds-energia` | Contenedor `fleet` (reproduce CSV públicos) |
-| Reales (`real`) | `gw-pc-01`, `phone-01`, `esp32-01` | Pendientes (ver PLAN.md) |
+| Reales (`real`) | `gw-pc-01` (PC del operario), `phone-01` (celular), `esp32-01` (pendiente) | `devices/real/pc-agent` (MQTT/TLS) · app Sensor Logger → HTTPS → servicio `control` |
 
 ## Estructura
 
 ```
-platform/     docker-compose y configuración de Caddy, Mosquitto, Telegraf, Grafana
-devices/      fleet/ (dispositivos de API y dataset) · datasets/fetch.py · real/ (pendiente)
+platform/     docker-compose y configuración de Caddy, Mosquitto, Telegraf, Grafana (dashboards y
+              alertas como código), control/ (API REST, panel /iot/, reglas, ingesta HTTPS)
+devices/      fleet/ (dispositivos de API y dataset) · datasets/fetch.py · real/pc-agent (gw-pc-01)
 minecraft/    plugin/ (agrocraft-bridge, Java 21) · server/ · world/
-scripts/      setup, deploy, sync-certs, build-plugin, cmd
+scripts/      setup, deploy, sync-certs, build-plugin, cmd, backup, pull-backups, install-timers,
+              check-dashboards
 docs/         arquitectura, evidencias, informe
 ```
 
@@ -82,7 +95,25 @@ Desde el PC (Git Bash), después de cambiar archivos del repo:
 bash scripts/deploy.sh                                   # copia el proyecto a la VM (sin secretos)
 ssh ... 'cd ~/agrocraft/platform && docker compose up -d --build'    # aplica cambios de plataforma o flota
 ssh ... 'cd ~/agrocraft && bash scripts/build-plugin.sh'             # recompila el plugin y reinicia Minecraft
+python platform/grafana/build_dashboards.py              # regenera los dashboards (luego deploy.sh)
+ssh ... 'cd ~/agrocraft && python3 scripts/check-dashboards.py'      # ejecuta todas sus consultas
+bash scripts/pull-backups.sh                             # baja al PC las copias de seguridad
 ```
+
+Ojo: Caddyfile, `mosquitto.conf`, `acl` y `telegraf.conf` se montan como archivos sueltos. Tras
+desplegar un cambio en ellos hay que reiniciar ese contenedor (`docker compose restart caddy`, etc.):
+la copia nueva tiene otro inodo y el contenedor seguiría leyendo la anterior.
+
+**Copias de seguridad:** temporizador de systemd diario a las 03:30 (`scripts/install-timers.sh`);
+quedan en `~/agrocraft/backups` (últimas 5) e incluyen secretos, así que no van al repositorio.
+
+**Agente del PC (`gw-pc-01`):** `devices/real/pc-agent`. Requiere `.env` con `MQTT_PASS_GW_PC_01`.
+Arranque manual: `.venv\Scripts\pythonw.exe agent.py`. Arranque con Windows:
+`powershell -ExecutionPolicy Bypass -File install-autostart.ps1`.
+
+**Celular (`phone-01`):** app Sensor Logger → Settings → Data Streaming → HTTP Push, URL
+`https://agrocraft.northcentralus.cloudapp.azure.com/iot/api/ingest/phone-01?token=<MQTT_PASS_PHONE_01>`,
+sensores Light, Barometer, Battery, Accelerometer y Microphone. La ubicación se descarta.
 
 Instalación desde cero en una VM nueva (Debian 12 con Docker):
 

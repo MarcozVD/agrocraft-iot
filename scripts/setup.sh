@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../platform"
 
-SECRETS="INFLUX_ADMIN_PASS INFLUX_TOKEN GRAFANA_ADMIN_PASS RCON_PASSWORD"
+SECRETS="INFLUX_ADMIN_PASS INFLUX_TOKEN GRAFANA_ADMIN_PASS RCON_PASSWORD CONTROL_PASS ALERT_TOKEN"
 MQTT_USERS="telegraf operator mc-bridge api-clima api-aire api-suelo ds-invernadero ds-energia gw-pc-01 phone-01 esp32-01"
 
 var_of() { echo "MQTT_PASS_$(echo "$1" | tr 'a-z-' 'A-Z_')"; }
@@ -27,7 +27,8 @@ for user in $MQTT_USERS; do ensure "$(var_of "$user")"; done
 
 set -a; . ./.env; set +a
 
-mkdir -p ../data/caddy ../data/fleet ../data/datasets ../data/minecraft
+grep -q "^CONTROL_USER=" .env || echo "CONTROL_USER=operador" >> .env
+mkdir -p ../data/caddy ../data/fleet ../data/datasets ../data/minecraft ../data/control
 sudo mkdir -p ../data/mosquitto/auth ../data/mosquitto/conf.d ../data/mosquitto/certs
 
 # Usuarios del bróker: se escribe usuario:clave y mosquitto_passwd lo convierte a hashes

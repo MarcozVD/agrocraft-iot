@@ -1,7 +1,7 @@
 # Proyecto Final IoT — AgroCraft: granja inteligente con gemelo digital en Minecraft
 
 Universidad Autónoma de Bucaramanga · IoT + Cloud + Sistemas Distribuidos
-Versión 3 · actualizado miércoles 2026-11-11, 01:15 (hora Colombia)
+Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 
 > **Idea central.** Un mundo de Minecraft alojado en la nube es el gemelo digital 3D de una granja
 > inteligente. Los bloques del juego son sensores y actuadores: publican telemetría por MQTT como
@@ -17,36 +17,42 @@ Versión 3 · actualizado miércoles 2026-11-11, 01:15 (hora Colombia)
 | Qué | Estado |
 |---|---|
 | Plataforma en la VM (Caddy, Mosquitto, Telegraf, InfluxDB, Grafana) | Funcionando |
-| URL con HTTPS: https://agrocraft.northcentralus.cloudapp.azure.com | Funcionando (Grafana, aún sin dashboards) |
+| Grafana: https://agrocraft.northcentralus.cloudapp.azure.com | 5 dashboards como código, verificados con datos |
+| Alertas de Grafana (6 reglas, una alerta por dispositivo) | Funcionando; contacto webhook → servicio de control, probado |
+| Servicio de control `/iot/`: panel, API REST, reglas en la nube, ingesta HTTPS | Funcionando y probado de punta a punta |
 | MQTT sobre TLS (`:8883`) y sobre WebSocket (`/mqtt`) | Verificados desde fuera |
 | Dispositivos de API (3) y de dataset (2) | **Capturando desde 11 nov 00:50** |
 | Servidor Minecraft (Paper 1.21.11) + plugin `agrocraft-bridge` 0.1.0 | Funcionando, granja construida |
 | Gemelos de Minecraft (8) | **Capturando desde 11 nov 01:05** |
-| Retroceso (`cmd` → `ack`) | Probado en flota y en gemelos, por `scripts/cmd.sh` |
+| Real `gw-pc-01` (agente del PC, MQTT/TLS) | **Capturando desde 11 nov 08:24** · solo mientras el PC esté encendido |
+| Real `phone-01` (celular → HTTPS) | Endpoint listo y probado; falta configurar la app en un celular |
+| Real `esp32-01` | Pendiente (D4: ¿hay hardware?) |
+| Copias de seguridad | Diarias 03:30 en la VM (systemd); primera copia ya descargada al PC |
 | Repositorio | https://github.com/MarcozVD/agrocraft-iot (privado) |
-| Dispositivos reales (3) | **Pendientes: ninguno publica todavía** |
-| Dashboards, alertas, Node-RED, mapa web, documento | Pendientes |
+| Mapa web, plugin 0.2, documento | Pendientes |
 
-Total hoy: **13 dispositivos** con datos (8 gemelos + 3 API + 2 dataset). Falta la clase "Real".
+Total: **14 dispositivos con datos** (8 gemelos + 3 API + 2 dataset + 1 real). Las cuatro clases
+cubiertas.
 
 ### Siguientes pasos, en orden
 
-1. **Dispositivo real `gw-pc-01`** (urgente: es la única clase sin datos). Agente Python con `psutil`
-   en el PC, publicando por MQTT/TLS a `agrocraft...:8883`. Puede reutilizar `devices/fleet/base.py`
-   (`cls = "real"`, `MQTT_TLS=1`). El usuario y la clave ya existen en el bróker
-   (`MQTT_PASS_GW_PC_01` en `platform/.env` de la VM). Va en `devices/real/pc-agent/`.
-2. **Dashboards de Grafana** como código en `platform/grafana/dashboards/` (sección 8).
-3. **Copia de seguridad diaria** de InfluxDB, Grafana y el mundo, descargada fuera de la VM.
-4. **Node-RED** con contraseña: endpoints REST (ingesta HTTP del celular, comandos), panel
-   `/control` y reglas en la nube. Agregar rutas en `platform/caddy/Caddyfile`.
-5. **`phone-01`** (Sensor Logger → HTTPS) y **`esp32-01`** si hay hardware.
-6. **Alertas** de Grafana + canal de notificación (Telegram o Discord).
-7. **Mapa web** y acceso al mundo: decidir lo de BlueMap (sección 2, D8), lista blanca con los
-   nombres de jugador, plugin de inicio de sesión.
-8. **Plugin 0.2**: pantallas con lecturas reales dentro del juego, palanca que enciende el LED del
+1. **Arranque automático del agente `gw-pc-01`** al iniciar sesión en Windows:
+   `powershell -ExecutionPolicy Bypass -File devices
+eal\pc-agent\install-autostart.ps1`
+   (lo debe ejecutar el usuario; crea un acceso directo en la carpeta Inicio). Sin esto, el agente
+   se detiene al reiniciar el PC.
+2. **`phone-01`**: instalar Sensor Logger en un celular y configurar HTTP Push (ver `README.md`).
+3. **Canal de notificación humano** para las alertas (Telegram o Discord): agregar un segundo
+   receptor en `platform/grafana/provisioning/alerting/contact-points.yml` (requiere token del bot).
+4. **Mapa web** y acceso al mundo: decidir D8, lista blanca con los nombres de jugador, plugin de
+   inicio de sesión.
+5. **`esp32-01`** si hay hardware (adaptar sketch del Lab 2 al bróker propio, puerto 8883).
+6. **Plugin 0.2**: pantallas con lecturas reales dentro del juego, palanca que enciende el LED del
    ESP32, eventos de jugadores.
-9. **Experimentos de retroceso** con hora y motivo anotados (sección 9, Fase 5).
-10. **Documento**, análisis con IA, PDF, repositorio público, sustentación.
+7. **Experimentos de retroceso** con hora y motivo anotados (sección 9, Fase 5). Se pueden hacer
+   desde el panel `/iot/`; quedan marcados en las gráficas.
+8. **Documento**, análisis con IA, PDF, repositorio público, sustentación. Capturas de los
+   dashboards ya en `docs/evidencias/` (regenerarlas al cierre con más días de datos).
 
 Operación diaria (entrar a la VM, ver registros, enviar comandos, desplegar): ver `README.md`.
 
@@ -115,7 +121,7 @@ flowchart LR
   subgraph PLAT["Capa de plataforma — VM Azure (Docker)"]
     C["Caddy<br/>proxy inverso + TLS"]
     B["Mosquitto<br/>bróker MQTT"]
-    N["Node-RED (pendiente)<br/>endpoints REST + reglas"]
+    N["Servicio de control<br/>API REST · reglas · webhook"]
     TG["Telegraf<br/>ingesta"]
     I["InfluxDB 2<br/>series de tiempo"]
   end
@@ -210,7 +216,7 @@ y al 11 nov 2009 (energía, mismo día de la semana). Retroceso propio: `set_spe
 | ID | Dispositivo | Variables | Protocolo |
 |---|---|---|---|
 | `gw-pc-01` | PC como gateway de campo (agente Python `psutil`) | `cpu_pct`, `ram_pct`, `cpu_temp_c`, `battery_pct`, `wifi_rssi_dbm` | MQTT 3.1.1 / TLS 8883 |
-| `phone-01` | Celular (app Sensor Logger) | `lux`, `pressure_hpa`, `battery_pct` | HTTPS POST → Node-RED → MQTT |
+| `phone-01` | Celular (app Sensor Logger) | `lux`, `pressure_hpa`, `battery_pct` | HTTPS POST → servicio de control → MQTT |
 | `esp32-01` | ESP32 + DHT22 + LDR + LED *(si hay hardware)* | `temp_c`, `hum_pct`, `lux`, `led` | MQTT 3.1.1 / TLS 8883 |
 
 Los tres usuarios ya existen en el bróker. Para la tabla del documento faltan los rangos de datasheet
@@ -287,7 +293,7 @@ entrar con cualquier nombre. Protecciones:
 | `mqtts://<host>:8883` | MQTT sobre TLS | Funciona |
 | `<host>:25565` | Servidor de Minecraft | Funciona (IP y lista blanca restringidas) |
 | `https://<host>/map` | Mapa web del mundo | Pendiente (D8) |
-| `https://<host>/control`, `/nodered/`, `/api/...` | Node-RED | Pendiente |
+| `https://<host>/iot/` | Panel de control y API REST (servicio `control`) | Funciona |
 
 **Firewall `iot-nsg`:** 22, 80, 443 y 8883 abiertos; 25565 solo desde la IP de un integrante.
 
@@ -318,7 +324,7 @@ consumida por día, cosechas por día. Anotaciones desde la medición `events`.
 | Dispositivo fuera de línea | Sin datos por 3 intervalos | Notificación |
 | Gemelo degradado | `tps` < 15 por 5 min | Notificación |
 
-**Reglas en la nube (Node-RED).** Los gemelos ya traen control local; las reglas en la nube sirven
+**Reglas en la nube (servicio de control, `platform/control/rules.py`).** Implementadas: `lamparas-radiacion` y `aire-ventilas`. Los gemelos ya traen control local; las reglas en la nube sirven
 para mostrar retroceso iniciado por la plataforma: por ejemplo, cortar el riego si el tanque baja de
 15 %, o encender lámparas de crecimiento cuando la radiación real es baja durante el día.
 
@@ -336,15 +342,15 @@ Captura iniciada el miércoles 11 a la 01:05. Cuatro días completos se cumplen 
   plugin, comandos de retroceso, clima y hora reales dentro del juego.
 
 ### Fase 3 — Reales y operación · miércoles 11 y jueves 12
-- [ ] `gw-pc-01` publicando (prioridad 1).
-- [ ] Copia de seguridad diaria.
-- [ ] Node-RED con contraseña: ingesta HTTP, comandos por REST, panel `/control`.
+- [x] `gw-pc-01` publicando (11 nov 08:24). - [ ] Arranque automático con Windows.
+- [x] Copia de seguridad diaria (systemd, 03:30).
+- [x] Servicio de control con usuario operador: ingesta HTTP, comandos por REST, panel `/iot/` (reemplaza a Node-RED).
 - [ ] `phone-01`; `esp32-01` si hay hardware.
 - [ ] Revisar saldo de crédito en el portal de Azure for Students.
 
 ### Fase 4 — Visualización, alertas y reglas · jueves 12 y viernes 13
-- [ ] Los 6 dashboards.
-- [ ] Alertas + canal de notificación; reglas en Node-RED.
+- [x] 5 dashboards como código (Resumen, Cultivo, Clima, Operación, Por dispositivo).
+- [x] Alertas (6) + webhook al servicio de control; reglas en la nube. - [ ] Canal humano (Telegram/Discord).
 - [ ] Mapa web (D8), lista blanca e inicio de sesión.
 
 ### Fase 5 — Experimentos de retroceso · viernes 13 a domingo 15
@@ -369,7 +375,7 @@ Ejecutar a propósito, anotando hora y motivo (quedan visibles en gráficas y en
 - [ ] Documento en PDF (sección 10); repositorio público; ensayo de sustentación individual.
 - [ ] Mantener la VM encendida hasta después de la sustentación; luego volver a `B2ats_v2`.
 
-**Si el tiempo aprieta, recortar en este orden:** plugin 0.2 → mapa web → `phone-01` → Node-RED
+**Si el tiempo aprieta, recortar en este orden:** plugin 0.2 → mapa web → `phone-01` → `esp32-01`
 (los comandos siguen funcionando por `scripts/cmd.sh`). No recortar: `gw-pc-01`, dashboards,
 alertas, experimentos de retroceso, documento.
 

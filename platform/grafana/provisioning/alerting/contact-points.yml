@@ -1,0 +1,23 @@
+# Destino de las alertas: el servicio de control. Registra cada alerta como evento
+# (agro/platform/alertas/event) y, si la regla trae la anotación agro_cmd, ejecuta ese comando.
+# $ALERT_TOKEN se toma del entorno del contenedor de Grafana.
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: agrocraft-control
+    receivers:
+      - uid: agro-webhook
+        type: webhook
+        settings:
+          url: http://control:8080/iot/api/alert?token=$ALERT_TOKEN
+          httpMethod: POST
+        disableResolveMessage: false
+
+policies:
+  - orgId: 1
+    receiver: agrocraft-control
+    group_by: ["alertname", "device"]
+    group_wait: 30s
+    group_interval: 2m
+    repeat_interval: 4h
