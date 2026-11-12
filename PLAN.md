@@ -10,6 +10,25 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 
 ---
 
+## 0. Desarrollo en pausa (11 nov 2026, 18:30)
+
+**Sigue encendido a propósito (es la captura del informe):** VM, granja real y sus 9 gemelos, API,
+pronóstico y datasets, agente del PC (`gw-pc-01`, arranca con Windows), servicio de control, Grafana,
+alertas y copia de seguridad diaria (03:30). No apagar la VM: 4 días de datos se cumplen el
+sábado 15 nov 01:05; 6 días, el martes 17 nov 01:05. La VM cuesta unos US$0.90/día de crédito.
+
+**Apagado o en reposo:** granja de simulación (en pausa; `sim-control` sin publicar, se reactiva con
+`set_enabled {"enabled":1}`), sin experimentos ni pruebas programadas, sin navegador de pruebas.
+
+**Al retomar:**
+1. Cargar en `platform/.env` de la VM `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_WEBHOOK_URL` y,
+   si se quiere el análisis con IA, `ANTHROPIC_API_KEY`; luego `docker compose up -d control` y
+   `POST /iot/api/notify/test`.
+2. Revisar que la captura siga sin huecos (dashboard Resumen, tabla "Estado de la flota").
+3. Documento final: contexto, arquitectura, tablas, comunicación, visualización, retroceso
+   (`docs/experimentos/experimentos.csv`), simulación (`docs/experimentos/sim-tests-*`), análisis con IA.
+4. Pendientes opcionales: AMQP para `ds-energia`, detección de anomalías.
+
 ## 1. Estado y cómo retomar
 
 **La captura de datos ya está corriendo.** No apagar la VM ni cambiar nombres de variables.
