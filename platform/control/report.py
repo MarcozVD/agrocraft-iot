@@ -120,7 +120,7 @@ async def analyze_openai_compatible(prompt: str) -> tuple:
     key = os.environ.get("ANALYST_API_KEY", "").strip()
     if not key:
         return "_Análisis con IA no configurado: falta ANALYST_API_KEY en platform/.env._", None
-    body = {"model": MODEL, "max_tokens": 4000, "temperature": 0.3,
+    body = {"model": MODEL, "max_tokens": 16000, "temperature": 0.3,   # modelo de razonamiento: deja margen
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}]}
     try:
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=300)) as http:
@@ -137,6 +137,9 @@ async def analyze_openai_compatible(prompt: str) -> tuple:
     usage = reply.get("usage", {})
     log.info("análisis generado con %s (%s tokens de entrada, %s de salida)", reply.get("model", MODEL),
              usage.get("prompt_tokens"), usage.get("completion_tokens"))
+    if choice.get("finish_reason") == "length" and len(content.strip()) < 400:
+        return ("_El modelo agotó su límite de salida razonando y no terminó el informe "
+                f"({usage.get('completion_tokens')} tokens)._"), None
     if not content.strip():
         return "_El modelo no devolvió texto._", reply.get("model", MODEL)
     return content.strip(), reply.get("model", MODEL)
