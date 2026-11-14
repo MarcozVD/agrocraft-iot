@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c8393f"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="660" fill="#ffffff"/>
+
+  <!-- Capas -->
+  <g font-weight="700" font-size="14" fill="#1d2433">
+    <rect x="10" y="10" width="230" height="640" rx="10" fill="#eef4fb" stroke="#2f6db3"/>
+    <text x="125" y="34" text-anchor="middle">1. Dispositivo</text>
+    <rect x="255" y="10" width="200" height="640" rx="10" fill="#f6f1fb" stroke="#7b4fb3"/>
+    <text x="355" y="34" text-anchor="middle">2. Telecomunicaciones</text>
+    <rect x="470" y="10" width="290" height="640" rx="10" fill="#eff8f1" stroke="#3a9a4a"/>
+    <text x="615" y="34" text-anchor="middle">3. Plataforma (VM Azure, Docker)</text>
+    <rect x="775" y="10" width="215" height="640" rx="10" fill="#fdf4ea" stroke="#e07b24"/>
+    <text x="882" y="34" text-anchor="middle">4. Operación</text>
+  </g>
+
+  <!-- Dispositivos -->
+  <g>
+    <rect x="25" y="55" width="200" height="88" rx="7" fill="#fff" stroke="#2f6db3"/>
+    <text x="35" y="75" font-weight="700">Reales (2)</text>
+    <text x="35" y="95">gw-pc-01 · PC gateway</text>
+    <text x="35" y="113">phone-01 · iPhone</text>
+    <text x="35" y="131" fill="#5b6475" font-size="11.5">psutil · Sensor Logger</text>
+
+    <rect x="25" y="155" width="200" height="190" rx="7" fill="#fff" stroke="#2f6db3"/>
+    <text x="35" y="175" font-weight="700">Digital Twins (9 + 8 sim)</text>
+    <text x="35" y="195">Mundo Minecraft · Paper</text>
+    <text x="35" y="213">plugin agrocraft-bridge</text>
+    <text x="35" y="233" fill="#5b6475" font-size="11.5">parcelas A/B · tanque</text>
+    <text x="35" y="250" fill="#5b6475" font-size="11.5">invernadero · silo · corral</text>
+    <text x="35" y="267" fill="#5b6475" font-size="11.5">seguridad · estación · servidor</text>
+    <text x="35" y="291" fill="#5b6475" font-size="11.5">granja de simulación ×360</text>
+    <text x="35" y="315" fill="#5b6475" font-size="11.5">letreros, palancas, chat</text>
+    <text x="35" y="333" fill="#5b6475" font-size="11.5">modelo acoplado al clima real</text>
+
+    <rect x="25" y="357" width="200" height="110" rx="7" fill="#fff" stroke="#2f6db3"/>
+    <text x="35" y="377" font-weight="700">API (4)</text>
+    <text x="35" y="397">Open-Meteo (HTTPS)</text>
+    <text x="35" y="415" fill="#5b6475" font-size="11.5">clima · aire · suelo</text>
+    <text x="35" y="433" fill="#5b6475" font-size="11.5">pronóstico + modelo</text>
+    <text x="35" y="455" fill="#5b6475" font-size="11.5">proceso fleet (Python)</text>
+
+    <rect x="25" y="479" width="200" height="92" rx="7" fill="#fff" stroke="#2f6db3"/>
+    <text x="35" y="499" font-weight="700">DataSet (2)</text>
+    <text x="35" y="519" fill="#5b6475" font-size="11.5">Wageningen AGC 2019</text>
+    <text x="35" y="537" fill="#5b6475" font-size="11.5">UCI Household Power</text>
+    <text x="35" y="557" fill="#5b6475" font-size="11.5">reproducción con fecha actual</text>
+  </g>
+
+  <!-- Telecomunicaciones -->
+  <g>
+    <rect x="270" y="80" width="170" height="120" rx="7" fill="#fff" stroke="#7b4fb3"/>
+    <text x="280" y="102" font-weight="700">MQTT 3.1.1</text>
+    <text x="280" y="122" font-size="12">TLS :8883 (Let's Encrypt)</text>
+    <text x="280" y="140" font-size="12">WebSocket WSS :443</text>
+    <text x="280" y="158" font-size="12">red interna :1883</text>
+    <text x="280" y="178" font-size="11.5" fill="#5b6475">QoS 1 · LWT · retenidos</text>
+    <text x="280" y="194" font-size="11.5" fill="#5b6475">usuario + ACL por equipo</text>
+
+    <rect x="270" y="225" width="170" height="92" rx="7" fill="#fff" stroke="#7b4fb3"/>
+    <text x="280" y="247" font-weight="700">HTTPS REST :443</text>
+    <text x="280" y="267" font-size="12">ingesta del celular</text>
+    <text x="280" y="285" font-size="12">API de comandos</text>
+    <text x="280" y="303" font-size="12">webhook de alertas</text>
+
+    <rect x="270" y="342" width="170" height="74" rx="7" fill="#fff" stroke="#7b4fb3"/>
+    <text x="280" y="364" font-weight="700">HTTPS GET (pull)</text>
+    <text x="280" y="384" font-size="12">Open-Meteo</text>
+    <text x="280" y="402" font-size="12">cada 5-15 min</text>
+
+    <rect x="270" y="441" width="170" height="74" rx="7" fill="#fff" stroke="#7b4fb3"/>
+    <text x="280" y="463" font-weight="700">Minecraft :25565</text>
+    <text x="280" y="483" font-size="12">clientes TLauncher</text>
+    <text x="280" y="501" font-size="12">IP restringida</text>
+
+    <rect x="270" y="540" width="170" height="74" rx="7" fill="#fff" stroke="#7b4fb3"/>
+    <text x="280" y="562" font-weight="700">Salida</text>
+    <text x="280" y="582" font-size="12">Telegram · Discord</text>
+    <text x="280" y="600" font-size="12">API de Claude (IA)</text>
+  </g>
+
+  <!-- Plataforma -->
+  <g>
+    <rect x="485" y="55" width="260" height="50" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="495" y="77" font-weight="700">Caddy · proxy inverso + TLS</text>
+    <text x="495" y="95" font-size="11.5" fill="#5b6475">agrocraft.northcentralus.cloudapp.azure.com</text>
+
+    <rect x="485" y="125" width="125" height="70" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="495" y="147" font-weight="700">Mosquitto</text>
+    <text x="495" y="166" font-size="11.5">bróker MQTT</text>
+    <text x="495" y="184" font-size="11.5" fill="#5b6475">ACL · passwd</text>
+
+    <rect x="620" y="125" width="125" height="70" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="630" y="147" font-weight="700">Servicio de</text>
+    <text x="630" y="165" font-weight="700">control</text>
+    <text x="630" y="184" font-size="11.5" fill="#5b6475">REST · reglas · IA</text>
+
+    <rect x="485" y="225" width="125" height="60" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="495" y="247" font-weight="700">Telegraf</text>
+    <text x="495" y="266" font-size="11.5">MQTT → InfluxDB</text>
+
+    <rect x="485" y="315" width="260" height="60" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="495" y="337" font-weight="700">InfluxDB 2 · series de tiempo</text>
+    <text x="495" y="356" font-size="11.5" fill="#5b6475">telemetry · events · simulation</text>
+
+    <rect x="485" y="405" width="260" height="60" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="495" y="427" font-weight="700">Grafana · dashboards + alertas</text>
+    <text x="495" y="446" font-size="11.5" fill="#5b6475">7 dashboards · 9 reglas · webhook</text>
+
+    <rect x="485" y="495" width="260" height="60" rx="7" fill="#fff" stroke="#3a9a4a"/>
+    <text x="495" y="517" font-weight="700">Copias diarias (systemd)</text>
+    <text x="495" y="536" font-size="11.5" fill="#5b6475">InfluxDB · mundo · Grafana · config</text>
+
+    <text x="495" y="590" font-size="11.5" fill="#5b6475">Azure for Students · Standard_B2als_v2</text>
+    <text x="495" y="607" font-size="11.5" fill="#5b6475">Debian 12 · 2 vCPU · 4 GiB · IP estática</text>
+  </g>
+
+  <!-- Operación -->
+  <g>
+    <rect x="790" y="80" width="185" height="62" rx="7" fill="#fff" stroke="#e07b24"/>
+    <text x="800" y="102" font-weight="700">Grafana /</text>
+    <text x="800" y="122" font-size="12">gráficas · prom/máx/mín</text>
+    <rect x="790" y="160" width="185" height="62" rx="7" fill="#fff" stroke="#e07b24"/>
+    <text x="800" y="182" font-weight="700">Panel /iot/</text>
+    <text x="800" y="202" font-size="12">comandos de retroceso</text>
+    <rect x="790" y="240" width="185" height="62" rx="7" fill="#fff" stroke="#e07b24"/>
+    <text x="800" y="262" font-weight="700">Mapa web /map/</text>
+    <text x="800" y="282" font-size="12">marcadores en vivo</text>
+    <rect x="790" y="320" width="185" height="62" rx="7" fill="#fff" stroke="#e07b24"/>
+    <text x="800" y="342" font-weight="700">Mundo Minecraft</text>
+    <text x="800" y="362" font-size="12">letreros y palancas</text>
+    <rect x="790" y="400" width="185" height="62" rx="7" fill="#fff" stroke="#e07b24"/>
+    <text x="800" y="422" font-weight="700">Informes con IA</text>
+    <text x="800" y="442" font-size="12">/iot/reportes/ diario</text>
+    <rect x="790" y="480" width="185" height="62" rx="7" fill="#fff" stroke="#e07b24"/>
+    <text x="800" y="502" font-weight="700">Telegram · Discord</text>
+    <text x="800" y="522" font-size="12">alertas al operador</text>
+  </g>
+
+  <!-- Flujos de envío (gris) -->
+  <g stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <path d="M225,99 L270,130"/>
+    <path d="M225,110 L270,265"/>
+    <path d="M225,250 L270,150"/>
+    <path d="M225,410 L270,380"/>
+    <path d="M225,520 L270,170"/>
+    <path d="M440,140 L485,160"/>
+    <path d="M440,270 L485,80"/>
+    <path d="M547,195 L547,225"/>
+    <path d="M547,285 L547,315"/>
+    <path d="M615,375 L615,405"/>
+    <path d="M745,435 L790,111"/>
+    <path d="M745,160 L790,191"/>
+    <path d="M440,478 L790,351"/>
+  </g>
+  <!-- Retroceso (rojo) -->
+  <g stroke="#c8393f" stroke-width="1.8" fill="none" stroke-dasharray="6 4" marker-end="url(#b)">
+    <path d="M790,200 L745,175"/>
+    <path d="M620,160 L610,160"/>
+    <path d="M485,175 L440,175"/>
+    <path d="M270,190 L225,280"/>
+    <path d="M745,450 C770,300 700,230 700,195"/>
+  </g>
+  <g font-size="12">
+    <line x1="520" y1="630" x2="560" y2="630" stroke="#4b5563" stroke-width="1.6"/>
+    <text x="566" y="634">envío de telemetría</text>
+    <line x1="700" y1="630" x2="740" y2="630" stroke="#c8393f" stroke-width="1.8" stroke-dasharray="6 4"/>
+    <text x="746" y="634">retroceso (cmd → ack)</text>
+  </g>
+</svg>

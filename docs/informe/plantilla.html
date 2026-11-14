@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AgroCraft · Informe final IoT</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  :root { --ink: #1d2433; --muted: #5b6475; --accent: #2f6db3; --line: #d9dee7; --soft: #f3f5f9; --green: #3a9a4a; }
+  * { box-sizing: border-box; }
+  html { font-size: 10pt; }
+  body { margin: 0; color: var(--ink); font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.45; background: #fff; }
+  h1, h2, h3 { color: var(--ink); line-height: 1.2; }
+  h1 { font-size: 17pt; margin: 0 0 8pt; padding-top: 4pt; border-bottom: 2px solid var(--accent); padding-bottom: 4pt; break-before: page; }
+  h2 { font-size: 12.5pt; margin: 16pt 0 6pt; color: var(--accent); break-after: avoid; }
+  h3 { font-size: 11pt; margin: 12pt 0 4pt; break-after: avoid; }
+  p, li { text-align: justify; hyphens: auto; }
+  code { font-family: Consolas, "Cascadia Code", monospace; font-size: 8.5pt; background: var(--soft); padding: 0 3px; border-radius: 3px; }
+  pre { background: var(--soft); padding: 8pt; border-radius: 4px; font-size: 8pt; white-space: pre-wrap; break-inside: avoid; }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 8pt; break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th { background: var(--accent); color: #fff; text-align: left; padding: 4pt 5pt; font-weight: 600; }
+  td { border-bottom: 1px solid var(--line); padding: 3.5pt 5pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfd; }
+  td code { font-size: 7.5pt; white-space: nowrap; }
+  figure { margin: 8pt 0 12pt; text-align: center; break-inside: avoid; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 3px; }
+  figcaption { font-size: 8.3pt; color: var(--muted); margin-top: 3pt; text-align: center; }
+  blockquote { margin: 8pt 0; padding: 6pt 10pt; border-left: 3px solid var(--green); background: #f2f8f3; color: #2a3a2c; }
+  .portada { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; padding: 10mm 4mm; }
+  .portada .uni { font-size: 11pt; color: var(--muted); letter-spacing: .5px; }
+  .portada h1.titulo { font-size: 30pt; border: 0; break-before: avoid; margin: 0; color: var(--accent); }
+  .portada .sub { font-size: 14pt; color: var(--ink); margin-top: 6pt; }
+  .portada .datos { font-size: 10.5pt; line-height: 1.7; }
+  .portada .datos b { display: inline-block; min-width: 110pt; color: var(--muted); font-weight: 600; }
+  .indice { break-before: page; }
+  .indice h1 { break-before: avoid; }
+  .indice ol { font-size: 10.5pt; line-height: 1.9; }
+  .nota { font-size: 8.5pt; color: var(--muted); }
+</style>
+</head>
+<body>
+<section class="portada">
+  <div>
+    <div class="uni">Universidad Autónoma de Bucaramanga · IoT + Cloud + Sistemas Distribuidos</div>
+    <div style="margin-top:40mm">
+      <h1 class="titulo">AgroCraft</h1>
+      <div class="sub">Granja inteligente con gemelo digital en Minecraft<br>Proyecto final de IoT a la medida</div>
+    </div>
+  </div>
+  <div class="datos">
+    <div><b>Integrantes</b> {{integrantes}}</div>
+    <div><b>Docente</b> {{docente}}</div>
+    <div><b>URL del sistema</b> https://agrocraft.northcentralus.cloudapp.azure.com</div>
+    <div><b>Repositorio</b> https://github.com/MarcozVD/agrocraft-iot</div>
+    <div><b>Fecha</b> {{fecha}}</div>
+  </div>
+</section>
+<section class="indice">
+  <h1>Contenido</h1>
+  <ol>
+    <li>Descripción y contexto</li>
+    <li>Arquitectura de referencia IoT</li>
+    <li>Tecnologías seleccionadas: sensores y dispositivos, comunicación, nube y servicios</li>
+    <li>Visualización y procesamiento de los datos</li>
+    <li>Retroceso: control de los dispositivos desde la plataforma</li>
+    <li>Simulación de escenarios</li>
+    <li>Análisis de gráficas y comportamiento (IA)</li>
+    <li>Conclusiones</li>
+    <li>Referencias</li>
+  </ol>
+</section>
+{{contenido}}
+</body>
+</html>

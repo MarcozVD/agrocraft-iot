@@ -27,3 +27,4 @@ hora;id;fase;clase;dispositivo;accion;params;ok;detalle;motivo
 2026-11-11 18:02:58;P4;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.6.0;ok;;AgroCraft 0.6: marcadores en el mapa, rebaño simulado igual al real
 2026-11-11 20:37:54;E5;reversion;twin;mc-parcela-a;set_config;{"auto":1};ok;configuración actualizada;Reversión automática de E5 tras 360 min
 2026-11-11 21:03:17;P5;mantenimiento;sim;sim-control;set_enabled;{"enabled":0};ok;;Pausa del desarrollo: el controlador de simulación deja de publicar; la captura real sigue
+2026-11-14 10:32:44;P6;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.6.1;ok;;Corrección: el comedero publicaba un evento por segundo con el silo sin trigo; ahora usa zanahoria como forraje y avisa una vez
