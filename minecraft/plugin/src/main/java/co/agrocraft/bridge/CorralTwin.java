@@ -59,6 +59,8 @@ final class CorralTwin extends Twin {
     private long processed;
     private long beefTotal;
     private double sinceProcessH;
+    private boolean feederEmpty;
+    private double feederRetryH;
     private boolean seeded;
     private final Map<UUID, Double> babyAgeH = new HashMap<>();
 
@@ -196,8 +198,9 @@ final class CorralTwin extends Twin {
         water = Math.max(0, water - drinkL / WATER_CAPACITY_L * 100);
 
         // control local
-        if (autoFeed && feed < 30) {
-            refill("auto");
+        feederRetryH = Math.max(0, feederRetryH - hours);
+        if (autoFeed && feed < 30 && feederRetryH <= 0 && refill("auto") == 0) {
+            feederRetryH = 1;                        // silo sin alimento: reintenta en 1 h del modelo
         }
         if (autoWater && water < 40) {
             double wanted = (100 - water) / 100 * WATER_CAPACITY_L;
@@ -271,17 +274,27 @@ final class CorralTwin extends Twin {
         render(dt);
     }
 
-    private void refill(String reason) {
+    /**
+     * Llena el comedero desde el silo: trigo y, si no alcanza, zanahoria como forraje.
+     * Devuelve las unidades cargadas. Publica el evento solo si cargó algo, o una única vez cuando el
+     * silo está vacío (antes de 0.6.1 se publicaba en cada segundo de reintento).
+     */
+    private int refill(String reason) {
         int wanted = (int) Math.floor((100 - feed) / 100 * FEED_CAPACITY);
-        int got = silo.take(Material.WHEAT, wanted);
-        if (got > 0) {
-            feed = Math.min(100, feed + got / FEED_CAPACITY * 100);
+        int wheat = silo.take(Material.WHEAT, wanted);
+        int carrots = wheat < wanted ? silo.take(Material.CARROT, wanted - wheat) : 0;
+        int got = wheat + carrots;
+        feed = Math.min(100, feed + got / FEED_CAPACITY * 100);
+        if (got > 0 || !feederEmpty) {
+            JsonObject data = new JsonObject();
+            data.addProperty("wheat", wheat);
+            data.addProperty("carrots", carrots);
+            data.addProperty("reason", reason);
+            data.addProperty("feed_pct", Math.round(feed));
+            publishEvent(got > 0 ? "feeder" : "feeder_empty", data);
         }
-        JsonObject data = new JsonObject();
-        data.addProperty("wheat", got);
-        data.addProperty("reason", reason);
-        data.addProperty("feed_pct", Math.round(feed));
-        publishEvent("feeder", data);
+        feederEmpty = got == 0;
+        return got;
     }
 
     private boolean processOne(List<Cow> herd, String reason) {

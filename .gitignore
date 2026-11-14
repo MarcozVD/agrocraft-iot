@@ -64,3 +64,7 @@ devices/real/pc-agent/state/
 
 # Registro de experimentos (se copia a docs/ al cerrar)
 experiments/
+
+# Informe: entorno y datos regenerables
+docs/informe/.venv/
+docs/informe/datos/series.csv

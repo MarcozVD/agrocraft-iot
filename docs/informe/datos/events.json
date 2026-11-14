@@ -1,0 +1,2582 @@
+{
+ "commands": [
+  {
+   "time": "2026-11-11T19:37:38.386358779Z",
+   "device": "api-aire",
+   "cmd_id": "cli-1794425857",
+   "source": "experimento-E1",
+   "action": "set_enabled",
+   "params": {
+    "enabled": 0
+   }
+  },
+  {
+   "time": "2026-11-11T20:37:40.969162464Z",
+   "device": "api-aire",
+   "cmd_id": "cli-1794429459",
+   "source": "experimento-E1",
+   "action": "set_enabled",
+   "params": {
+    "enabled": 1
+   }
+  },
+  {
+   "time": "2026-11-11T23:04:10.804869687Z",
+   "device": "api-pronostico",
+   "cmd_id": "cli-1794438247",
+   "source": "prueba",
+   "action": "set_interval",
+   "params": {
+    "interval_s": 60
+   }
+  },
+  {
+   "time": "2026-11-11T23:05:20.159649779Z",
+   "device": "api-pronostico",
+   "cmd_id": "cli-1794438319",
+   "source": "prueba",
+   "action": "set_interval",
+   "params": {
+    "interval_s": 900
+   }
+  },
+  {
+   "time": "2026-11-11T19:37:39.621028976Z",
+   "device": "ds-invernadero",
+   "cmd_id": "cli-1794425858",
+   "source": "experimento-E2",
+   "action": "calibrate",
+   "params": {
+    "variable": "temp_c",
+    "offset": 3
+   }
+  },
+  {
+   "time": "2026-11-11T20:07:40.972868085Z",
+   "device": "ds-invernadero",
+   "cmd_id": "cli-1794427659",
+   "source": "experimento-E2",
+   "action": "calibrate",
+   "params": {
+    "reset": true
+   }
+  },
+  {
+   "time": "2026-11-12T09:06:41.150336797Z",
+   "device": "mc-corral",
+   "cmd_id": "alerta-84787edf",
+   "action": "set_actuator",
+   "params": {
+    "name": "feeder",
+    "value": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-11T19:37:44.604419349Z",
+   "device": "mc-estacion",
+   "cmd_id": "cli-1794425863",
+   "source": "experimento-E6",
+   "action": "set_weather",
+   "params": {
+    "weather": "thunder"
+   }
+  },
+  {
+   "time": "2026-11-11T19:57:57.870468255Z",
+   "device": "mc-estacion",
+   "cmd_id": "cli-1794427076",
+   "source": "experimento-E6",
+   "action": "set_config",
+   "params": {
+    "sync_weather": 1
+   }
+  },
+  {
+   "time": "2026-11-11T13:39:52.015788798Z",
+   "device": "mc-invernadero",
+   "cmd_id": "panel-22759b75",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "panel"
+  },
+  {
+   "time": "2026-11-11T13:39:52.116196777Z",
+   "device": "mc-invernadero",
+   "cmd_id": "panel-46a717dd",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "panel"
+  },
+  {
+   "time": "2026-11-11T13:40:00.506345662Z",
+   "device": "mc-invernadero",
+   "cmd_id": "regla-aire-ventilas-0b341b08",
+   "action": "set_config",
+   "params": {
+    "auto": 1
+   },
+   "source": "regla-aire-ventilas"
+  },
+  {
+   "time": "2026-11-11T16:14:40.024438808Z",
+   "device": "mc-invernadero",
+   "cmd_id": "alerta-4864d592",
+   "action": "set_actuator",
+   "params": {
+    "name": "vent",
+    "value": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-11T19:37:24.687404905Z",
+   "device": "mc-invernadero",
+   "cmd_id": "cli-1794425843",
+   "source": "experimento-E0",
+   "action": "set_config",
+   "params": {
+    "auto": 1
+   }
+  },
+  {
+   "time": "2026-11-11T19:39:52.493939548Z",
+   "device": "mc-invernadero",
+   "cmd_id": "cli-1794425991",
+   "source": "experimento-E9",
+   "action": "set_config",
+   "params": {
+    "auto": 1
+   }
+  },
+  {
+   "time": "2026-11-11T19:59:40.041951965Z",
+   "device": "mc-invernadero",
+   "cmd_id": "alerta-e72867aa",
+   "action": "set_config",
+   "params": {
+    "vent": 1,
+    "auto": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-12T15:52:42.24651968Z",
+   "device": "mc-invernadero",
+   "cmd_id": "alerta-1a6bf5ea",
+   "action": "set_config",
+   "params": {
+    "vent": 1,
+    "auto": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-13T16:16:42.253541547Z",
+   "device": "mc-invernadero",
+   "cmd_id": "alerta-5839d606",
+   "action": "set_config",
+   "params": {
+    "vent": 1,
+    "auto": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-11T06:08:10.312097656Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "cli-1794377289",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   }
+  },
+  {
+   "time": "2026-11-11T06:08:11.485760848Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "cli-1794377290",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   }
+  },
+  {
+   "time": "2026-11-11T13:40:00.556462433Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-b8d72903",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-11T19:37:40.8372441Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "cli-1794425859",
+   "source": "experimento-E3",
+   "action": "set_interval",
+   "params": {
+    "interval_s": 5
+   }
+  },
+  {
+   "time": "2026-11-11T19:37:43.349903683Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "cli-1794425862",
+   "source": "experimento-E5",
+   "action": "set_config",
+   "params": {
+    "auto": 0
+   }
+  },
+  {
+   "time": "2026-11-11T19:52:50.705984323Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "cli-1794426769",
+   "source": "experimento-E3",
+   "action": "set_interval",
+   "params": {
+    "interval_s": 30
+   }
+  },
+  {
+   "time": "2026-11-11T21:32:46.708565425Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "alerta-b777a742",
+   "action": "set_config",
+   "params": {
+    "auto": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-11T21:45:00.62757479Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-0b25e42e",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-11T22:45:00.280260853Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-c4852857",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T01:37:54.06392239Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "cli-1794447472",
+   "source": "experimento-E5",
+   "action": "set_config",
+   "params": {
+    "auto": 1
+   }
+  },
+  {
+   "time": "2026-11-12T10:45:00.316893592Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-36de0b81",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T12:15:00.588924785Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-916e8e6d",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T21:45:00.186178824Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-390532b6",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T22:45:00.159035032Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-62bf74e1",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T10:45:00.2730043Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-0dc94d72",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T12:30:00.3951951Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-73d6da85",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T21:45:00.132334107Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-072a95c7",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T22:45:00.253825561Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-ec0b1cc6",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-14T10:45:00.292551077Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-742a2f77",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-14T13:15:00.383957189Z",
+   "device": "mc-parcela-a",
+   "cmd_id": "regla-lamparas-radiacion-29ecbd92",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-11T13:40:00.556527354Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-8ec76dae",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-11T19:37:42.092446702Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "cli-1794425860",
+   "source": "experimento-E4",
+   "action": "set_config",
+   "params": {
+    "soil_min": 60,
+    "soil_max": 75
+   }
+  },
+  {
+   "time": "2026-11-11T21:37:51.725891774Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "cli-1794433070",
+   "source": "experimento-E4",
+   "action": "set_config",
+   "params": {
+    "soil_min": 35,
+    "soil_max": 65
+   }
+  },
+  {
+   "time": "2026-11-11T21:45:00.627646022Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-661344b8",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-11T22:45:00.280325333Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-1731ee07",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T10:45:00.316911575Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-184955b4",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T12:15:00.588939552Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-982f76ea",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T21:45:00.186291754Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-b01bbd60",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-12T22:45:00.159043778Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-7e60a6ec",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T10:45:00.273075502Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-d5fd26a5",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T12:30:00.395282191Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-023873bc",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T21:45:00.132368792Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-ed195dcc",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-13T22:45:00.253829608Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-08e7b6c5",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-14T10:45:00.292558621Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-5b8c32d8",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 1
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-14T13:15:00.383985451Z",
+   "device": "mc-parcela-b",
+   "cmd_id": "regla-lamparas-radiacion-99bcebbf",
+   "action": "set_actuator",
+   "params": {
+    "name": "lamp",
+    "value": 0
+   },
+   "source": "regla-lamparas-radiacion"
+  },
+  {
+   "time": "2026-11-11T13:39:52.351509642Z",
+   "device": "mc-seguridad",
+   "cmd_id": "alerta-c5fdf7a7",
+   "action": "set_config",
+   "params": {
+    "auto": 1
+   },
+   "source": "alerta"
+  },
+  {
+   "time": "2026-11-11T19:37:45.877236969Z",
+   "device": "mc-seguridad",
+   "cmd_id": "cli-1794425864",
+   "source": "experimento-E7",
+   "action": "set_actuator",
+   "params": {
+    "name": "alarm",
+    "value": 1
+   }
+  },
+  {
+   "time": "2026-11-11T19:37:47.133619274Z",
+   "device": "mc-seguridad",
+   "cmd_id": "cli-1794425865",
+   "source": "experimento-E8",
+   "action": "set_actuator",
+   "params": {
+    "name": "gate",
+    "value": 1
+   }
+  },
+  {
+   "time": "2026-11-11T19:43:05.942180661Z",
+   "device": "mc-seguridad",
+   "cmd_id": "cli-1794426184",
+   "source": "experimento-E8",
+   "action": "set_actuator",
+   "params": {
+    "name": "gate",
+    "value": 0
+   }
+  },
+  {
+   "time": "2026-11-11T19:43:06.006562405Z",
+   "device": "mc-seguridad",
+   "cmd_id": "cli-1794426184",
+   "source": "experimento-E7",
+   "action": "set_config",
+   "params": {
+    "alarm": 0,
+    "auto": 1
+   }
+  }
+ ],
+ "acks": [
+  {
+   "time": "2026-11-11T19:37:38.39301999Z",
+   "device": "api-aire",
+   "ts": 1794425858391,
+   "cmd_id": "cli-1794425857",
+   "action": "set_enabled",
+   "ok": true,
+   "detail": "enabled=0"
+  },
+  {
+   "time": "2026-11-11T20:37:41.05737823Z",
+   "device": "api-aire",
+   "ts": 1794429461055,
+   "cmd_id": "cli-1794429459",
+   "action": "set_enabled",
+   "ok": true,
+   "detail": "enabled=1"
+  },
+  {
+   "time": "2026-11-11T23:04:10.804910452Z",
+   "device": "api-pronostico",
+   "ts": 1794438249005,
+   "cmd_id": "cli-1794438247",
+   "action": "set_interval",
+   "ok": true,
+   "detail": "interval_s=60"
+  },
+  {
+   "time": "2026-11-11T23:05:20.160652573Z",
+   "device": "api-pronostico",
+   "ts": 1794438320159,
+   "cmd_id": "cli-1794438319",
+   "action": "set_interval",
+   "ok": true,
+   "detail": "interval_s=900"
+  },
+  {
+   "time": "2026-11-11T19:37:39.62458454Z",
+   "device": "ds-invernadero",
+   "ts": 1794425859623,
+   "cmd_id": "cli-1794425858",
+   "action": "calibrate",
+   "ok": true,
+   "detail": "temp_c: offset=3.0 gain=1.0"
+  },
+  {
+   "time": "2026-11-11T20:07:41.117757534Z",
+   "device": "ds-invernadero",
+   "ts": 1794427661115,
+   "cmd_id": "cli-1794427659",
+   "action": "calibrate",
+   "ok": true,
+   "detail": "calibración borrada"
+  },
+  {
+   "time": "2026-11-12T09:06:41.192296675Z",
+   "device": "mc-corral",
+   "ts": 1794474401178,
+   "cmd_id": "alerta-84787edf",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "comedero: 4 %"
+  },
+  {
+   "time": "2026-11-11T19:37:44.648256205Z",
+   "device": "mc-estacion",
+   "ts": 1794425864615,
+   "cmd_id": "cli-1794425863",
+   "action": "set_weather",
+   "ok": true,
+   "detail": "weather=thunder sync_weather=0"
+  },
+  {
+   "time": "2026-11-11T19:57:57.912250949Z",
+   "device": "mc-estacion",
+   "ts": 1794427077890,
+   "cmd_id": "cli-1794427076",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T13:39:52.061465302Z",
+   "device": "mc-invernadero",
+   "ts": 1794404392030,
+   "cmd_id": "panel-22759b75",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-11T13:39:52.160734926Z",
+   "device": "mc-invernadero",
+   "ts": 1794404392130,
+   "cmd_id": "panel-46a717dd",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-11T13:40:00.556187462Z",
+   "device": "mc-invernadero",
+   "ts": 1794404400530,
+   "cmd_id": "regla-aire-ventilas-0b341b08",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T16:14:40.068363776Z",
+   "device": "mc-invernadero",
+   "ts": 1794413680030,
+   "cmd_id": "alerta-4864d592",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "vent=1 auto=0"
+  },
+  {
+   "time": "2026-11-11T19:37:24.716610925Z",
+   "device": "mc-invernadero",
+   "ts": 1794425844715,
+   "cmd_id": "cli-1794425843",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T19:39:52.536207789Z",
+   "device": "mc-invernadero",
+   "ts": 1794425992515,
+   "cmd_id": "cli-1794425991",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T19:59:40.090432221Z",
+   "device": "mc-invernadero",
+   "ts": 1794427180090,
+   "cmd_id": "alerta-e72867aa",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-12T15:52:42.278840825Z",
+   "device": "mc-invernadero",
+   "ts": 1794498762278,
+   "cmd_id": "alerta-1a6bf5ea",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-13T16:16:42.279036654Z",
+   "device": "mc-invernadero",
+   "ts": 1794586602278,
+   "cmd_id": "alerta-5839d606",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T06:08:10.356577642Z",
+   "device": "mc-parcela-a",
+   "ts": 1794377290330,
+   "cmd_id": "cli-1794377289",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-11T06:08:11.533013863Z",
+   "device": "mc-parcela-a",
+   "ts": 1794377291530,
+   "cmd_id": "cli-1794377290",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-11T13:40:00.644190592Z",
+   "device": "mc-parcela-a",
+   "ts": 1794404400630,
+   "cmd_id": "regla-lamparas-radiacion-b8d72903",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-11T19:37:40.867386422Z",
+   "device": "mc-parcela-a",
+   "ts": 1794425860865,
+   "cmd_id": "cli-1794425859",
+   "action": "set_interval",
+   "ok": true,
+   "detail": "interval_s=5"
+  },
+  {
+   "time": "2026-11-11T19:37:43.392237643Z",
+   "device": "mc-parcela-a",
+   "ts": 1794425863365,
+   "cmd_id": "cli-1794425862",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T19:52:50.751586031Z",
+   "device": "mc-parcela-a",
+   "ts": 1794426770744,
+   "cmd_id": "cli-1794426769",
+   "action": "set_interval",
+   "ok": true,
+   "detail": "interval_s=30"
+  },
+  {
+   "time": "2026-11-11T21:32:46.752169855Z",
+   "device": "mc-parcela-a",
+   "ts": 1794432766740,
+   "cmd_id": "alerta-b777a742",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T21:45:00.672218675Z",
+   "device": "mc-parcela-a",
+   "ts": 1794433500640,
+   "cmd_id": "regla-lamparas-radiacion-0b25e42e",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-11T22:45:00.328153447Z",
+   "device": "mc-parcela-a",
+   "ts": 1794437100289,
+   "cmd_id": "regla-lamparas-radiacion-c4852857",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-12T01:37:54.104255047Z",
+   "device": "mc-parcela-a",
+   "ts": 1794447474078,
+   "cmd_id": "cli-1794447472",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-12T10:45:00.36022186Z",
+   "device": "mc-parcela-a",
+   "ts": 1794480300328,
+   "cmd_id": "regla-lamparas-radiacion-36de0b81",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-12T12:15:00.632353849Z",
+   "device": "mc-parcela-a",
+   "ts": 1794485700628,
+   "cmd_id": "regla-lamparas-radiacion-916e8e6d",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-12T21:45:00.231782419Z",
+   "device": "mc-parcela-a",
+   "ts": 1794519900228,
+   "cmd_id": "regla-lamparas-radiacion-390532b6",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-12T22:45:00.200171098Z",
+   "device": "mc-parcela-a",
+   "ts": 1794523500178,
+   "cmd_id": "regla-lamparas-radiacion-62bf74e1",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-13T10:45:00.316189939Z",
+   "device": "mc-parcela-a",
+   "ts": 1794566700278,
+   "cmd_id": "regla-lamparas-radiacion-0dc94d72",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-13T12:30:00.436212779Z",
+   "device": "mc-parcela-a",
+   "ts": 1794573000428,
+   "cmd_id": "regla-lamparas-radiacion-73d6da85",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-13T21:45:00.181046887Z",
+   "device": "mc-parcela-a",
+   "ts": 1794606300178,
+   "cmd_id": "regla-lamparas-radiacion-072a95c7",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-13T22:45:00.3001667Z",
+   "device": "mc-parcela-a",
+   "ts": 1794609900278,
+   "cmd_id": "regla-lamparas-radiacion-ec0b1cc6",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-14T10:45:00.336175152Z",
+   "device": "mc-parcela-a",
+   "ts": 1794653100328,
+   "cmd_id": "regla-lamparas-radiacion-742a2f77",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-14T13:15:00.430481231Z",
+   "device": "mc-parcela-a",
+   "ts": 1794662100428,
+   "cmd_id": "regla-lamparas-radiacion-29ecbd92",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-11T13:40:00.644943995Z",
+   "device": "mc-parcela-b",
+   "ts": 1794404400630,
+   "cmd_id": "regla-lamparas-radiacion-8ec76dae",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-11T19:37:42.136256949Z",
+   "device": "mc-parcela-b",
+   "ts": 1794425862115,
+   "cmd_id": "cli-1794425860",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T21:37:51.768241431Z",
+   "device": "mc-parcela-b",
+   "ts": 1794433071740,
+   "cmd_id": "cli-1794433070",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T21:45:00.672400753Z",
+   "device": "mc-parcela-b",
+   "ts": 1794433500642,
+   "cmd_id": "regla-lamparas-radiacion-661344b8",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-11T22:45:00.329167704Z",
+   "device": "mc-parcela-b",
+   "ts": 1794437100291,
+   "cmd_id": "regla-lamparas-radiacion-1731ee07",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-12T10:45:00.360433353Z",
+   "device": "mc-parcela-b",
+   "ts": 1794480300332,
+   "cmd_id": "regla-lamparas-radiacion-184955b4",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-12T12:15:00.633600013Z",
+   "device": "mc-parcela-b",
+   "ts": 1794485700633,
+   "cmd_id": "regla-lamparas-radiacion-982f76ea",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-12T21:45:00.231817071Z",
+   "device": "mc-parcela-b",
+   "ts": 1794519900230,
+   "cmd_id": "regla-lamparas-radiacion-b01bbd60",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-12T22:45:00.200771284Z",
+   "device": "mc-parcela-b",
+   "ts": 1794523500180,
+   "cmd_id": "regla-lamparas-radiacion-7e60a6ec",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-13T10:45:00.316913795Z",
+   "device": "mc-parcela-b",
+   "ts": 1794566700279,
+   "cmd_id": "regla-lamparas-radiacion-d5fd26a5",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-13T12:30:00.436784825Z",
+   "device": "mc-parcela-b",
+   "ts": 1794573000430,
+   "cmd_id": "regla-lamparas-radiacion-023873bc",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-13T21:45:00.181902349Z",
+   "device": "mc-parcela-b",
+   "ts": 1794606300181,
+   "cmd_id": "regla-lamparas-radiacion-ed195dcc",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-13T22:45:00.3004144Z",
+   "device": "mc-parcela-b",
+   "ts": 1794609900280,
+   "cmd_id": "regla-lamparas-radiacion-08e7b6c5",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-14T10:45:00.384169039Z",
+   "device": "mc-parcela-b",
+   "ts": 1794653100329,
+   "cmd_id": "regla-lamparas-radiacion-5b8c32d8",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=1"
+  },
+  {
+   "time": "2026-11-14T13:15:00.433041093Z",
+   "device": "mc-parcela-b",
+   "ts": 1794662100431,
+   "cmd_id": "regla-lamparas-radiacion-99bcebbf",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "lamp=0"
+  },
+  {
+   "time": "2026-11-11T13:39:52.392198483Z",
+   "device": "mc-seguridad",
+   "ts": 1794404392380,
+   "cmd_id": "alerta-c5fdf7a7",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  },
+  {
+   "time": "2026-11-11T19:37:45.920960872Z",
+   "device": "mc-seguridad",
+   "ts": 1794425865915,
+   "cmd_id": "cli-1794425864",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "alarm=1 auto=0"
+  },
+  {
+   "time": "2026-11-11T19:37:47.176226973Z",
+   "device": "mc-seguridad",
+   "ts": 1794425867165,
+   "cmd_id": "cli-1794425865",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "gate=1"
+  },
+  {
+   "time": "2026-11-11T19:43:05.984266894Z",
+   "device": "mc-seguridad",
+   "ts": 1794426185965,
+   "cmd_id": "cli-1794426184",
+   "action": "set_actuator",
+   "ok": true,
+   "detail": "gate=0"
+  },
+  {
+   "time": "2026-11-11T19:43:06.07248693Z",
+   "device": "mc-seguridad",
+   "ts": 1794426186065,
+   "cmd_id": "cli-1794426184",
+   "action": "set_config",
+   "ok": true,
+   "detail": "configuración actualizada"
+  }
+ ],
+ "event_types": {
+  "reglas:rule": 14,
+  "mc-corral:cooling": 2,
+  "mc-corral:player_actuator": 2,
+  "mc-corral:birth": 10,
+  "mc-corral:feeder": 30409,
+  "mc-corral:processing": 2,
+  "mc-invernadero:actuator": 19,
+  "mc-invernadero:player_actuator": 9,
+  "mc-parcela-a:irrigation": 8,
+  "mc-parcela-a:harvest": 2,
+  "mc-parcela-b:irrigation": 10,
+  "mc-parcela-b:harvest": 2,
+  "mc-seguridad:intruder": 12,
+  "mc-seguridad:alarm": 33,
+  "mc-seguridad:intruder_gone": 12,
+  "mc-server:player_join": 5,
+  "mc-server:player_quit": 1,
+  "mc-tanque:pump": 6
+ },
+ "events": [
+  {
+   "time": "2026-11-11T13:40:00.506261516Z",
+   "device": "reglas",
+   "ts": 1794404400474,
+   "type": "rule",
+   "rule": "aire-ventilas",
+   "decision": "off",
+   "reason": "US AQI 53"
+  },
+  {
+   "time": "2026-11-11T13:40:00.556231915Z",
+   "device": "reglas",
+   "ts": 1794404400514,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 559 W/m², día"
+  },
+  {
+   "time": "2026-11-11T21:45:00.627324815Z",
+   "device": "reglas",
+   "ts": 1794433500626,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "on",
+   "reason": "radiación 123 W/m², día"
+  },
+  {
+   "time": "2026-11-11T22:45:00.280189751Z",
+   "device": "reglas",
+   "ts": 1794437100238,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 0 W/m², noche"
+  },
+  {
+   "time": "2026-11-12T10:45:00.316215809Z",
+   "device": "reglas",
+   "ts": 1794480300273,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "on",
+   "reason": "radiación 0 W/m², día"
+  },
+  {
+   "time": "2026-11-12T12:15:00.588174291Z",
+   "device": "reglas",
+   "ts": 1794485700544,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 254 W/m², día"
+  },
+  {
+   "time": "2026-11-12T21:45:00.185449139Z",
+   "device": "reglas",
+   "ts": 1794519900185,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "on",
+   "reason": "radiación 126 W/m², día"
+  },
+  {
+   "time": "2026-11-12T22:45:00.158714837Z",
+   "device": "reglas",
+   "ts": 1794523500157,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 0 W/m², noche"
+  },
+  {
+   "time": "2026-11-13T10:45:00.272911968Z",
+   "device": "reglas",
+   "ts": 1794566700272,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "on",
+   "reason": "radiación 0 W/m², día"
+  },
+  {
+   "time": "2026-11-13T12:30:00.395162028Z",
+   "device": "reglas",
+   "ts": 1794573000394,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 309 W/m², día"
+  },
+  {
+   "time": "2026-11-13T21:45:00.132214265Z",
+   "device": "reglas",
+   "ts": 1794606300088,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "on",
+   "reason": "radiación 117 W/m², día"
+  },
+  {
+   "time": "2026-11-13T22:45:00.253817626Z",
+   "device": "reglas",
+   "ts": 1794609900252,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 0 W/m², noche"
+  },
+  {
+   "time": "2026-11-14T10:45:00.292171421Z",
+   "device": "reglas",
+   "ts": 1794653100250,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "on",
+   "reason": "radiación 0 W/m², día"
+  },
+  {
+   "time": "2026-11-14T13:15:00.383005789Z",
+   "device": "reglas",
+   "ts": 1794662100382,
+   "type": "rule",
+   "rule": "lamparas-radiacion",
+   "decision": "off",
+   "reason": "radiación 269 W/m², día"
+  },
+  {
+   "time": "2026-11-11T23:02:36.310483332Z",
+   "device": "mc-corral",
+   "player": "MARCOS_V22",
+   "name": "cooling",
+   "on": 1,
+   "ok": true,
+   "detail": "cooling=1 auto=0",
+   "ts": 1794438156308,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T23:02:38.608743347Z",
+   "device": "mc-corral",
+   "player": "MARCOS_V22",
+   "name": "cooling",
+   "on": 0,
+   "ok": true,
+   "detail": "cooling=0 auto=0",
+   "ts": 1794438158607,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-12T00:13:51.781045661Z",
+   "device": "mc-corral",
+   "herd": 5,
+   "ts": 1794442431779,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-13T07:19:26.931112509Z",
+   "device": "mc-corral",
+   "herd": 6,
+   "ts": 1794554366930,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-13T11:09:45.929523436Z",
+   "device": "mc-corral",
+   "herd": 7,
+   "ts": 1794568185929,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-13T18:10:50.930243435Z",
+   "device": "mc-corral",
+   "herd": 8,
+   "ts": 1794593450929,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-13T22:57:56.930231122Z",
+   "device": "mc-corral",
+   "herd": 9,
+   "ts": 1794610676929,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-14T00:11:04.930476736Z",
+   "device": "mc-corral",
+   "herd": 10,
+   "ts": 1794615064930,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-14T05:11:03.929809247Z",
+   "device": "mc-corral",
+   "herd": 11,
+   "ts": 1794633063929,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-14T08:22:43.929588695Z",
+   "device": "mc-corral",
+   "herd": 12,
+   "ts": 1794644563929,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-14T10:57:58.92996289Z",
+   "device": "mc-corral",
+   "beef": 3,
+   "stored": 3,
+   "reason": "auto",
+   "ts": 1794653878929,
+   "type": "processing"
+  },
+  {
+   "time": "2026-11-14T12:57:58.929924108Z",
+   "device": "mc-corral",
+   "beef": 3,
+   "stored": 3,
+   "reason": "auto",
+   "ts": 1794661078929,
+   "type": "processing"
+  },
+  {
+   "time": "2026-11-14T14:11:48.93083256Z",
+   "device": "mc-corral",
+   "herd": 11,
+   "ts": 1794665508930,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-14T14:34:34.931882995Z",
+   "device": "mc-corral",
+   "herd": 12,
+   "ts": 1794666874931,
+   "type": "birth"
+  },
+  {
+   "time": "2026-11-11T13:04:27.431214304Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "auto",
+   "temp_c": 28.0,
+   "ts": 1794402267430,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T13:39:52.060187017Z",
+   "device": "mc-invernadero",
+   "name": "lamp",
+   "on": 1,
+   "reason": "comando",
+   "temp_c": 27.9,
+   "ts": 1794404392030,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T13:39:52.16018857Z",
+   "device": "mc-invernadero",
+   "name": "lamp",
+   "on": 0,
+   "reason": "comando",
+   "temp_c": 27.9,
+   "ts": 1794404392130,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T16:14:40.068185154Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "comando",
+   "temp_c": 32.1,
+   "ts": 1794413680030,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:39:08.171534325Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "comando",
+   "temp_c": 31.0,
+   "ts": 1794425948170,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:39:08.17335434Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 0,
+   "ok": true,
+   "detail": "vent=0 auto=0",
+   "ts": 1794425948171,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:39:30.221013021Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "comando",
+   "temp_c": 31.1,
+   "ts": 1794425970220,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:39:30.221953758Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 1,
+   "ok": true,
+   "detail": "vent=1 auto=0",
+   "ts": 1794425970221,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:41:22.12287608Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "comando",
+   "temp_c": 31.1,
+   "ts": 1794426082122,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:41:22.124878404Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 0,
+   "ok": true,
+   "detail": "vent=0 auto=0",
+   "ts": 1794426082122,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:41:34.523240909Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "comando",
+   "temp_c": 31.1,
+   "ts": 1794426094522,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:41:34.524353067Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 1,
+   "ok": true,
+   "detail": "vent=1 auto=0",
+   "ts": 1794426094523,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:41:43.772122612Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "comando",
+   "temp_c": 31.1,
+   "ts": 1794426103771,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:41:43.773719973Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 0,
+   "ok": true,
+   "detail": "vent=0 auto=0",
+   "ts": 1794426103771,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:45:55.820003604Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "comando",
+   "temp_c": 31.6,
+   "ts": 1794426355819,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:45:55.821511378Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 1,
+   "ok": true,
+   "detail": "vent=1 auto=0",
+   "ts": 1794426355819,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:47:02.867311793Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "comando",
+   "temp_c": 31.5,
+   "ts": 1794426422865,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:47:02.867334446Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 0,
+   "ok": true,
+   "detail": "vent=0 auto=0",
+   "ts": 1794426422866,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:47:11.76691766Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "comando",
+   "temp_c": 31.5,
+   "ts": 1794426431766,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:47:11.768651575Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 1,
+   "ok": true,
+   "detail": "vent=1 auto=0",
+   "ts": 1794426431767,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T19:47:20.467848157Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "comando",
+   "temp_c": 31.5,
+   "ts": 1794426440467,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-11T19:47:20.47203484Z",
+   "device": "mc-invernadero",
+   "player": "MARCOS_V22",
+   "name": "vent",
+   "on": 0,
+   "ok": true,
+   "detail": "vent=0 auto=0",
+   "ts": 1794426440470,
+   "type": "player_actuator"
+  },
+  {
+   "time": "2026-11-11T22:41:22.190794265Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "auto",
+   "temp_c": 25.0,
+   "ts": 1794436882190,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-12T13:06:19.92927673Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "auto",
+   "temp_c": 28.0,
+   "ts": 1794488779928,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-12T22:19:25.928903552Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "auto",
+   "temp_c": 25.0,
+   "ts": 1794521965928,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-13T13:14:57.929019549Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "auto",
+   "temp_c": 28.0,
+   "ts": 1794575697928,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-13T22:02:18.929443947Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 0,
+   "reason": "auto",
+   "temp_c": 25.0,
+   "ts": 1794607338929,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-14T14:35:51.928889992Z",
+   "device": "mc-invernadero",
+   "name": "vent",
+   "on": 1,
+   "reason": "auto",
+   "temp_c": 28.0,
+   "ts": 1794666951928,
+   "type": "actuator"
+  },
+  {
+   "time": "2026-11-12T12:53:37.929328249Z",
+   "device": "mc-parcela-a",
+   "yield": 288,
+   "stored": 288,
+   "harvests": 1,
+   "ts": 1794488017928,
+   "type": "harvest"
+  },
+  {
+   "time": "2026-11-13T17:12:08.930160017Z",
+   "device": "mc-parcela-a",
+   "yield": 288,
+   "stored": 288,
+   "harvests": 2,
+   "ts": 1794589928929,
+   "type": "harvest"
+  },
+  {
+   "time": "2026-11-12T16:22:21.9300736Z",
+   "device": "mc-parcela-b",
+   "yield": 288,
+   "stored": 288,
+   "harvests": 1,
+   "ts": 1794500541929,
+   "type": "harvest"
+  },
+  {
+   "time": "2026-11-14T05:32:43.931565025Z",
+   "device": "mc-parcela-b",
+   "yield": 288,
+   "stored": 288,
+   "harvests": 2,
+   "ts": 1794634363931,
+   "type": "harvest"
+  },
+  {
+   "time": "2026-11-11T07:21:37.676406427Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 11,
+   "z": 16,
+   "ts": 1794381697666,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-11T07:21:38.432041448Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794381698431,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T07:28:37.434380901Z",
+   "device": "mc-seguridad",
+   "ts": 1794382117434,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-11T07:28:38.430931054Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794382118430,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T07:41:22.431783019Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": -4,
+   "z": 16,
+   "ts": 1794382882431,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-11T07:41:23.431015339Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794382883430,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T07:46:22.430978028Z",
+   "device": "mc-seguridad",
+   "ts": 1794383182430,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-11T07:46:23.435265357Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794383183430,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T08:00:43.431693951Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 21,
+   "z": 16,
+   "ts": 1794384043431,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-11T08:00:44.430874597Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794384044430,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T08:04:43.431028332Z",
+   "device": "mc-seguridad",
+   "ts": 1794384283430,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-11T08:04:44.431004153Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794384284430,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T19:37:45.920173788Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "comando",
+   "hostiles": 0,
+   "ts": 1794425865915,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T19:43:06.815669689Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 3,
+   "ts": 1794426186815,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T21:16:27.190464985Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794431787190,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T00:56:21.929138756Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794444981928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T00:57:30.932220123Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794445050931,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T00:58:40.931148668Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794445120929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:00:37.92906042Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794445237928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:01:54.929979476Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794445314929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:02:36.929606237Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794445356929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:03:06.929597339Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794445386929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:03:40.930605515Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794445420929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:04:35.929239681Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794445475928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:05:35.928950614Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794445535928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:06:25.928942402Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794445585928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:17:02.929768249Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794446222929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:18:16.930142751Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794446296929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:26:36.929720478Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794446796929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:27:33.929200601Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794446853928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-12T01:41:32.930209146Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 17,
+   "z": 16,
+   "ts": 1794447692929,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-12T01:49:32.929674529Z",
+   "device": "mc-seguridad",
+   "ts": 1794448172929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-12T04:52:30.932434084Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 11,
+   "z": 16,
+   "ts": 1794459150930,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-12T04:57:30.93113743Z",
+   "device": "mc-seguridad",
+   "ts": 1794459450930,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-12T06:32:20.930606894Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 25,
+   "z": 16,
+   "ts": 1794465140930,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-12T06:38:20.930047932Z",
+   "device": "mc-seguridad",
+   "ts": 1794465500929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-12T09:04:04.931056901Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 0,
+   "z": 16,
+   "ts": 1794474244930,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-12T09:09:04.93040527Z",
+   "device": "mc-seguridad",
+   "ts": 1794474544929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-12T09:39:40.930650733Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 19,
+   "z": 16,
+   "ts": 1794476380930,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-12T09:45:40.930447536Z",
+   "device": "mc-seguridad",
+   "ts": 1794476740929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-12T10:29:59.929920705Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794479399928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-13T07:23:36.931434353Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 7,
+   "z": 16,
+   "ts": 1794554616930,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-13T07:23:37.929001058Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794554617928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-13T07:28:36.929918157Z",
+   "device": "mc-seguridad",
+   "ts": 1794554916929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-13T07:28:37.929220775Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794554917928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-13T08:26:38.930238055Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 11,
+   "z": 16,
+   "ts": 1794558398929,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-13T08:26:39.929765039Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794558399928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-13T08:30:38.929881654Z",
+   "device": "mc-seguridad",
+   "ts": 1794558638929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-13T08:30:39.930336756Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794558639929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-14T01:12:37.929682522Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 4,
+   "z": 16,
+   "ts": 1794618757929,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-14T01:12:38.929841424Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794618758929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-14T01:17:37.929129541Z",
+   "device": "mc-seguridad",
+   "ts": 1794619057928,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-14T01:17:38.929608558Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794619058929,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-14T04:39:08.930192959Z",
+   "device": "mc-seguridad",
+   "kind": "zombie",
+   "x": 20,
+   "z": 16,
+   "ts": 1794631148929,
+   "type": "intruder"
+  },
+  {
+   "time": "2026-11-14T04:39:09.929165724Z",
+   "device": "mc-seguridad",
+   "on": 1,
+   "reason": "auto",
+   "hostiles": 1,
+   "ts": 1794631149928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-14T04:43:08.929625782Z",
+   "device": "mc-seguridad",
+   "ts": 1794631388929,
+   "type": "intruder_gone"
+  },
+  {
+   "time": "2026-11-14T04:43:09.929251158Z",
+   "device": "mc-seguridad",
+   "on": 0,
+   "reason": "auto",
+   "hostiles": 0,
+   "ts": 1794631389928,
+   "type": "alarm"
+  },
+  {
+   "time": "2026-11-11T19:35:19.269598278Z",
+   "device": "mc-server",
+   "player": "MARCOS_V22",
+   "ts": 1794425719269,
+   "type": "player_join"
+  },
+  {
+   "time": "2026-11-11T19:45:45.523204945Z",
+   "device": "mc-server",
+   "player": "MARCOS_V22",
+   "ts": 1794426345522,
+   "type": "player_join"
+  },
+  {
+   "time": "2026-11-11T20:01:29.341570016Z",
+   "device": "mc-server",
+   "player": "MARCOS_V22",
+   "ts": 1794427289341,
+   "type": "player_join"
+  },
+  {
+   "time": "2026-11-11T22:57:08.047089854Z",
+   "device": "mc-server",
+   "player": "MARCOS_V22",
+   "ts": 1794437828046,
+   "type": "player_join"
+  },
+  {
+   "time": "2026-11-12T00:55:59.373568095Z",
+   "device": "mc-server",
+   "player": "MARCOS_V22",
+   "ts": 1794444959373,
+   "type": "player_join"
+  },
+  {
+   "time": "2026-11-12T01:27:57.587153933Z",
+   "device": "mc-server",
+   "player": "MARCOS_V22",
+   "ts": 1794446877586,
+   "type": "player_quit"
+  }
+ ],
+ "alerts": [
+  {
+   "time": "2026-11-11T13:39:52.351493141Z",
+   "device": "mc-seguridad",
+   "ts": 1794404392350,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Prueba",
+   "summary": "prueba de webhook",
+   "values": "[ var=A value=1 ]"
+  },
+  {
+   "time": "2026-11-11T13:42:19.553564613Z",
+   "device": "mc-seguridad",
+   "ts": 1794404539552,
+   "type": "alert",
+   "status": "firing",
+   "alert": "PruebaContacto",
+   "summary": "prueba del punto de contacto",
+   "values": "[ var='B' labels={__name__=go_threads, instance=host.docker.internal:3000, job=grafana} value=22 ], [ var='C' labels={__name__=go_threads, instance=host.docker.internal:3000, job=grafana} value=1 ]"
+  },
+  {
+   "time": "2026-11-11T16:14:40.024137639Z",
+   "device": "mc-invernadero",
+   "ts": 1794413680023,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a {{ $$values.B.Value | printf \"%.1f\" }} °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=32.0395 ], [ var='C' labels={device=mc-invernadero} value=1 ]"
+  },
+  {
+   "time": "2026-11-11T19:02:40.074325907Z",
+   "device": "mc-invernadero",
+   "ts": 1794423760073,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a {{ $$values.B.Value | printf \"%.1f\" }} °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=31.991299999999995 ], [ var='C' labels={device=mc-invernadero} value=0 ]"
+  },
+  {
+   "time": "2026-11-11T19:39:43.361376732Z",
+   "device": "mc-seguridad",
+   "ts": 1794425983360,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "{{ $$values.B.Value | printf \"%.0f\" }} criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=2 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-11T19:59:40.041935244Z",
+   "device": "mc-invernadero",
+   "ts": 1794427180040,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a {{ $$values.B.Value | printf \"%.1f\" }} °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=32.22677777777778 ], [ var='C' labels={device=mc-invernadero} value=1 ]"
+  },
+  {
+   "time": "2026-11-11T20:00:45.230939764Z",
+   "device": "api-aire",
+   "ts": 1794427245230,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Dispositivo sin datos",
+   "summary": "{{ $$labels.device }} no envía datos hace {{ $$values.B.Value | printf \"%.0f\" }} s",
+   "values": "[ var='B' labels={device=api-aire} value=1814.544959828 ], [ var='C' labels={device=api-aire} value=1 ]"
+  },
+  {
+   "time": "2026-11-11T20:01:40.032797397Z",
+   "device": "mc-invernadero",
+   "ts": 1794427300032,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a {{ $$values.B.Value | printf \"%.1f\" }} °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=31.938299999999998 ], [ var='C' labels={device=mc-invernadero} value=0 ]"
+  },
+  {
+   "time": "2026-11-11T20:40:45.241370346Z",
+   "device": "api-aire",
+   "ts": 1794429645241,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Dispositivo sin datos",
+   "summary": "{{ $$labels.device }} no envía datos hace {{ $$values.B.Value | printf \"%.0f\" }} s",
+   "values": "[ var='B' labels={device=api-aire} value=14.549022843 ], [ var='C' labels={device=api-aire} value=0 ]"
+  },
+  {
+   "time": "2026-11-11T21:19:43.395190851Z",
+   "device": "mc-seguridad",
+   "ts": 1794431983394,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Intruso en la granja",
+   "summary": "{{ $$values.B.Value | printf \"%.0f\" }} criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=0 ], [ var='C' labels={device=mc-seguridad} value=0 ]"
+  },
+  {
+   "time": "2026-11-11T21:32:46.708293689Z",
+   "device": "mc-parcela-a",
+   "ts": 1794432766707,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Suelo seco",
+   "summary": "Humedad del suelo de mc-parcela-a por debajo de 30 %: 29.6 %",
+   "values": "[ var='B' labels={device=mc-parcela-a} value=29.566399999999998 ], [ var='C' labels={device=mc-parcela-a} value=1 ]"
+  },
+  {
+   "time": "2026-11-11T21:36:46.707289193Z",
+   "device": "mc-parcela-a",
+   "ts": 1794433006706,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Suelo seco",
+   "summary": "Humedad del suelo de mc-parcela-a por debajo de 30 %: 30.6 %",
+   "values": "[ var='B' labels={device=mc-parcela-a} value=30.63205 ], [ var='C' labels={device=mc-parcela-a} value=0 ]"
+  },
+  {
+   "time": "2026-11-12T00:57:45.597755116Z",
+   "device": "mc-seguridad",
+   "ts": 1794445065597,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "2 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=2 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T04:57:45.648766556Z",
+   "device": "mc-seguridad",
+   "ts": 1794459465648,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "3 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=3 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T08:57:45.723492498Z",
+   "device": "mc-seguridad",
+   "ts": 1794473865722,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "2 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=2 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T08:59:46.895600521Z",
+   "device": "gw-pc-01",
+   "ts": 1794473986894,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Dispositivo sin datos",
+   "summary": "gw-pc-01 no envía datos hace 1816 s",
+   "values": "[ var='B' labels={device=gw-pc-01} value=1816.385247509 ], [ var='C' labels={device=gw-pc-01} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T09:06:41.150319665Z",
+   "device": "mc-corral",
+   "ts": 1794474401149,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Comedero vacío",
+   "summary": "Comedero del corral al 4 %: se intenta llenar desde el silo",
+   "values": "[ var='B' labels={device=mc-corral} value=4.031 ], [ var='C' labels={device=mc-corral} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T10:33:45.753282741Z",
+   "device": "mc-seguridad",
+   "ts": 1794479625752,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Intruso en la granja",
+   "summary": "0 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=0 ], [ var='C' labels={device=mc-seguridad} value=0 ]"
+  },
+  {
+   "time": "2026-11-12T12:54:41.223242665Z",
+   "device": "mc-corral",
+   "ts": 1794488081222,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Comedero vacío",
+   "summary": "Comedero del corral al 100 %: se intenta llenar desde el silo",
+   "values": "[ var='B' labels={device=mc-corral} value=99.96 ], [ var='C' labels={device=mc-corral} value=0 ]"
+  },
+  {
+   "time": "2026-11-12T12:59:46.969362627Z",
+   "device": "gw-pc-01",
+   "ts": 1794488386968,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Dispositivo sin datos",
+   "summary": "gw-pc-01 no envía datos hace 16216 s",
+   "values": "[ var='B' labels={device=gw-pc-01} value=16216.386319024 ], [ var='C' labels={device=gw-pc-01} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T13:53:46.985730637Z",
+   "device": "gw-pc-01",
+   "ts": 1794491626985,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Dispositivo sin datos",
+   "summary": "gw-pc-01 no envía datos hace 16 s",
+   "values": "[ var='B' labels={device=gw-pc-01} value=16.402961032 ], [ var='C' labels={device=gw-pc-01} value=0 ]"
+  },
+  {
+   "time": "2026-11-12T15:52:42.246120861Z",
+   "device": "mc-invernadero",
+   "ts": 1794498762245,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a 32.1 °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=32.13290000000001 ], [ var='C' labels={device=mc-invernadero} value=1 ]"
+  },
+  {
+   "time": "2026-11-12T18:38:42.29608772Z",
+   "device": "mc-invernadero",
+   "ts": 1794508722295,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a 32.0 °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=31.9652 ], [ var='C' labels={device=mc-invernadero} value=0 ]"
+  },
+  {
+   "time": "2026-11-13T07:24:45.589594413Z",
+   "device": "mc-seguridad",
+   "ts": 1794554685588,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "1 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=1 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-13T07:32:45.58885253Z",
+   "device": "mc-seguridad",
+   "ts": 1794555165588,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Intruso en la granja",
+   "summary": "0 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=0 ], [ var='C' labels={device=mc-seguridad} value=0 ]"
+  },
+  {
+   "time": "2026-11-13T08:27:45.580575988Z",
+   "device": "mc-seguridad",
+   "ts": 1794558465579,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "1 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=1 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-13T08:33:45.582257051Z",
+   "device": "mc-seguridad",
+   "ts": 1794558825581,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Intruso en la granja",
+   "summary": "0 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=0 ], [ var='C' labels={device=mc-seguridad} value=0 ]"
+  },
+  {
+   "time": "2026-11-13T16:16:42.253524856Z",
+   "device": "mc-invernadero",
+   "ts": 1794586602252,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a 32.1 °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=32.072199999999995 ], [ var='C' labels={device=mc-invernadero} value=1 ]"
+  },
+  {
+   "time": "2026-11-13T17:18:42.272527436Z",
+   "device": "mc-invernadero",
+   "ts": 1794590322271,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Estrés térmico en el invernadero",
+   "summary": "Invernadero a 32.0 °C (umbral 32 °C): se abren las ventilas",
+   "values": "[ var='B' labels={device=mc-invernadero} value=31.971999999999998 ], [ var='C' labels={device=mc-invernadero} value=0 ]"
+  },
+  {
+   "time": "2026-11-14T01:13:45.581310656Z",
+   "device": "mc-seguridad",
+   "ts": 1794618825580,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "1 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=1 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-14T01:21:45.582749094Z",
+   "device": "mc-seguridad",
+   "ts": 1794619305582,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Intruso en la granja",
+   "summary": "0 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=0 ], [ var='C' labels={device=mc-seguridad} value=0 ]"
+  },
+  {
+   "time": "2026-11-14T04:40:45.585584768Z",
+   "device": "mc-seguridad",
+   "ts": 1794631245584,
+   "type": "alert",
+   "status": "firing",
+   "alert": "Intruso en la granja",
+   "summary": "1 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=1 ], [ var='C' labels={device=mc-seguridad} value=1 ]"
+  },
+  {
+   "time": "2026-11-14T04:46:45.587157414Z",
+   "device": "mc-seguridad",
+   "ts": 1794631605586,
+   "type": "alert",
+   "status": "resolved",
+   "alert": "Intruso en la granja",
+   "summary": "0 criatura(s) hostil(es) dentro de la cerca",
+   "values": "[ var='B' labels={device=mc-seguridad} value=0 ], [ var='C' labels={device=mc-seguridad} value=0 ]"
+  }
+ ]
+}

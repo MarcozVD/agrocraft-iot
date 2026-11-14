@@ -33,7 +33,7 @@ import com.google.gson.JsonParser;
  * dispositivos de API. El plugin lleva el modelo, así que el mundo evoluciona sin jugadores.
  */
 public final class AgroCraftPlugin extends JavaPlugin implements Listener {
-    static final String FW = "agrocraft-bridge-0.6.0";
+    static final String FW = "agrocraft-bridge-0.6.1";
 
     Layout layout;
     Mqtt mqtt;
