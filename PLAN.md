@@ -10,24 +10,20 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 
 ---
 
-## 0. Desarrollo en pausa (11 nov 2026, 18:30)
+## 0. Recta final (actualizado sábado 14 nov 2026) · entrega jueves 19 nov
 
-**Sigue encendido a propósito (es la captura del informe):** VM, granja real y sus 9 gemelos, API,
-pronóstico y datasets, agente del PC (`gw-pc-01`, arranca con Windows), servicio de control, Grafana,
-alertas y copia de seguridad diaria (03:30). No apagar la VM: 4 días de datos se cumplen el
-sábado 15 nov 01:05; 6 días, el martes 17 nov 01:05. La VM cuesta unos US$0.90/día de crédito.
+| Fecha | Tarea | Estado |
+|---|---|---|
+| sáb 14 | Revisión de la captura (3,5 días sin caídas), arreglo del comedero (0.6.1), entorno del agente del PC rehecho en Python 3.13 | Hecho |
+| sáb 14 | Generador del informe (`docs/informe/generar.sh`) y primer borrador del PDF (35 páginas) | Hecho |
+| sáb 14 | Guía de sustentación (`docs/SUSTENTACION.md`) | Hecho |
+| — | Portada: integrantes y docente en `docs/informe/portada.json` | Falta el dato |
+| — | Tokens de Telegram/Discord y clave de Claude (opcional) en `platform/.env` de la VM | Falta el dato |
+| mar 17 (después de 01:05) | Cerrar ventana de 6 días: `bash docs/informe/generar.sh 2026-11-17T06:05:00Z`, revisar cifras del análisis | Pendiente |
+| mié 18 | Repositorio público, revisión final del PDF, ensayo de la demo | Pendiente |
+| jue 19 | Entrega: PDF + GitHub + URL + sustentación | — |
 
-**Apagado o en reposo:** granja de simulación (en pausa; `sim-control` sin publicar, se reactiva con
-`set_enabled {"enabled":1}`), sin experimentos ni pruebas programadas, sin navegador de pruebas.
-
-**Al retomar:**
-1. Cargar en `platform/.env` de la VM `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_WEBHOOK_URL` y,
-   si se quiere el análisis con IA, `ANTHROPIC_API_KEY`; luego `docker compose up -d control` y
-   `POST /iot/api/notify/test`.
-2. Revisar que la captura siga sin huecos (dashboard Resumen, tabla "Estado de la flota").
-3. Documento final: contexto, arquitectura, tablas, comunicación, visualización, retroceso
-   (`docs/experimentos/experimentos.csv`), simulación (`docs/experimentos/sim-tests-*`), análisis con IA.
-4. Pendientes opcionales: AMQP para `ds-energia`, detección de anomalías.
+No apagar la VM hasta después de la sustentación; luego volver a `Standard_B2ats_v2`.
 
 ## 1. Estado y cómo retomar
 

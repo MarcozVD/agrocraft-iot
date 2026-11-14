@@ -17,6 +17,18 @@ mkdir -p datos
 scp -q -o BatchMode=yes -i "$KEY" "$HOST:/tmp/informe-datos/*" datos/
 ssh -o BatchMode=yes -i "$KEY" "$HOST" "cat ~/agrocraft/experiments/experimentos.csv" > ../experimentos/experimentos.csv
 
+# Capturas de los dashboards con el rango exacto de la ventana
+FROM_MS=$(( $(date -d "$START" +%s) * 1000 )); TO_MS=$(( $(date -d "$STOP" +%s) * 1000 ))
+SITE="https://agrocraft.northcentralus.cloudapp.azure.com"
+playwright-cli open "$SITE/d/agro-resumen?orgId=1&kiosk" >/dev/null
+playwright-cli resize 1600 1500 >/dev/null
+for d in resumen cultivo clima operacion dispositivo ganaderia; do
+  playwright-cli goto "$SITE/d/agro-$d?orgId=1&kiosk&from=$FROM_MS&to=$TO_MS" >/dev/null
+  playwright-cli run-code "async page => { await page.waitForTimeout(12000); }" >/dev/null
+  playwright-cli screenshot --filename="$(cygpath -m "$PWD")/../evidencias/dash-$d.png" >/dev/null
+done
+playwright-cli close >/dev/null
+
 .venv/Scripts/python.exe build.py
 
 # Impresión a PDF (el navegador necesita servir los archivos por HTTP)
