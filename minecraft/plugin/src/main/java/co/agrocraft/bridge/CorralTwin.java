@@ -31,11 +31,11 @@ import com.google.gson.JsonObject;
  * Cadena: parcela A (trigo) -> silo -> comedero -> vacas -> planta de proceso -> carne asada.
  */
 final class CorralTwin extends Twin {
-    static final Layout.Box CORRAL = new Layout.Box(-4, -16, 2, -6);
-    static final int[] FEEDER = {-2, -14};
-    static final int[] TROUGH = {0, -14};
-    static final int[] SMOKER = {-2, -3};
-    static final int[] COLD_ROOM = {0, -3};
+    static final Layout.Box CORRAL = Layout.CORRAL;
+    static final int[] FEEDER = {CORRAL.x1() + 2, CORRAL.z1() + 2};
+    static final int[] TROUGH = {CORRAL.x1() + 4, CORRAL.z1() + 2};
+    static final int[] SMOKER = {Layout.PLANT.x1() + 2, Layout.PLANT.z1() + 1};
+    static final int[] COLD_ROOM = {Layout.PLANT.x1() + 4, Layout.PLANT.z1() + 1};
 
     private static final double FEED_CAPACITY = 120;       // unidades de trigo en el comedero
     private static final double WATER_CAPACITY_L = 200;

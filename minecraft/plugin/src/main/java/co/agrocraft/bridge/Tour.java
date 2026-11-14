@@ -37,18 +37,34 @@ final class Tour implements CommandExecutor, Listener {
     private static final int MOVE_TICKS = 50;
     private static final int HOLD_TICKS = 110;
 
+    private static final Layout.Box F = Layout.FARM;
     private static final List<Stop> STOPS = List.of(
-        new Stop(false, 14.5, 5, 27, 14.5, 3, 12, "AgroCraft", "17 dispositivos IoT · gemelo digital en Azure"),
-        new Stop(false, 14.5, 11, 19, 14.5, 1, 7, "Parcelas A y B", "humedad del suelo · riego automático · pronóstico de lluvia"),
-        new Stop(false, 19, 9, 13, 14.5, 7, 8.5, "Silo de grano", "recibe la cosecha y despacha · mc-silo"),
-        new Stop(false, 13, 9, -2, 6.5, 5, -8, "Tanque de agua", "nivel en vivo · bomba · lluvia real captada"),
-        new Stop(false, 28, 8, -3, 20.5, 3, -10, "Invernadero", "temperatura, humedad, ventilas y calefacción"),
-        new Stop(false, 7, 8, -9, -1, 2, -13, "Corral y establo", "THI · bienestar · comedero desde el silo · aspersores"),
-        new Stop(false, 4, 5, 3, -1, 1, -3, "Planta de proceso", "ahumador y cámara fría · carne producida"),
-        new Stop(false, 5, 6, 6, 0.5, 3, 0.5, "Estación y seguridad", "luz, lluvia, intrusos y alarma"),
-        new Stop(false, 31, 6, 15, 27.5, 2, 11, "Centro de control", "MQTT · Grafana · reglas en la nube · IA"),
-        new Stop(true, 14.5, 22, 34, 14.5, 0, 0, "Granja de simulación", "olas de calor, sequía, tormentas e intrusos a 360x"),
-        new Stop(false, 12, 42, 40, 12, 0, 0, "Panorama", "datos reales de Bucaramanga moviendo el mundo"));
+        new Stop(false, Layout.GATE_X + 0.5, 6, F.z2() + 12, Layout.GATE_X, 3, F.z2() - 12,
+                "AgroCraft", "17 dispositivos IoT · gemelo digital en Azure"),
+        new Stop(false, Layout.SILO_X + 0.5, 16, Layout.CHANNEL_Z + 22, Layout.SILO_X + 0.5, 1, Layout.CHANNEL_Z,
+                "Parcelas A y B", "humedad del suelo · riego automático · pronóstico de lluvia"),
+        new Stop(false, Layout.SILO_X + 7, 10, Layout.CHANNEL_Z + 8, Layout.SILO_X + 0.5, 7, Layout.CHANNEL_Z + 0.5,
+                "Silo de grano", "recibe la cosecha y alimenta el corral · mc-silo"),
+        new Stop(false, Layout.TANK.cx() + 10, 11, Layout.TANK.z2() + 9, Layout.TANK.cx() + 0.5, 5, Layout.TANK.cz() + 0.5,
+                "Tanque de agua", "nivel en vivo · bomba · lluvia real captada"),
+        new Stop(false, Layout.GREENHOUSE.x2() + 9, 10, Layout.GREENHOUSE.z2() + 8, Layout.GREENHOUSE.cx() + 0.5, 3,
+                Layout.GREENHOUSE.cz() + 0.5, "Invernadero", "temperatura, humedad, ventilas y calefacción"),
+        new Stop(false, Layout.CORRAL.x2() + 12, 12, Layout.CORRAL.cz() + 6, Layout.CORRAL.cx() + 0.5, 2,
+                Layout.CORRAL.cz() + 0.5, "Corral y establo", "THI · bienestar · comedero desde el silo · aspersores"),
+        new Stop(false, Layout.PLANT.x2() + 8, 7, Layout.PLANT.z2() + 7, Layout.PLANT.cx() + 0.5, 1, Layout.PLANT.cz() + 0.5,
+                "Planta de proceso", "ahumador y cámara fría · carne producida"),
+        new Stop(false, Layout.STATION[0] + 7, 7, Layout.STATION[1] + 7, Layout.STATION[0] + 0.5, 3, Layout.STATION[1] + 0.5,
+                "Estación meteorológica", "luz y lluvia del mundo · clima real de Bucaramanga"),
+        new Stop(false, Layout.SECURITY[0] + 6, 6, Layout.SECURITY[1] + 6, Layout.SECURITY[0] + 0.5, 2, Layout.SECURITY[1] + 0.5,
+                "Seguridad", "intrusos, monstruos y alarma · puerta controlada por MQTT"),
+        new Stop(false, Layout.BOOTH.x1() - 8, 7, Layout.BOOTH.cz() + 7, Layout.BOOTH.cx() + 0.5, 2, Layout.BOOTH.cz() + 0.5,
+                "Centro de control", "MQTT · AMQP · Grafana · reglas en la nube · IA"),
+        new Stop(false, Layout.LOOKOUT.cx() + 0.5, 14, Layout.LOOKOUT.cz() + 0.5, F.cx(), 0, F.cz(),
+                "Mirador", "toda la granja desde arriba"),
+        new Stop(true, F.cx(), 45, F.z2() + 35, F.cx(), 0, F.cz(),
+                "Granja de simulación", "olas de calor, sequía, tormentas e intrusos a 360x"),
+        new Stop(false, F.cx(), 75, F.z2() + 65, F.cx(), 0, F.cz(),
+                "Panorama", "datos reales de Bucaramanga moviendo el mundo"));
 
     private final AgroCraftPlugin plugin;
     private final Map<UUID, Session> sessions = new HashMap<>();

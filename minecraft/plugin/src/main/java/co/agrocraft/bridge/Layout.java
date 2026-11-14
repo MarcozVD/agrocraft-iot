@@ -13,7 +13,19 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * Plano de la granja. Todas las coordenadas son relativas al origen configurado; dy = 0 es el suelo.
- * build() levanta la estructura mínima para que los gemelos funcionen; el grupo puede decorarla después.
+ * Es la única fuente de posiciones: gemelos, letreros, hologramas, marcadores, arquitectura y visita
+ * guiada leen de aquí.
+ *
+ * Versión 2 del plano (plugin 0.8): zonas separadas por 12-16 bloques y unidas por caminos.
+ *
+ *          N (z negativo)
+ *   corral + establo      tanque           invernadero              mirador
+ *   planta de proceso
+ *   ---------------------------- camino z = 0 ----------------------------
+ *                         parcela A  silo  parcela B      caseta de control
+ *   ---------------------------- camino z = 24 ---------------------------
+ *   estación              seguridad   entrada (puerta, tablero)
+ *          S (z positivo)
  */
 final class Layout {
     record Box(int x1, int z1, int x2, int z2) {
@@ -24,18 +36,41 @@ final class Layout {
         boolean border(int x, int z) {
             return x == x1 || x == x2 || z == z1 || z == z2;
         }
+
+        int cx() {
+            return (x1 + x2) / 2;
+        }
+
+        int cz() {
+            return (z1 + z2) / 2;
+        }
     }
 
-    static final Box FARM = new Box(-6, -18, 30, 18);
-    static final Box PLOT_A = new Box(4, 4, 12, 12);
-    static final Box PLOT_B = new Box(16, 4, 24, 12);
-    static final int CHANNEL_Z = 8;                         // canal de riego que cruza cada parcela
-    static final Box TANK = new Box(4, -10, 8, -6);         // muros de vidrio; el agua ocupa el interior
+    static final int VERSION = 2;
+
+    static final Box FARM = new Box(-44, -48, 72, 40);
+    static final Box PLOT_A = new Box(-6, 10, 2, 18);
+    static final Box PLOT_B = new Box(30, 10, 38, 18);
+    static final int CHANNEL_Z = 14;                        // canal de riego que cruza cada parcela
+    static final int LAMP_A_X = PLOT_A.cx();
+    static final int LAMP_B_X = PLOT_B.cx();
+    static final int SILO_X = 16;                           // barril del silo, sobre el canal
+    static final Box TANK = new Box(0, -18, 4, -14);        // muros de vidrio; el agua ocupa el interior
     static final int TANK_LAYERS = 8;
-    static final Box GREENHOUSE = new Box(16, -14, 24, -6);
+    static final Box GREENHOUSE = new Box(24, -24, 32, -16);
     static final int GREENHOUSE_ROOF = 5;
-    static final int VENT_Z = -10;                          // fila de ventilas en el techo
-    static final int GATE_X = 14;
+    static final int VENT_Z = GREENHOUSE.cz();              // fila de ventilas en el techo
+    static final int HEATER_Z = GREENHOUSE.z1() + 2;        // fogata y lámparas de calefacción
+    static final Box CORRAL = new Box(-38, -30, -28, -14);
+    static final Box PLANT = new Box(-38, -6, -32, -3);     // planta de proceso
+    static final int[] STATION = {-14, 30};
+    static final int[] SECURITY = {8, 32};                  // poste y lámpara de alarma
+    static final int GATE_X = 16;
+    static final Box BOOTH = new Box(52, 12, 55, 16);       // caseta de control
+    static final Box LOOKOUT = new Box(62, -42, 64, -40);   // mirador
+
+    /** Plano anterior (v1): se limpia al migrar. */
+    static final Box LEGACY = new Box(-8, -20, 32, 20);
 
     final World world;
     final int ox;
@@ -82,6 +117,22 @@ final class Layout {
         lamp.setBlockData(data, false);
     }
 
+    /** Deja una caja como terreno plano: pasto, tierra debajo y aire encima. */
+    void clear(Box box, int height) {
+        for (int x = box.x1(); x <= box.x2(); x++) {
+            for (int z = box.z1(); z <= box.z2(); z++) {
+                at(x, -1, z).setType(Material.DIRT, false);
+                at(x, 0, z).setType(Material.GRASS_BLOCK, false);
+                for (int dy = 1; dy <= height; dy++) {
+                    Block block = at(x, dy, z);
+                    if (!block.getType().isAir()) {
+                        block.setType(Material.AIR, false);
+                    }
+                }
+            }
+        }
+    }
+
     void build(boolean setSpawn) {
         List<Block> fences = new ArrayList<>();
         for (int x = FARM.x1(); x <= FARM.x2(); x++) {
@@ -110,7 +161,7 @@ final class Layout {
             }
         }
 
-        int doorX = (GREENHOUSE.x1() + GREENHOUSE.x2()) / 2;
+        int doorX = GREENHOUSE.cx();
         for (int x = GREENHOUSE.x1(); x <= GREENHOUSE.x2(); x++) {
             for (int z = GREENHOUSE.z1(); z <= GREENHOUSE.z2(); z++) {
                 if (GREENHOUSE.border(x, z)) {
@@ -123,31 +174,31 @@ final class Layout {
                 at(x, GREENHOUSE_ROOF, z).setType(vent ? Material.OAK_TRAPDOOR : Material.GLASS, false);
             }
         }
-        at(doorX, 1, -12).setType(Material.CAMPFIRE, false);        // calefacción
-        lamp(doorX - 2, 1, -12, 0, false);
-        lamp(doorX + 2, 1, -12, 0, false);
+        at(doorX, 1, HEATER_Z).setType(Material.CAMPFIRE, false);   // calefacción
+        lamp(doorX - 2, 1, HEATER_Z, 0, false);
+        lamp(doorX + 2, 1, HEATER_Z, 0, false);
 
-        at(14, 1, CHANNEL_Z).setType(Material.BARREL, false);       // silo de cosecha
+        at(SILO_X, 1, CHANNEL_Z).setType(Material.BARREL, false);   // silo de cosecha
 
         for (int dy = 1; dy <= 3; dy++) {                           // estación meteorológica
-            at(0, dy, 0).setType(Material.OAK_FENCE, false);
+            at(STATION[0], dy, STATION[1]).setType(Material.OAK_FENCE, false);
         }
-        at(0, 4, 0).setType(Material.DAYLIGHT_DETECTOR, false);
+        at(STATION[0], 4, STATION[1]).setType(Material.DAYLIGHT_DETECTOR, false);
 
-        at(2, 1, 2).setType(Material.STONE_BRICKS, false);          // poste de la alarma
-        lamp(2, 3, 2, 2, false);
+        at(SECURITY[0], 1, SECURITY[1]).setType(Material.STONE_BRICKS, false);   // poste de la alarma
+        lamp(SECURITY[0], 3, SECURITY[1], 2, false);
 
-        lamp(8, 4, CHANNEL_Z, 5, false);                            // lámparas de crecimiento
-        lamp(20, 4, CHANNEL_Z, 5, false);
+        lamp(LAMP_A_X, 4, CHANNEL_Z, 5, false);                     // lámparas de crecimiento
+        lamp(LAMP_B_X, 4, CHANNEL_Z, 5, false);
 
         if (setSpawn) {
             world.setSpawnLocation(ox + GATE_X, y0 + 1, oz + FARM.z2() - 2);
         }
     }
 
-    /** Corral de vacas y planta de proceso (se agregó en la versión 0.5 a granjas ya construidas). */
+    /** Corral de vacas y planta de proceso. */
     void buildCorral() {
-        Box c = CorralTwin.CORRAL;
+        Box c = CORRAL;
         List<Block> fences = new ArrayList<>();
         for (int x = c.x1(); x <= c.x2(); x++) {
             for (int z = c.z1(); z <= c.z2(); z++) {
@@ -171,8 +222,8 @@ final class Layout {
         }
         at(CorralTwin.FEEDER[0], 1, CorralTwin.FEEDER[1]).setType(Material.COMPOSTER, false);
         at(CorralTwin.TROUGH[0], 1, CorralTwin.TROUGH[1]).setType(Material.WATER_CAULDRON, false);
-        for (int x = -4; x <= 2; x++) {                     // piso de la planta de proceso
-            for (int z = -4; z <= -1; z++) {
+        for (int x = PLANT.x1(); x <= PLANT.x2(); x++) {          // piso de la planta de proceso
+            for (int z = PLANT.z1(); z <= PLANT.z2(); z++) {
                 at(x, 0, z).setType(Material.SMOOTH_STONE, false);
             }
         }

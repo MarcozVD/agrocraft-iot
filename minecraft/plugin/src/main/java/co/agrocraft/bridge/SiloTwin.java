@@ -25,7 +25,7 @@ final class SiloTwin extends Twin {
     }
 
     private Inventory inventory() {
-        Block block = layout.at(14, 1, Layout.CHANNEL_Z);
+        Block block = layout.at(Layout.SILO_X, 1, Layout.CHANNEL_Z);
         if (block.getType() != Material.BARREL) {
             block.setType(Material.BARREL, false);
         }

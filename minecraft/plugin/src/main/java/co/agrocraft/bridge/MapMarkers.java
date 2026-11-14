@@ -28,14 +28,14 @@ final class MapMarkers {
     private static final Map<String, double[]> SPOTS = new LinkedHashMap<>();       // sufijo -> {x, z, radio}
 
     static {
-        SPOTS.put("parcela-a", new double[] {8.5, 8.5, 4});
-        SPOTS.put("parcela-b", new double[] {20.5, 8.5, 4});
-        SPOTS.put("tanque", new double[] {6.5, -7.5, 2.5});
-        SPOTS.put("invernadero", new double[] {20.5, -9.5, 4});
-        SPOTS.put("silo", new double[] {14.5, 8.5, 1.5});
-        SPOTS.put("estacion", new double[] {0.5, 0.5, 1.5});
-        SPOTS.put("seguridad", new double[] {2.5, 2.5, 1.5});
-        SPOTS.put("corral", new double[] {-0.5, -10.5, 4});
+        SPOTS.put("parcela-a", new double[] {Layout.PLOT_A.cx() + 0.5, Layout.PLOT_A.cz() + 0.5, 4});
+        SPOTS.put("parcela-b", new double[] {Layout.PLOT_B.cx() + 0.5, Layout.PLOT_B.cz() + 0.5, 4});
+        SPOTS.put("tanque", new double[] {Layout.TANK.cx() + 0.5, Layout.TANK.cz() + 0.5, 2.5});
+        SPOTS.put("invernadero", new double[] {Layout.GREENHOUSE.cx() + 0.5, Layout.GREENHOUSE.cz() + 0.5, 4});
+        SPOTS.put("silo", new double[] {Layout.SILO_X + 0.5, Layout.CHANNEL_Z + 0.5, 1.5});
+        SPOTS.put("estacion", new double[] {Layout.STATION[0] + 0.5, Layout.STATION[1] + 0.5, 1.5});
+        SPOTS.put("seguridad", new double[] {Layout.SECURITY[0] + 0.5, Layout.SECURITY[1] + 0.5, 1.5});
+        SPOTS.put("corral", new double[] {Layout.CORRAL.cx() + 0.5, Layout.CORRAL.cz() + 0.5, 5});
     }
 
     private static final Color GREEN = new Color(0x4CAF50);

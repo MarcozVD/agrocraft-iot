@@ -69,14 +69,14 @@ final class SecurityTwin extends Twin {
             setAlarm(hostiles > 0, "auto");
         }
         if (shownAlarm == null || shownAlarm != alarm) {
-            layout.lamp(2, 3, 2, 2, alarm);
+            layout.lamp(Layout.SECURITY[0], 3, Layout.SECURITY[1], 2, alarm);
             shownAlarm = alarm;
         }
         if (alarm) {
             bellTimer += dt;
             if (bellTimer >= 3) {
                 bellTimer = 0;
-                layout.world.playSound(layout.at(2, 3, 2).getLocation(), Sound.BLOCK_BELL_USE, 3f, 1f);
+                layout.world.playSound(layout.at(Layout.SECURITY[0], 3, Layout.SECURITY[1]).getLocation(), Sound.BLOCK_BELL_USE, 3f, 1f);
             }
         }
     }

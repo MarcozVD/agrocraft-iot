@@ -62,7 +62,7 @@ final class StationTwin extends Twin {
         World world = layout.world;
         out.put("raining", world.hasStorm() ? 1.0 : 0.0);
         out.put("thundering", world.isThundering() ? 1.0 : 0.0);
-        out.put("daylight_lvl", (double) layout.at(0, 5, 0).getLightLevel());
+        out.put("daylight_lvl", (double) layout.at(Layout.STATION[0], 5, Layout.STATION[1]).getLightLevel());
         out.put("time_ticks", (double) world.getTime());
     }
 

@@ -47,9 +47,9 @@ final class SimControl extends Twin {
             rainTimer += dt;
             if (rainTimer >= 0.5) {
                 rainTimer = 0;
-                Location center = layout.at(12, 12, 0).getLocation();
+                Location center = layout.at(Layout.FARM.cx(), 12, Layout.FARM.cz()).getLocation();
                 int drops = (int) Math.min(600, 40 + sim.rainRateMmH * 25);
-                layout.world.spawnParticle(Particle.FALLING_WATER, center, drops, 18, 4, 18, 0);
+                layout.world.spawnParticle(Particle.FALLING_WATER, center, drops * 3, 50, 4, 40, 0);
             }
         }
         if (wasRunning && !sim.running) {           // terminó por duración

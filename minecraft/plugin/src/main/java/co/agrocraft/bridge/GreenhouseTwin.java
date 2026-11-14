@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
  * ganancia solar (radiación real), que las ventilas abiertas disipan.
  */
 final class GreenhouseTwin extends Twin {
-    private static final int DOOR_X = (Layout.GREENHOUSE.x1() + Layout.GREENHOUSE.x2()) / 2;
+    private static final int DOOR_X = Layout.GREENHOUSE.cx();
 
     private double temp = 24;
     private double hum = 70;
@@ -133,8 +133,9 @@ final class GreenhouseTwin extends Twin {
 
     private static final Material[] ROOF = {Material.LIGHT_BLUE_STAINED_GLASS, Material.GLASS,
         Material.YELLOW_STAINED_GLASS, Material.ORANGE_STAINED_GLASS, Material.RED_STAINED_GLASS};
-    private static final int[] BUSH_X = {17, 18, 19, 21, 22, 23};
-    private static final int[] BUSH_Z = {-8, -10};
+    private static final int[] BUSH_X = {Layout.GREENHOUSE.x1() + 1, Layout.GREENHOUSE.x1() + 2, Layout.GREENHOUSE.x1() + 3,
+        Layout.GREENHOUSE.x1() + 5, Layout.GREENHOUSE.x1() + 6, Layout.GREENHOUSE.x1() + 7};
+    private static final int[] BUSH_Z = {Layout.GREENHOUSE.z2() - 2, Layout.GREENHOUSE.z2() - 4};
 
     private void renderPlants() {
         int band = band();
@@ -183,7 +184,7 @@ final class GreenhouseTwin extends Twin {
             shownVent = vent;
         }
         if (shownHeater == null || shownHeater != heater) {
-            Block campfire = layout.at(DOOR_X, 1, -12);
+            Block campfire = layout.at(DOOR_X, 1, Layout.HEATER_Z);
             if (campfire.getBlockData() instanceof Lightable data) {
                 data.setLit(heater);
                 campfire.setBlockData(data, false);
@@ -191,8 +192,8 @@ final class GreenhouseTwin extends Twin {
             shownHeater = heater;
         }
         if (shownLamp == null || shownLamp != lamp) {
-            layout.lamp(DOOR_X - 2, 1, -12, 0, lamp);
-            layout.lamp(DOOR_X + 2, 1, -12, 0, lamp);
+            layout.lamp(DOOR_X - 2, 1, Layout.HEATER_Z, 0, lamp);
+            layout.lamp(DOOR_X + 2, 1, Layout.HEATER_Z, 0, lamp);
             shownLamp = lamp;
         }
     }

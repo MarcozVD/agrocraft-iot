@@ -51,28 +51,47 @@ final class Displays implements Listener {
     record Lever(String twin, String actuator, Spot spot) {
     }
 
+    // Letrero y palanca de cada dispositivo, frente a su zona (ver Layout)
+    private static final Spot SIGN_A = new Spot(Layout.PLOT_A.cx(), Layout.PLOT_A.z2() + 2);
+    private static final Spot SIGN_B = new Spot(Layout.PLOT_B.cx(), Layout.PLOT_B.z2() + 2);
+    private static final Spot SIGN_TANK = new Spot(Layout.TANK.cx(), Layout.TANK.z2() + 2);
+    private static final Spot SIGN_GREENHOUSE = new Spot(Layout.GREENHOUSE.cx() - 2, Layout.GREENHOUSE.z2() + 2);
+    private static final Spot SIGN_SECURITY = new Spot(Layout.SECURITY[0], Layout.SECURITY[1] + 1);
+    private static final Spot SIGN_CORRAL = new Spot(Layout.CORRAL.cx() + 1, Layout.CORRAL.z2() + 2);
+
     private static final Map<String, Spot> DEVICE_SIGNS = new LinkedHashMap<>();
     private static final List<Spot> BOARD = new ArrayList<>();
     private static final List<Lever> LEVERS = List.of(
-            new Lever("parcela-a", "irrigation", new Spot(9, 13)),
-            new Lever("parcela-b", "irrigation", new Spot(21, 13)),
-            new Lever("tanque", "pump", new Spot(7, -5)),
-            new Lever("invernadero", "vent", new Spot(19, -5)),
-            new Lever("seguridad", "alarm", new Spot(3, 3)),
-            new Lever("corral", "cooling", new Spot(-3, -5)));
+            new Lever("parcela-a", "irrigation", new Spot(SIGN_A.x() + 1, SIGN_A.z())),
+            new Lever("parcela-b", "irrigation", new Spot(SIGN_B.x() + 1, SIGN_B.z())),
+            new Lever("tanque", "pump", new Spot(SIGN_TANK.x() + 1, SIGN_TANK.z())),
+            new Lever("invernadero", "vent", new Spot(SIGN_GREENHOUSE.x() + 1, SIGN_GREENHOUSE.z())),
+            new Lever("seguridad", "alarm", new Spot(SIGN_SECURITY.x() + 1, SIGN_SECURITY.z())),
+            new Lever("corral", "cooling", new Spot(SIGN_CORRAL.x() - 2, SIGN_CORRAL.z())));
 
     static {
-        DEVICE_SIGNS.put("parcela-a", new Spot(8, 13));
-        DEVICE_SIGNS.put("parcela-b", new Spot(20, 13));
-        DEVICE_SIGNS.put("tanque", new Spot(6, -5));
-        DEVICE_SIGNS.put("invernadero", new Spot(18, -5));
-        DEVICE_SIGNS.put("silo", new Spot(14, 9));
-        DEVICE_SIGNS.put("estacion", new Spot(0, 1));
-        DEVICE_SIGNS.put("seguridad", new Spot(2, 3));
-        DEVICE_SIGNS.put("corral", new Spot(-1, -5));
-        for (int x = 9; x <= 19; x += 2) {          // tablero frente al punto de aparición (14, 16)
-            BOARD.add(new Spot(x, 15));
+        DEVICE_SIGNS.put("parcela-a", SIGN_A);
+        DEVICE_SIGNS.put("parcela-b", SIGN_B);
+        DEVICE_SIGNS.put("tanque", SIGN_TANK);
+        DEVICE_SIGNS.put("invernadero", SIGN_GREENHOUSE);
+        DEVICE_SIGNS.put("silo", new Spot(Layout.SILO_X, Layout.CHANNEL_Z + 1));
+        DEVICE_SIGNS.put("estacion", new Spot(Layout.STATION[0], Layout.STATION[1] + 1));
+        DEVICE_SIGNS.put("seguridad", SIGN_SECURITY);
+        DEVICE_SIGNS.put("corral", SIGN_CORRAL);
+        for (int x = Layout.GATE_X - 5; x <= Layout.GATE_X + 5; x += 2) {     // tablero frente a la entrada
+            BOARD.add(new Spot(x, Layout.FARM.z2() - 3));
         }
+    }
+
+    /** Spots de letreros y palancas: Decor no construye encima. */
+    static List<Spot> fixtures() {
+        List<Spot> out = new ArrayList<>(DEVICE_SIGNS.values());
+        out.addAll(BOARD);
+        out.add(SIM_SIGN);
+        for (Lever lever : LEVERS) {
+            out.add(lever.spot());
+        }
+        return out;
     }
 
     /** Hologramas: posición (relativa al origen, y sobre el suelo) encima de cada dispositivo. */
@@ -80,19 +99,19 @@ final class Displays implements Listener {
     static final String HOLO_TAG = "agrocraft-holo";
 
     static {
-        HOLOGRAMS.put("parcela-a", new double[] {8.5, 3.2, 10.5});
-        HOLOGRAMS.put("parcela-b", new double[] {20.5, 3.2, 10.5});
-        HOLOGRAMS.put("tanque", new double[] {6.5, 11.0, -7.5});
-        HOLOGRAMS.put("invernadero", new double[] {20.5, 7.4, -10.0});
-        HOLOGRAMS.put("silo", new double[] {14.5, 12.6, 8.5});
-        HOLOGRAMS.put("estacion", new double[] {0.5, 6.6, 0.5});
-        HOLOGRAMS.put("seguridad", new double[] {2.5, 4.8, 2.5});
-        HOLOGRAMS.put("corral", new double[] {-0.5, 8.6, -13.5});
+        HOLOGRAMS.put("parcela-a", new double[] {Layout.PLOT_A.cx() + 0.5, 3.2, Layout.CHANNEL_Z + 2.5});
+        HOLOGRAMS.put("parcela-b", new double[] {Layout.PLOT_B.cx() + 0.5, 3.2, Layout.CHANNEL_Z + 2.5});
+        HOLOGRAMS.put("tanque", new double[] {Layout.TANK.cx() + 0.5, Layout.TANK_LAYERS + 3.0, Layout.TANK.cz() + 0.5});
+        HOLOGRAMS.put("invernadero", new double[] {Layout.GREENHOUSE.cx() + 0.5, Layout.GREENHOUSE_ROOF + 2.4, Layout.GREENHOUSE.cz() + 0.5});
+        HOLOGRAMS.put("silo", new double[] {Layout.SILO_X + 0.5, 12.6, Layout.CHANNEL_Z + 0.5});
+        HOLOGRAMS.put("estacion", new double[] {Layout.STATION[0] + 0.5, 6.6, Layout.STATION[1] + 0.5});
+        HOLOGRAMS.put("seguridad", new double[] {Layout.SECURITY[0] + 0.5, 4.8, Layout.SECURITY[1] + 0.5});
+        HOLOGRAMS.put("corral", new double[] {Layout.CORRAL.cx() + 0.5, 10.6, Layout.CORRAL.z1() + 3.5});
     }
 
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
 
-    private static final Spot SIM_SIGN = new Spot(14, 15);
+    private static final Spot SIM_SIGN = new Spot(Layout.GATE_X, Layout.FARM.z2() - 3);
 
     private final AgroCraftPlugin plugin;
     private final Farm farm;
@@ -133,7 +152,7 @@ final class Displays implements Listener {
                     Component.text("Granja de simulación", NamedTextColor.AQUA).append(Component.newline())
                             .append(Component.text("escenarios a reloj acelerado", NamedTextColor.WHITE)));
         }
-        label("caseta", new double[] {27.5, 5.3, 11.0},
+        label("caseta", new double[] {Layout.BOOTH.cx() + 1.0, 5.3, Layout.BOOTH.cz() + 0.5},
                 Component.text("Centro de control", NamedTextColor.YELLOW).append(Component.newline())
                         .append(Component.text("MQTT · Grafana · Azure", NamedTextColor.GRAY)));
         if (main) {
