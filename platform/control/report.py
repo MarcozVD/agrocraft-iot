@@ -33,6 +33,11 @@ REPORT_DIR = Path(os.environ.get("STATE_DIR", "/state")) / "reportes"
 INFLUX_URL = os.environ.get("INFLUX_URL", "http://influxdb:8086")
 TZ = ZoneInfo(os.environ.get("TZ", "America/Bogota"))
 BASE_URL = os.environ.get("ANALYST_BASE_URL", "").strip().rstrip("/")
+SERIES = [("api-clima", "temp_c"), ("mc-invernadero", "temp_c"), ("ds-invernadero", "temp_c"),
+          ("mc-parcela-a", "soil_pct"), ("mc-parcela-b", "soil_pct"), ("mc-tanque", "level_pct"),
+          ("mc-corral", "thi"), ("mc-corral", "welfare_pct"), ("api-clima", "radiation_wm2"),
+          ("api-clima", "hum_pct"), ("api-aire", "pm2_5"), ("ds-energia", "power_kw"),
+          ("gw-pc-01", "cpu_pct"), ("gw-pc-01", "ram_pct")]
 MODEL = os.environ.get("ANALYST_MODEL", "").strip() or ("deepseek-v4.1-flash:free" if BASE_URL else "claude-opus-5-5")
 
 SYSTEM = """Eres el analista de datos de AgroCraft, una granja inteligente en Santander (Colombia) cuyo
@@ -97,10 +102,23 @@ async def gather(hours: int) -> dict:
                            "device": data.get("device"), "resumen": data.get("summary")})
         else:
             by_type[f'{row["device"]}:{data.get("type")}'] += 1
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=120)) as http:
+        series_rows = await _flux(http, f'''from(bucket: "telemetry")
+  |> range(start: {window})
+  |> filter(fn: (r) => r._measurement == "telemetry")
+  |> filter(fn: (r) => {" or ".join(f'(r.device == "{d}" and r._field == "{f}")' for d, f in SERIES)})
+  |> aggregateWindow(every: 20m, fn: mean, createEmpty: false)''')
+    series = defaultdict(lambda: {"t": [], "v": []})
+    for row in series_rows:
+        point = series[f'{row["device"]}/{row["_field"]}']
+        stamp = datetime.fromisoformat(row["_time"].replace("Z", "+00:00")).astimezone(TZ)
+        point["t"].append(stamp.strftime("%d %H:%M"))
+        point["v"].append(round(float(row["_value"]), 2))
     forecast = stats.get("api/api-pronostico", {})
     return {"ventana_horas": hours, "generado": datetime.now(TZ).isoformat(timespec="minutes"),
             "estadisticas": dict(stats), "eventos_por_tipo": dict(by_type), "alertas": alerts[-40:],
-            "comandos": commands[-40:], "pronostico": {k: v.get("last") for k, v in forecast.items()}}
+            "comandos": commands[-40:], "pronostico": {k: v.get("last") for k, v in forecast.items()},
+            "series": dict(series)}
 
 
 def stats_markdown(data: dict) -> str:
@@ -182,7 +200,9 @@ async def analyze(data: dict) -> tuple:
 
 async def build_report(hours: int = 24) -> dict:
     data = await gather(hours)
+    series = data.pop("series")              # no se envían al modelo: solo para las gráficas
     analysis, model = await analyze(data)
+    data.update(series=series, analisis=analysis, modelo=model)
     stamp = datetime.now(TZ)
     name = stamp.strftime("%Y-%m-%d-%H%M")
     header = (f"# Informe AgroCraft · {stamp.strftime('%Y-%m-%d %H:%M')} (hora Colombia)\n\n"

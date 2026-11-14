@@ -20,6 +20,7 @@ Habla con los dispositivos solo por MQTT: publica en `cmd` y escucha `ack`, `sta
 import asyncio
 import base64
 import hmac
+import html
 import json
 import logging
 import os
@@ -36,6 +37,7 @@ from base import MQTT_HOST, MQTT_PORT, now_ms
 from http_devices import PhoneProxy
 from notifier import Notifier, format_alert
 import report
+import report_page
 from rules import Rules
 
 log = logging.getLogger("control")
@@ -284,20 +286,58 @@ async def notify_report(app, result):
 
 
 async def list_reports(request):
-    items = "".join(f'<li><a href="/iot/reportes/{name}">{name}</a></li>' for name in report.list_reports())
-    return web.Response(content_type="text/html", text=(
-        "<!doctype html><meta charset=utf-8><title>Informes AgroCraft</title>"
-        "<body style='font:15px system-ui;max-width:760px;margin:40px auto;padding:0 16px'>"
-        "<h1>Informes del analista con IA</h1><p>Uno por día a las 07:00 (hora Colombia).</p>"
-        f"<ul>{items or '<li>Aún no hay informes.</li>'}</ul>"))
+    cards = []
+    for name in report.list_reports():
+        data_path = report.REPORT_DIR / f"{name}.json"
+        model, summary = None, ""
+        try:
+            data = json.loads(data_path.read_text(encoding="utf-8"))
+            model = data.get("modelo")
+            summary = (data.get("analisis") or "").split("## 2")[0]
+            summary = " ".join(line for line in summary.splitlines() if line and not line.startswith("#"))[:260]
+        except (OSError, ValueError):
+            pass
+        day, hour = name[:10], name[11:13] + ":" + name[13:15]
+        cards.append(f'<a class="card" href="/iot/reportes/{name}"><b>{day} · {hour}</b>'
+                     f'<span>{html.escape(summary) or "Informe estadístico"}</span>'
+                     f'<small>{html.escape(model or "sin IA")}</small></a>')
+    return web.Response(content_type="text/html", text=REPORT_LIST.format(cards="".join(cards) or "<p>Aún no hay informes.</p>"))
+
+
+REPORT_LIST = """<!doctype html><html lang=es><meta charset=utf-8><meta name=viewport content="width=device-width, initial-scale=1">
+<title>Informes AgroCraft</title><style>
+:root{{--bg:#f5f7fb;--card:#fff;--ink:#1d2433;--muted:#5b6475;--line:#e3e7ef;--accent:#2f6db3}}
+@media (prefers-color-scheme:dark){{:root{{--bg:#0f1115;--card:#181b22;--ink:#dbe0e8;--muted:#8a93a3;--line:#2a2f3a;--accent:#6ea2e6}}}}
+body{{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}}
+header{{background:linear-gradient(120deg,#244f86,#2f6db3 60%,#3a9a4a);color:#fff;padding:26px 16px}}
+header div,main{{max-width:900px;margin:0 auto}} header a{{color:#d9e7ff;font-size:13px;text-decoration:none}}
+h1{{margin:6px 0 2px}} main{{padding:20px 16px 50px;display:grid;gap:12px}}
+.card{{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;color:inherit;text-decoration:none}}
+.card:hover{{border-color:var(--accent)}} .card b{{color:var(--accent)}} .card span{{display:block;margin:4px 0;font-size:14px}}
+.card small{{color:var(--muted)}}</style>
+<header><div><a href="/">Dashboards</a> · <a href="/iot/">Panel de control</a><h1>Informes del analista con IA</h1>
+<p style="margin:0;opacity:.9">Uno por día a las 07:00 (hora Colombia), con gráficas, indicadores y análisis.</p></div></header>
+<main>{cards}</main></html>"""
 
 
 async def show_report(request):
     name = request.match_info["name"]
+    raw = name.endswith(".md")
+    name = name[:-3] if raw else name
     if name not in report.list_reports():
         raise web.HTTPNotFound()
     text = (report.REPORT_DIR / f"{name}.md").read_text(encoding="utf-8")
-    return web.Response(text=text, content_type="text/markdown", charset="utf-8")
+    if raw:
+        return web.Response(text=text, content_type="text/markdown", charset="utf-8")
+    try:
+        data = json.loads((report.REPORT_DIR / f"{name}.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        data = {}
+    analysis = data.get("analisis")
+    if analysis is None:                     # informes anteriores: el análisis está en el Markdown
+        analysis = text.split("## Análisis", 1)[-1].split("\n## Estadísticas", 1)[0]
+    page = report_page.render(name, data, analysis, data.get("modelo"))
+    return web.Response(text=page, content_type="text/html", charset="utf-8")
 
 
 @require_operator
