@@ -53,6 +53,6 @@ comedero bajo 30 %, alarma ante hostiles.
   de retroceso (requiere usuario de operador).
 - **Mapa web** (`/map/`): vista del mundo con un marcador por gemelo, coloreado según su estado.
 - **Dentro del mundo**: letreros con lecturas en vivo, un tablero con los datos reales y palancas.
-- **Informes con IA** (`/iot/reportes/`): análisis diario redactado por Claude a partir de las estadísticas.
+- **Informes con IA** (`/iot/reportes/`): análisis diario redactado por un modelo de lenguaje (DeepSeek V4.1 Flash vía TokenHarbor) a partir de las estadísticas.
 
 {{img:../evidencias/panel-control.png|Panel de control: cada botón publica un comando MQTT y muestra la respuesta (ack) del dispositivo.}}

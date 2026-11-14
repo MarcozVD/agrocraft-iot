@@ -40,7 +40,7 @@ de la demo: 8 minutos.
   temperatura, humedad de Open-Meteo); los sensores de referencia y sus rangos están en la tabla 3.1.
 - **¿Dónde está el procesamiento?** Flux en Grafana (agregación por ventana, prom/máx/mín), alertas,
   reglas en el servicio de control, modelo en el plugin, pronóstico en la flota.
-- **¿Qué hace la IA?** Analiza las estadísticas de 24 h y redacta el informe diario; el análisis del
+- **¿Qué hace la IA?** Analiza las estadísticas de 24 h y redacta el informe diario (DeepSeek vía TokenHarbor); el análisis del
   documento se redactó con IA y se verificó contra las gráficas.
 
 ## Si algo falla en vivo

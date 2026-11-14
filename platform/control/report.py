@@ -8,7 +8,11 @@
    recomendaciones.
 3. Lo guarda en /state/reportes/<fecha>.md (servido en /iot/reportes/) y lo envía a Telegram/Discord.
 
-Sin ANTHROPIC_API_KEY se genera solo la parte estadística, indicando que la IA no está configurada.
+Proveedor del modelo (variables en platform/.env):
+  - Compatible con OpenAI (p. ej. TokenHarbor): ANALYST_BASE_URL, ANALYST_API_KEY, ANALYST_MODEL.
+    Se llama POST {ANALYST_BASE_URL}/chat/completions.
+  - Claude: ANTHROPIC_API_KEY (y opcional ANALYST_MODEL), si no hay ANALYST_BASE_URL.
+Sin ninguno se genera solo la parte estadística, indicando que la IA no está configurada.
 """
 
 import csv
@@ -28,7 +32,8 @@ log = logging.getLogger("analista")
 REPORT_DIR = Path(os.environ.get("STATE_DIR", "/state")) / "reportes"
 INFLUX_URL = os.environ.get("INFLUX_URL", "http://influxdb:8086")
 TZ = ZoneInfo(os.environ.get("TZ", "America/Bogota"))
-MODEL = os.environ.get("ANALYST_MODEL", "claude-opus-5-5")
+BASE_URL = os.environ.get("ANALYST_BASE_URL", "").strip().rstrip("/")
+MODEL = os.environ.get("ANALYST_MODEL", "").strip() or ("deepseek-v4.1-flash:free" if BASE_URL else "claude-opus-5-5")
 
 SYSTEM = """Eres el analista de datos de AgroCraft, una granja inteligente en Santander (Colombia) cuyo
 gemelo digital corre en un mundo de Minecraft. Recibes estadísticas reales de una ventana de tiempo,
@@ -110,10 +115,41 @@ def stats_markdown(data: dict) -> str:
     return "\n".join(lines)
 
 
+async def analyze_openai_compatible(prompt: str) -> tuple:
+    """Proveedor con API compatible con OpenAI (Chat Completions)."""
+    key = os.environ.get("ANALYST_API_KEY", "").strip()
+    if not key:
+        return "_Análisis con IA no configurado: falta ANALYST_API_KEY en platform/.env._", None
+    body = {"model": MODEL, "max_tokens": 4000, "temperature": 0.3,
+            "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}]}
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=300)) as http:
+            async with http.post(f"{BASE_URL}/chat/completions", json=body,
+                                 headers={"Authorization": f"Bearer {key}"}) as response:
+                text = await response.text()
+                if response.status >= 300:
+                    return f"_Análisis no disponible: el proveedor respondió HTTP {response.status}: {text[:200]}_", None
+                reply = json.loads(text)
+    except (aiohttp.ClientError, TimeoutError, ValueError) as error:
+        return f"_Análisis no disponible: {error!r}_", None
+    choice = (reply.get("choices") or [{}])[0]
+    content = (choice.get("message") or {}).get("content") or ""
+    usage = reply.get("usage", {})
+    log.info("análisis generado con %s (%s tokens de entrada, %s de salida)", reply.get("model", MODEL),
+             usage.get("prompt_tokens"), usage.get("completion_tokens"))
+    if not content.strip():
+        return "_El modelo no devolvió texto._", reply.get("model", MODEL)
+    return content.strip(), reply.get("model", MODEL)
+
+
 async def analyze(data: dict) -> tuple:
     """Devuelve (texto del análisis, modelo usado). Sin clave de API devuelve un aviso."""
+    prompt = "Datos de la ventana (JSON):\n\n" + json.dumps(data, ensure_ascii=False)
+    if BASE_URL:
+        return await analyze_openai_compatible(prompt)
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        return ("_Análisis con IA no configurado: falta ANTHROPIC_API_KEY en platform/.env. "
+        return ("_Análisis con IA no configurado: falta ANALYST_BASE_URL/ANALYST_API_KEY "
+                "(o ANTHROPIC_API_KEY) en platform/.env. "
                 "Se incluyen solo las estadísticas._"), None
     client = anthropic.AsyncAnthropic()
     try:
