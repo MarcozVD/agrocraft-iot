@@ -4,6 +4,7 @@
   GET  /iot/api/devices            estado, configuración y última telemetría de cada dispositivo
   POST /iot/api/cmd                envía un comando y espera el ack         (requiere usuario operador)
   GET  /iot/api/rules              reglas en la nube y su estado
+  GET  /iot/api/anomalies          anomalías abiertas y última revisión por variable
   POST /iot/api/rules/<id>         activa o desactiva una regla             (requiere usuario operador)
   POST /iot/api/ingest/<device>    ingesta HTTPS de dispositivos sin MQTT   (token del dispositivo)
   POST /iot/api/alert              webhook de Grafana Alerting              (token de alertas)
@@ -35,6 +36,8 @@ from aiohttp import web
 
 from base import MQTT_HOST, MQTT_PORT, now_ms
 from http_devices import PhoneProxy
+from amqp_live import AmqpLive
+from anomaly import Anomalies
 from notifier import Notifier, format_alert
 import report
 import report_page
@@ -87,6 +90,10 @@ class Hub:
             data = json.loads(text) if channel != "status" else text
         except ValueError:
             return
+        self.feed(cls, device, channel, data)
+
+    def feed(self, cls: str, device: str, channel: str, data) -> None:
+        """Registra un mensaje venga de MQTT o de AMQP (puede llamarse desde cualquier hilo)."""
         with self.lock:
             entry = self.devices.setdefault(device, {"device": device, "class": cls, "status": "desconocido",
                                                      "state": {}, "telemetry": {}, "telemetry_ts": None,
@@ -201,6 +208,10 @@ async def command(request):
 
 async def list_rules(request):
     return web.json_response(request.app["rules"].describe())
+
+
+async def list_anomalies(request):
+    return web.json_response(request.app["anomalies"].describe())
 
 
 @require_operator
@@ -383,11 +394,16 @@ async def on_startup(app):
     rules = Rules(hub)
     hub.listeners.append(rules.on_message)
     hub.start()
+    if os.environ.get("AMQP_PASS"):
+        app["amqp"] = AmqpLive(hub)
+        app["amqp"].start()
     for proxy in proxies.values():
         proxy.start()
     app["hub"], app["proxies"], app["rules"] = hub, proxies, rules
     app["notifier"] = Notifier()
     app["daily"] = asyncio.ensure_future(daily_reports(app))
+    app["anomalies"] = Anomalies(hub, app["notifier"])
+    app["anomaly_task"] = asyncio.ensure_future(app["anomalies"].run())
 
 
 async def on_cleanup(app):
@@ -395,12 +411,14 @@ async def on_cleanup(app):
         proxy.shutdown()
     app["hub"].client.loop_stop()
     app["daily"].cancel()
+    app["anomaly_task"].cancel()
     if app["notifier"].session is not None:
         await app["notifier"].session.close()
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)-10s %(levelname)s %(message)s")
+    logging.getLogger("pika").setLevel(logging.WARNING)
     app = web.Application(client_max_size=4 * 1024 * 1024)
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)
@@ -411,6 +429,7 @@ def main() -> None:
         web.post("/iot/api/cmd", command),
         web.get("/iot/api/rules", list_rules),
         web.post("/iot/api/rules/{rule}", toggle_rule),
+        web.get("/iot/api/anomalies", list_anomalies),
         web.post("/iot/api/ingest/{device}", ingest),
         web.post("/iot/api/alert", alert),
         web.get("/iot/api/health", health),

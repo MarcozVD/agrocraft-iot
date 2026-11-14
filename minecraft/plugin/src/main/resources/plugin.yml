@@ -1,8 +1,12 @@
 name: AgroCraft
-version: '0.6.1'
+version: '0.7.0'
 main: co.agrocraft.bridge.AgroCraftPlugin
 api-version: '1.21'
 description: Gemelo digital IoT. Publica los sensores del mundo por MQTT y recibe comandos de la plataforma.
 softdepend: [squaremap]
+commands:
+  agro:
+    description: Visita guiada (/agro tour) y arquitectura de la granja (/agro decor, operadores).
+    usage: /agro <tour [stop]|decor>
 libraries:
   - org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5

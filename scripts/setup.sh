@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../platform"
 
-SECRETS="INFLUX_ADMIN_PASS INFLUX_TOKEN GRAFANA_ADMIN_PASS RCON_PASSWORD CONTROL_PASS ALERT_TOKEN"
+SECRETS="INFLUX_ADMIN_PASS INFLUX_TOKEN GRAFANA_ADMIN_PASS RCON_PASSWORD CONTROL_PASS ALERT_TOKEN AMQP_PASS"
 MQTT_USERS="telegraf operator mc-bridge api-clima api-aire api-suelo api-pronostico ds-invernadero ds-energia gw-pc-01 phone-01 esp32-01"
 
 var_of() { echo "MQTT_PASS_$(echo "$1" | tr 'a-z-' 'A-Z_')"; }

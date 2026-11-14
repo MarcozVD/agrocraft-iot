@@ -9,6 +9,7 @@ from dataset_devices import DsEnergia, DsInvernadero
 from forecast_device import ApiPronostico
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)-15s %(levelname)s %(message)s")
+logging.getLogger("pika").setLevel(logging.WARNING)   # una conexión AMQP por lectura: sin ruido
 
 
 def main() -> None:

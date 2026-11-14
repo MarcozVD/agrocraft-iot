@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -18,6 +20,8 @@ import org.bukkit.block.data.FaceAttachable;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.block.data.type.Switch;
 import org.bukkit.block.sign.Side;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -71,6 +75,21 @@ final class Displays implements Listener {
         }
     }
 
+    /** Hologramas: posición (relativa al origen, y sobre el suelo) encima de cada dispositivo. */
+    private static final Map<String, double[]> HOLOGRAMS = new LinkedHashMap<>();
+    static final String HOLO_TAG = "agrocraft-holo";
+
+    static {
+        HOLOGRAMS.put("parcela-a", new double[] {8.5, 3.2, 10.5});
+        HOLOGRAMS.put("parcela-b", new double[] {20.5, 3.2, 10.5});
+        HOLOGRAMS.put("tanque", new double[] {6.5, 11.0, -7.5});
+        HOLOGRAMS.put("invernadero", new double[] {20.5, 7.4, -10.0});
+        HOLOGRAMS.put("silo", new double[] {14.5, 12.6, 8.5});
+        HOLOGRAMS.put("estacion", new double[] {0.5, 6.6, 0.5});
+        HOLOGRAMS.put("seguridad", new double[] {2.5, 4.8, 2.5});
+        HOLOGRAMS.put("corral", new double[] {-0.5, 8.6, -13.5});
+    }
+
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
 
     private static final Spot SIM_SIGN = new Spot(14, 15);
@@ -81,6 +100,8 @@ final class Displays implements Listener {
     private final Layout layout;
     private final ZoneId zone;
     private final Map<Spot, String> shown = new HashMap<>();
+    private final Map<String, TextDisplay> holograms = new HashMap<>();
+    private final Map<String, String> holoShown = new HashMap<>();
 
     Displays(AgroCraftPlugin plugin, Farm farm, ZoneId zone, boolean main) {
         this.plugin = plugin;
@@ -95,9 +116,26 @@ final class Displays implements Listener {
         for (Map.Entry<String, Spot> entry : DEVICE_SIGNS.entrySet()) {
             Twin twin = farm.twin(entry.getKey());
             if (twin != null) {
-                sign(entry.getValue(), deviceLines(entry.getKey(), twin));
+                String[] lines = deviceLines(entry.getKey(), twin);
+                sign(entry.getValue(), lines);
+                double[] at = HOLOGRAMS.get(entry.getKey());
+                if (at != null) {
+                    hologram(entry.getKey(), at, twin, lines);
+                }
             }
         }
+        if (main) {
+            label("entrada", new double[] {Layout.GATE_X + 0.5, 6.4, Layout.FARM.z2() + 0.5},
+                    Component.text("AgroCraft", NamedTextColor.GOLD).append(Component.newline())
+                            .append(Component.text("granja IoT · gemelo digital", NamedTextColor.WHITE)));
+        } else {
+            label("entrada", new double[] {Layout.GATE_X + 0.5, 6.4, Layout.FARM.z2() + 0.5},
+                    Component.text("Granja de simulación", NamedTextColor.AQUA).append(Component.newline())
+                            .append(Component.text("escenarios a reloj acelerado", NamedTextColor.WHITE)));
+        }
+        label("caseta", new double[] {27.5, 5.3, 11.0},
+                Component.text("Centro de control", NamedTextColor.YELLOW).append(Component.newline())
+                        .append(Component.text("MQTT · Grafana · Azure", NamedTextColor.GRAY)));
         if (main) {
             List<String[]> board = boardLines();
             for (int i = 0; i < BOARD.size() && i < board.size(); i++) {
@@ -208,6 +246,63 @@ final class Displays implements Listener {
             return "--";
         }
         return String.format(Locale.ROOT, "%." + decimals + "f", value);
+    }
+
+    // ------------------------------------------------------------------------ hologramas
+    /** Quita hologramas que hayan quedado de una carga anterior del plugin. */
+    static void clearHolograms(org.bukkit.World world) {
+        for (TextDisplay display : world.getEntitiesByClass(TextDisplay.class)) {
+            if (display.getScoreboardTags().contains(HOLO_TAG)) {
+                display.remove();
+            }
+        }
+    }
+
+    private TextDisplay display(String key, double[] at) {
+        TextDisplay display = holograms.get(key);
+        if (display != null && display.isValid()) {
+            return display;
+        }
+        Location where = new Location(layout.world, layout.ox + at[0], layout.y0 + at[1], layout.oz + at[2]);
+        display = layout.world.spawn(where, TextDisplay.class, d -> {
+            d.setPersistent(false);
+            d.addScoreboardTag(HOLO_TAG);
+            d.setBillboard(Display.Billboard.CENTER);
+            d.setBackgroundColor(Color.fromARGB(150, 10, 20, 30));
+            d.setShadowed(true);
+            d.setLineWidth(220);
+            d.setAlignment(TextDisplay.TextAlignment.CENTER);
+        });
+        holograms.put(key, display);
+        holoShown.remove(key);
+        return display;
+    }
+
+    private void label(String key, double[] at, Component text) {
+        TextDisplay display = display(key, at);
+        if (!"static".equals(holoShown.get(key))) {
+            display.text(text);
+            holoShown.put(key, "static");
+        }
+    }
+
+    private void hologram(String suffix, double[] at, Twin twin, String[] lines) {
+        boolean enabled = twin.enabled;
+        String key = String.join("|", lines) + enabled;
+        TextDisplay display = display(suffix, at);
+        if (key.equals(holoShown.get(suffix))) {
+            return;
+        }
+        Component text = Component.text(lines[0], enabled ? NamedTextColor.GREEN : NamedTextColor.RED)
+                .append(Component.text("  " + twin.id, NamedTextColor.GRAY));
+        for (int i = 1; i < lines.length; i++) {
+            text = text.append(Component.newline()).append(Component.text(lines[i], NamedTextColor.WHITE));
+        }
+        if (!enabled) {
+            text = text.append(Component.newline()).append(Component.text("envío apagado", NamedTextColor.RED));
+        }
+        display.text(text);
+        holoShown.put(suffix, key);
     }
 
     // --------------------------------------------------------------------------- bloques

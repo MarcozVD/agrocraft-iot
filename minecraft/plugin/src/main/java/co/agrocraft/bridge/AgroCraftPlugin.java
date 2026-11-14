@@ -33,7 +33,7 @@ import com.google.gson.JsonParser;
  * dispositivos de API. El plugin lleva el modelo, así que el mundo evoluciona sin jugadores.
  */
 public final class AgroCraftPlugin extends JavaPlugin implements Listener {
-    static final String FW = "agrocraft-bridge-0.6.1";
+    static final String FW = "agrocraft-bridge-0.7.0";
 
     Layout layout;
     Mqtt mqtt;
@@ -46,6 +46,8 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
     private File stateFile;
     private long lastStep;
     private int secondsToSave = 60;
+    private int decorVersion;
+    private Tour tour;
 
     @Override
     public void onEnable() {
@@ -92,6 +94,13 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         buildFarm(simFarm);
         register(simFarm, new SimControl(this, simFarm, realFarm, zone));
 
+        decorVersion = saved.has("decor_v") ? saved.get("decor_v").getAsInt() : 0;
+        if (decorVersion < Decor.VERSION) {
+            int blocks = rebuildDecor();
+            getLogger().info("Arquitectura v" + Decor.VERSION + " construida en las dos granjas: " + blocks + " bloques");
+        }
+        Displays.clearHolograms(world);
+
         JsonObject savedTwins = saved.has("twins") ? saved.getAsJsonObject("twins") : new JsonObject();
         for (Twin twin : twins.values()) {
             if (savedTwins.has(twin.id)) {
@@ -114,6 +123,11 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         }
 
         Bukkit.getPluginManager().registerEvents(this, this);
+        tour = new Tour(this);
+        Bukkit.getPluginManager().registerEvents(tour, this);
+        if (getCommand("agro") != null) {
+            getCommand("agro").setExecutor(tour);
+        }
         for (Farm farm : farms) {
             Displays displays = new Displays(this, farm, zone, farm == realFarm);
             Bukkit.getPluginManager().registerEvents(displays, this);
@@ -129,6 +143,12 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (tour != null) {
+            tour.shutdown();
+        }
+        for (Farm farm : farms) {
+            Displays.clearHolograms(farm.layout.world);
+        }
         if (layout != null && !twins.isEmpty()) {
             saveState();
         }
@@ -139,6 +159,19 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
 
     Twin twin(String id) {
         return twins.get(id);
+    }
+
+    /** Levanta la arquitectura en las dos granjas sin tocar los bloques de los gemelos (ver Decor). */
+    int rebuildDecor() {
+        int blocks = 0;
+        for (Farm farm : farms) {
+            blocks += new Decor(farm.layout).build();
+        }
+        decorVersion = Decor.VERSION;
+        if (simFarm != null) {
+            saveState();
+        }
+        return blocks;
     }
 
     private void register(Farm farm, Twin twin) {
@@ -273,6 +306,7 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         root.addProperty("sim_y0", simFarm.layout.y0);
         root.addProperty("corral", true);
         root.addProperty("sim_corral", true);
+        root.addProperty("decor_v", decorVersion);
         JsonObject all = new JsonObject();
         for (Twin twin : twins.values()) {
             all.add(twin.id, twin.save());

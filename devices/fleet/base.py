@@ -47,6 +47,7 @@ class Device(threading.Thread):
     cls = "api"                 # clase del dispositivo dentro del tema
     default_interval = 300      # segundos entre muestras
     variables: tuple = ()       # variables que publica (las que admite `calibrate`)
+    telemetry_amqp = False      # True: la telemetría sale por AMQP (RabbitMQ); comandos y estado por MQTT
 
     def __init__(self, device_id: str):
         super().__init__(name=device_id, daemon=True)
@@ -180,6 +181,13 @@ class Device(threading.Thread):
             self.state["seq"] += 1
             payload = {"ts": now_ms(), "seq": self.state["seq"], **payload}
             self._save_state()
+        if self.telemetry_amqp:
+            try:
+                import amqp_link                # solo lo necesitan los dispositivos AMQP
+                amqp_link.publish(self.cls, self.id, payload)
+                return
+            except Exception as error:          # sin RabbitMQ la lectura no se pierde: va por MQTT
+                self.log.warning("AMQP no disponible (%r); la lectura sale por MQTT", error)
         self.client.publish(f"{self.base}/telemetry", json.dumps(payload), qos=1)
 
     def _sample_and_publish(self) -> None:

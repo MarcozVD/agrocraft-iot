@@ -28,3 +28,5 @@ hora;id;fase;clase;dispositivo;accion;params;ok;detalle;motivo
 2026-11-11 20:37:54;E5;reversion;twin;mc-parcela-a;set_config;{"auto":1};ok;configuración actualizada;Reversión automática de E5 tras 360 min
 2026-11-11 21:03:17;P5;mantenimiento;sim;sim-control;set_enabled;{"enabled":0};ok;;Pausa del desarrollo: el controlador de simulación deja de publicar; la captura real sigue
 2026-11-14 10:32:44;P6;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.6.1;ok;;Corrección: el comedero publicaba un evento por segundo con el silo sin trigo; ahora usa zanahoria como forraje y avisa una vez
+2026-11-14 18:35:14;P7;mantenimiento;dataset;ds-energia;cambio de protocolo;telemetría por AMQP 0-9-1 (RabbitMQ);ok;se perdió seq 5388 (cola de Telegraf aún no declarada);ds-energia publica su telemetría por AMQP, comandos y estado siguen por MQTT. Nuevos: detección de anomalías y regla riego-pronostico
+2026-11-14 18:37:11;P8;mantenimiento;twin;mc-*;reinicio servidor;plugin 0.7.0;ok;1768 bloques de arquitectura;Arquitectura de la granja, hologramas en vivo y visita guiada /agro tour, ~45 s sin datos de los gemelos

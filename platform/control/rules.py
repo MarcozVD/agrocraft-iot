@@ -7,6 +7,10 @@ de dispositivos distintos, algo que ningún dispositivo puede decidir solo:
                       las parcelas; con sol o de noche las apaga. Histéresis 150/250 W/m².
   aire-ventilas       Aire exterior malo (US AQI > 100) -> cierra las ventilas del invernadero y
                       lo saca de automático; cuando mejora (< 80) lo devuelve a automático.
+  riego-pronostico    El pronóstico (api-pronostico) anuncia lluvia >= 5 mm con probabilidad >= 70 %
+                      en 24 h -> baja el umbral de riego de las parcelas de 35 % a 25 %: se deja que
+                      llueva y se ahorra agua del tanque, sin dejar secar el cultivo. Con < 2 mm
+                      previstos vuelve a 35 %.
 
 Cada decisión queda como evento en agro/platform/reglas/event y el comando en el canal cmd.
 """
@@ -24,7 +28,7 @@ STATE_FILE = Path(os.environ.get("STATE_DIR", "/state")) / "rules.json"
 class Rules:
     def __init__(self, hub):
         self.hub = hub
-        self.enabled = {"lamparas-radiacion": True, "aire-ventilas": True}
+        self.enabled = {"lamparas-radiacion": True, "aire-ventilas": True, "riego-pronostico": True}
         self.last = {}          # regla -> última decisión ("on"/"off")
         try:
             saved = json.loads(STATE_FILE.read_text())
@@ -46,6 +50,10 @@ class Rules:
              "last": self.last.get("aire-ventilas"),
              "description": "Con US AQI exterior > 100 cierra las ventilas del invernadero; "
                             "< 80 lo devuelve a control automático."},
+            {"id": "riego-pronostico", "enabled": self.enabled["riego-pronostico"],
+             "last": self.last.get("riego-pronostico"),
+             "description": "Si se pronostican >= 5 mm de lluvia (prob. >= 70 %) en 24 h baja el umbral de riego "
+                            "de las parcelas a 25 %; con < 2 mm lo devuelve a 35 %."},
         ]}
 
     def set_enabled(self, rule: str, enabled: bool) -> bool:
@@ -64,6 +72,8 @@ class Rules:
             self._lamps(data)
         elif device == "api-aire" and self.enabled["aire-ventilas"]:
             self._air(data)
+        elif device == "api-pronostico" and self.enabled["riego-pronostico"]:
+            self._forecast(data)
 
     def _decide(self, rule: str, decision: str, reason: str, commands: list) -> None:
         if self.last.get(rule) == decision:
@@ -101,3 +111,18 @@ class Rules:
         elif aqi < 80:
             self._decide("aire-ventilas", "off", f"US AQI {aqi:.0f}",
                          [("twin", "mc-invernadero", "set_config", {"auto": 1})])
+
+    def _forecast(self, data: dict) -> None:
+        rain, prob = data.get("rain_next24_mm"), data.get("rain_prob_max_pct")
+        if rain is None or prob is None:
+            return
+        if rain >= 5 and prob >= 70:
+            decision, soil_min = "on", 25
+        elif rain < 2:
+            decision, soil_min = "off", 35
+        else:
+            return                                   # zona de histéresis
+        self._decide("riego-pronostico", decision,
+                     f"lluvia prevista {rain:.1f} mm en 24 h (prob. máx. {prob:.0f} %)",
+                     [("twin", plot, "set_config", {"soil_min": soil_min})
+                      for plot in ("mc-parcela-a", "mc-parcela-b")])

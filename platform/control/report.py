@@ -53,7 +53,8 @@ Escribe un informe en español, en Markdown, para el operador de la granja y par
    (rango, tendencia, ciclos día/noche), citando cifras de las estadísticas.
 3. **Relaciones**: cómo el clima real explica el comportamiento de los gemelos (secado del suelo por
    ET0, temperatura del invernadero frente a la exterior, estrés térmico del rebaño por THI, lluvia y tanque).
-4. **Anomalías y eventos**: huecos de datos, descalibraciones, alertas, comandos de retroceso y su efecto.
+4. **Anomalías y eventos**: anomalías detectadas por patrón diario (campo `anomalias`), huecos de datos,
+   descalibraciones, alertas, comandos de retroceso y su efecto.
 5. **Recomendaciones** operativas concretas para las próximas 24 h, apoyadas en el pronóstico.
 
 Reglas: usa solo las cifras recibidas; si algo no se puede afirmar con los datos, dilo. No inventes
@@ -88,7 +89,7 @@ async def gather(hours: int) -> dict:
   |> range(start: {window})
   |> filter(fn: (r) => r._measurement == "events" and (r.channel == "event" or r.channel == "cmd") and r.class != "sim")''')
     by_type = Counter()
-    alerts, commands = [], []
+    alerts, commands, anomalies = [], [], []
     for row in events:
         try:
             data = json.loads(row["_value"])
@@ -102,6 +103,10 @@ async def gather(hours: int) -> dict:
                            "device": data.get("device"), "resumen": data.get("summary")})
         else:
             by_type[f'{row["device"]}:{data.get("type")}'] += 1
+            if row["device"] == "anomalias":
+                anomalies.append({"hora": row["_time"][:16], "tipo": data.get("type"), "device": data.get("device"),
+                                  "variable": data.get("variable"), "valor": data.get("valor"),
+                                  "esperado": data.get("esperado"), "z": data.get("z")})
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=120)) as http:
         series_rows = await _flux(http, f'''from(bucket: "telemetry")
   |> range(start: {window})
@@ -117,7 +122,7 @@ async def gather(hours: int) -> dict:
     forecast = stats.get("api/api-pronostico", {})
     return {"ventana_horas": hours, "generado": datetime.now(TZ).isoformat(timespec="minutes"),
             "estadisticas": dict(stats), "eventos_por_tipo": dict(by_type), "alertas": alerts[-40:],
-            "comandos": commands[-40:], "pronostico": {k: v.get("last") for k, v in forecast.items()},
+            "comandos": commands[-40:], "anomalias": anomalies[-40:], "pronostico": {k: v.get("last") for k, v in forecast.items()},
             "series": dict(series)}
 
 

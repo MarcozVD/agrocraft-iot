@@ -83,21 +83,27 @@ def _events(data):
         f"<li><b>{html.escape(str(c.get('hora', ''))[11:16])}</b> <code>{html.escape(str(c.get('device')))}</code> "
         f"{html.escape(str(c.get('accion')))} <span class=muted>({html.escape(str(c.get('origen')))})</span></li>"
         for c in data.get("comandos", []))
-    return alerts or "<li>Sin alertas.</li>", commands or "<li>Sin comandos.</li>"
+    anomalies = "".join(
+        f"<li><b>{html.escape(str(a.get('hora', ''))[11:16])}</b> {'🔎' if a.get('tipo') == 'anomaly_open' else '✅'} "
+        f"<code>{html.escape(str(a.get('device')))}</code> {html.escape(str(a.get('variable')))}: "
+        f"{_num(a.get('valor'), 1)} (esperado {_num(a.get('esperado'), 1)}, z {_num(a.get('z'), 1)})</li>"
+        for a in data.get("anomalias", []))
+    return (alerts or "<li>Sin alertas.</li>", commands or "<li>Sin comandos.</li>",
+            anomalies or "<li>Sin anomalías respecto al patrón diario.</li>")
 
 
 def render(name: str, data: dict, analysis: str, model: str | None) -> str:
     charts = [{"title": t, "items": [{"key": k, "label": lab, "color": c, "axis": ax} for k, lab, c, ax in items],
                "y": y, "y1": y1} for t, items, y, y1 in CHARTS]
     payload = json.dumps({"series": data.get("series", {}), "charts": charts}).replace("</", "<\\/")
-    alerts, commands = _events(data)
+    alerts, commands, anomalies = _events(data)
     generated = html.escape(str(data.get("generado", ""))).replace("T", " ")
     model_note = (f"Análisis generado por <b>{html.escape(model)}</b>. Verificar cada afirmación contra las gráficas."
                   if model else "Análisis con IA no disponible para este informe.")
     has_series = bool(data.get("series"))
     return PAGE.format(
         name=html.escape(name), generated=generated, hours=int(data.get("ventana_horas", 24)), model_note=model_note,
-        kpis=_kpis(data), analysis=_analysis_html(analysis), tables=_tables(data), alerts=alerts, commands=commands,
+        kpis=_kpis(data), analysis=_analysis_html(analysis), tables=_tables(data), alerts=alerts, commands=commands, anomalies=anomalies,
         charts="" if has_series else '<p class="muted">Este informe es anterior a las gráficas: no guardó series de tiempo.</p>',
         payload=payload)
 
@@ -158,6 +164,7 @@ td {{ border-bottom:1px solid var(--line); padding:4px 6px; font-variant-numeric
     <div><h2 style="color:var(--accent);font-size:17px;margin-top:0">Alertas</h2><ul class="list">{alerts}</ul></div>
     <div><h2 style="color:var(--accent);font-size:17px;margin-top:0">Comandos de retroceso</h2><ul class="list">{commands}</ul></div>
   </section>
+  <section><h2>Anomalías (patrón diario)</h2><p class="muted" style="margin-top:0">Promedio de 30 min comparado con la misma hora de los días anteriores; se abre con |z| ≥ 3 y se cierra con |z| &lt; 2.</p><ul class="list">{anomalies}</ul></section>
   <section><h2>Estadísticas por dispositivo</h2><p class="muted" style="margin-top:0">Promedio, mínimo, máximo, último valor y número de muestras de la ventana.</p>{tables}</section>
 </main>
 <script type="application/json" id="data">{payload}</script>

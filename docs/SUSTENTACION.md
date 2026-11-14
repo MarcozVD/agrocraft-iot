@@ -24,7 +24,8 @@ de la demo: 8 minutos.
 | 4-5 | Calibrar `api-clima` temp_c offset +2 y luego borrar | Retroceso de calibración; se ve el escalón en la gráfica |
 | 5-6 | Experimento E5 en el informe (figura) | Ciclo cerrado sin personas: sensor → alerta → webhook → comando → riego |
 | 6-7 | Simulación: iniciar "ola de calor" a 360× desde el panel | Dashboard Simulación: invernadero > 38 °C, THI > 78, aspersores; datos en medición aparte |
-| 7-8 | Mapa web / mundo / informe con IA | Marcadores por estado; análisis diario con Claude |
+| 7-8 | En el juego: `/agro tour` (visita guiada de 11 paradas) | Hologramas con el valor en vivo sobre cada dispositivo = mismo número que en Grafana |
+| 8-9 | Informe con IA → sección "Anomalías" | Detección por patrón diario (z ≥ 3 frente a la misma hora de días anteriores) |
 
 ## Preguntas probables
 
@@ -40,6 +41,14 @@ de la demo: 8 minutos.
   temperatura, humedad de Open-Meteo); los sensores de referencia y sus rangos están en la tabla 3.1.
 - **¿Dónde está el procesamiento?** Flux en Grafana (agregación por ventana, prom/máx/mín), alertas,
   reglas en el servicio de control, modelo en el plugin, pronóstico en la flota.
+- **¿Solo MQTT?** No: `ds-energia` envía su telemetría por **AMQP 0-9-1** a RabbitMQ (exchange topic
+  `agro.telemetry`, cola durable de Telegraf y confirmación del bróker); sus comandos siguen por MQTT. El
+  celular usa HTTPS. Si RabbitMQ cae, la lectura sale por MQTT y no se pierde.
+- **¿Cómo detectan anomalías?** Cada 10 min se compara el promedio de 30 min de 14 variables con la
+  media y desviación de esa misma hora en los días anteriores; |z| ≥ 3 dos veces seguidas abre la
+  anomalía, |z| < 2 la cierra; también detecta sensores "pegados". Se publica como evento y llega al informe.
+- **¿Las reglas usan el pronóstico?** Sí: `riego-pronostico` baja el umbral de riego a 25 % si se
+  esperan ≥ 5 mm de lluvia con probabilidad ≥ 70 %, y lo devuelve a 35 % con < 2 mm.
 - **¿Qué hace la IA?** Analiza las estadísticas de 24 h y redacta el informe diario (DeepSeek vía TokenHarbor); el análisis del
   documento se redactó con IA y se verificó contra las gráficas.
 

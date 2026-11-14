@@ -91,6 +91,7 @@ class DsInvernadero(ReplayDevice):
 
 
 class DsEnergia(ReplayDevice):
+    telemetry_amqp = True             # demuestra un segundo protocolo de mensajería: AMQP 0-9-1
     """Medidor eléctrico (UCI Individual Household Electric Power Consumption), cada minuto.
 
     2009-11-11 y 2026-11-11 son miércoles: la reproducción conserva el día de la semana.

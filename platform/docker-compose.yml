@@ -76,6 +76,26 @@ services:
     mem_limit: 768m
     logging: *logging
 
+  # --- Bróker AMQP 0-9-1: telemetría de ds-energia (solo red interna) -----------------------------
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    restart: unless-stopped
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: agro
+      RABBITMQ_DEFAULT_PASS: ${AMQP_PASS}
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-agrocraft.conf:ro
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    mem_limit: 256m
+    logging: *logging
+
   # --- Ingesta: suscriptor MQTT que escribe en InfluxDB ----------------------------------------------
   telegraf:
     image: telegraf:1.35
@@ -83,9 +103,11 @@ services:
     depends_on:
       mosquitto: { condition: service_healthy }
       influxdb: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
     environment:
       MQTT_PASS_TELEGRAF: ${MQTT_PASS_TELEGRAF}
       INFLUX_TOKEN: ${INFLUX_TOKEN}
+      AMQP_PASS: ${AMQP_PASS}
     volumes:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     mem_limit: 192m
@@ -198,6 +220,7 @@ services:
     logging: *logging
 
 volumes:
+  rabbitmq-data:
   caddy-config:
   mosquitto-data:
   influxdb-data:
