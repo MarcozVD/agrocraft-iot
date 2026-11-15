@@ -33,7 +33,7 @@ import com.google.gson.JsonParser;
  * dispositivos de API. El plugin lleva el modelo, así que el mundo evoluciona sin jugadores.
  */
 public final class AgroCraftPlugin extends JavaPlugin implements Listener {
-    static final String FW = "agrocraft-bridge-0.8.0";
+    static final String FW = "agrocraft-bridge-0.8.1";
 
     Layout layout;
     Mqtt mqtt;
@@ -146,6 +146,15 @@ public final class AgroCraftPlugin extends JavaPlugin implements Listener {
         }
         lastStep = System.nanoTime();
         Bukkit.getScheduler().runTaskTimer(this, this::tick, 40L, 20L);
+        // La granja simulada solo avanza mientras corre un escenario: se dibuja una vez al arrancar para
+        // que en pausa muestre su estado (cultivos, agua del tanque, vacas) en vez de quedar vacía.
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            for (Twin twin : simFarm.twins.values()) {
+                if (!(twin instanceof SimControl)) {
+                    runTwin(twin, 0.001, false);
+                }
+            }
+        }, 80L);
         saveState();
     }
 

@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "co.agrocraft"
-version = "0.8.0"
+version = "0.8.1"
 
 java {
     toolchain {
