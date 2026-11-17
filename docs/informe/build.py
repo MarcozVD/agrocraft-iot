@@ -409,14 +409,11 @@ def main():
     for part in sorted((HERE / "secciones").glob("*.md")):
         body += render(part.read_text(encoding="utf-8"), figures) + "\n"
     template = (HERE / "plantilla.html").read_text(encoding="utf-8")
-    cover = json.loads((HERE / "portada.json").read_text(encoding="utf-8")) if (HERE / "portada.json").exists() else {}
     months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
               "noviembre", "diciembre"]
     today = datetime.now()
     out = (template.replace("{{contenido}}", body)
-           .replace("{{fecha}}", f"{today.day} de {months[today.month - 1]} de {today.year}")
-           .replace("{{integrantes}}", html.escape(cover.get("integrantes", "[por completar]")))
-           .replace("{{docente}}", html.escape(cover.get("docente", "[por completar]"))))
+           .replace("{{fecha}}", f"{today.day} de {months[today.month - 1]} de {today.year}"))
     (HERE / "informe.html").write_text(out, encoding="utf-8", newline="\n")
     print(f"informe.html: {len(figures)} figuras, ventana {T0} – {T1}")
 

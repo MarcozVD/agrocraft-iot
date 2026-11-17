@@ -17,7 +17,7 @@ Versión 4 · actualizado miércoles 2026-11-11, 09:00 (hora Colombia)
 | sáb 14 | Revisión de la captura (3,5 días sin caídas), arreglo del comedero (0.6.1), entorno del agente del PC rehecho en Python 3.13 | Hecho |
 | sáb 14 | Generador del informe (`docs/informe/generar.sh`) y primer borrador del PDF (35 páginas) | Hecho |
 | sáb 14 | Guía de sustentación (`docs/SUSTENTACION.md`) | Hecho |
-| — | Portada: integrantes y docente en `docs/informe/portada.json` | Falta el dato |
+| — | Portada sin nombres de estudiantes ni docente (decisión del equipo) | Hecho |
 | — | Tokens de Telegram/Discord y clave de Claude (opcional) en `platform/.env` de la VM | Falta el dato |
 | mar 17 (después de 01:05) | Cerrar ventana de 6 días: `bash docs/informe/generar.sh 2026-11-17T06:05:00Z`, revisar cifras del análisis | Pendiente |
 | mié 18 | Repositorio público, revisión final del PDF, ensayo de la demo | Pendiente |
