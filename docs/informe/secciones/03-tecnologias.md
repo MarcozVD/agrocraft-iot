@@ -45,6 +45,12 @@ puede publicar en sus propios temas y leer sus propios comandos.
 con token), comandos (`POST /iot/api/cmd`, espera el `ack` hasta 10 s), webhook de alertas de Grafana.
 **HTTPS GET** hacia Open-Meteo para los dispositivos de API.
 
+**Sobre la API de Azure Maps Weather sugerida en el enunciado.** Se probó el 16 de noviembre con la
+clave entregada y con las de la colección de Postman del curso: la primera respondió `401 AccountLocked`
+(la cuenta asociada está deshabilitada) y las otras `401 InvalidKey`. Por eso los dispositivos de API usan
+Open-Meteo, que ofrece las mismas variables (condiciones actuales, calidad del aire y pronóstico horario)
+sin clave y con las mismas coordenadas de Bucaramanga.
+
 **Ejemplo real de un ciclo de retroceso** (tomado de la captura):
 
 ```
