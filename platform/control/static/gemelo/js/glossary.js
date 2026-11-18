@@ -126,3 +126,24 @@ export const GLOSSARY = [
   ["API", "Servicio web al que se le piden datos (aquí, el clima real de Open-Meteo)."],
   ["DataSet", "Datos reales grabados de otro lugar que se reproducen como si llegaran ahora."],
 ];
+
+// Umbrales con nombre para las gráficas del detalle: [valor, qué pasa]. Por dispositivo cuando cambia.
+export function thresholds(device, key) {
+  const base = device.startsWith("sim-") ? "mc-" + device.slice(4) : device;
+  if (key === "soil_pct") return [[35, "riego se abre"], [65, "riego se cierra"]];
+  if (key === "level_pct") return [[25, "bomba se enciende"], [90, "bomba se apaga"]];
+  if (key === "temp_c" && base === "mc-invernadero") return [[28, "ventilas se abren"], [16, "calefacción"]];
+  if (key === "thi" || key === "thi_max_next24") return [[72, "estrés leve"], [78, "estrés"]];
+  if (key === "tps") return [[15, "lento"]];
+  if (key === "us_aqi") return [[100, "ventilas se cierran"]];
+  if (key === "pm2_5") return [[15, "límite OMS"]];
+  if (key === "radiation_wm2") return [[150, "lámparas si es de día"]];
+  if (key === "rain_next24_mm") return [[5, "riego reducido"]];
+  if (key === "cpu_pct" || key === "ram_pct") return [[90, "saturado"]];
+  if (key === "feed_pct" || key === "water_pct") return [[30, "bajo"]];
+  if (key === "welfare_pct") return [[50, "malo"]];
+  return [];
+}
+
+export const PERCENT_FIELDS = new Set(["soil_pct", "growth_pct", "level_pct", "hum_pct", "plant_health_pct", "fill_pct",
+  "feed_pct", "water_pct", "welfare_pct", "cpu_pct", "ram_pct", "disk_pct", "battery_pct", "cloud_pct", "vent_pct", "rain_prob_max_pct"]);

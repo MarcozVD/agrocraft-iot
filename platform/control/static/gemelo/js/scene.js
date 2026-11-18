@@ -225,8 +225,15 @@ export class Stage {
         this.controls.target.lerpVectors(fromT, target, ease(t));
         this.persp.position.lerpVectors(fromP, toP, ease(t));
       });
-    } else {
-      this.flyTo(target.x, 0, target.z, 60);
+    } else {                                                  // toda la granja a la vista
+      const fromT = this.controls.target.clone(), fromZoom = this.ortho.zoom, toZoom = this.mode === "2d" ? 1.05 : 1;
+      this.animate(900, (t) => {
+        const k = ease(t);
+        this.controls.target.lerpVectors(fromT, target, k);
+        this.ortho.position.copy(this.controls.target).add(this.orthoOffset());
+        this.ortho.zoom = lerp(fromZoom, toZoom, k);
+        this.ortho.updateProjectionMatrix();
+      });
     }
   }
 

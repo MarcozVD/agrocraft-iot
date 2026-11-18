@@ -92,7 +92,7 @@ def _events(data):
             anomalies or "<li>Sin anomalías respecto al patrón diario.</li>")
 
 
-def render(name: str, data: dict, analysis: str, model: str | None) -> str:
+def render(name: str, data: dict, analysis: str, model: str | None, embed: bool = False) -> str:
     charts = [{"title": t, "items": [{"key": k, "label": lab, "color": c, "axis": ax} for k, lab, c, ax in items],
                "y": y, "y1": y1} for t, items, y, y1 in CHARTS]
     payload = json.dumps({"series": data.get("series", {}), "charts": charts}).replace("</", "<\\/")
@@ -102,7 +102,7 @@ def render(name: str, data: dict, analysis: str, model: str | None) -> str:
                   if model else "Análisis con IA no disponible para este informe.")
     has_series = bool(data.get("series"))
     return PAGE.format(
-        name=html.escape(name), generated=generated, hours=int(data.get("ventana_horas", 24)), model_note=model_note,
+        name=html.escape(name), generated=generated, embed="embed" if embed else "", hours=int(data.get("ventana_horas", 24)), model_note=model_note,
         kpis=_kpis(data), analysis=_analysis_html(analysis), tables=_tables(data), alerts=alerts, commands=commands, anomalies=anomalies,
         charts="" if has_series else '<p class="muted">Este informe es anterior a las gráficas: no guardó series de tiempo.</p>',
         payload=payload)
@@ -111,16 +111,21 @@ def render(name: str, data: dict, analysis: str, model: str | None) -> str:
 PAGE = """<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Informe AgroCraft {name}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;600&display=swap">
 <style>
-:root {{ --bg:#f5f7fb; --card:#fff; --ink:#1d2433; --muted:#5b6475; --line:#e3e7ef; --accent:#2f6db3; --soft:#eef3fa; }}
-@media (prefers-color-scheme: dark) {{ :root {{ --bg:#0f1115; --card:#181b22; --ink:#dbe0e8; --muted:#8a93a3; --line:#2a2f3a; --accent:#6ea2e6; --soft:#1f2530; }} }}
+:root {{ --bg:#0b130f; --card:rgba(255,255,255,.04); --ink:#e9efe6; --muted:#9fb3a5; --line:rgba(255,255,255,.09);
+         --accent:#7bc86c; --soft:rgba(255,255,255,.06); --wheat:#e8a33d; color-scheme:dark; }}
 * {{ box-sizing:border-box; }}
-body {{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 "Segoe UI",Roboto,system-ui,sans-serif; }}
-header {{ background:linear-gradient(120deg,#244f86,#2f6db3 60%,#3a9a4a); color:#fff; padding:28px 20px 34px; }}
+body {{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif; }}
+body.embed {{ background:transparent; }}
+h1, h2, h3 {{ font-family:"Space Grotesk",Inter,system-ui,sans-serif; }}
+header {{ background:radial-gradient(circle at 20% 0%,#1f3a2a,#0d1712 70%); color:var(--ink); padding:26px 20px 34px; border-bottom:1px solid var(--line); }}
+body.embed header {{ background:none; border:0; padding:18px 20px 30px; }}
+body.embed header nav {{ display:none; }}
 header .wrap, main {{ max-width:1100px; margin:0 auto; }}
-header a {{ color:#d9e7ff; text-decoration:none; font-size:13px; }}
+header a {{ color:var(--accent); text-decoration:none; font-size:13px; }}
 header h1 {{ margin:8px 0 4px; font-size:28px; }}
-header p {{ margin:0; opacity:.9; }}
+header p {{ margin:0; color:var(--muted); }}
 main {{ padding:0 16px 60px; }}
 .kpis {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:-22px; }}
 .kpi {{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; box-shadow:0 2px 8px #0000000d; }}
@@ -150,9 +155,9 @@ td {{ border-bottom:1px solid var(--line); padding:4px 6px; font-variant-numeric
 @media (max-width:640px) {{ .grid, .cols {{ grid-template-columns:1fr; }} header h1 {{ font-size:22px; }} }}
 @media print {{ body {{ background:#fff; }} section {{ break-inside:avoid; }} details {{ display:block; }} }}
 </style></head>
-<body>
+<body class="{embed}">
 <header><div class="wrap">
-  <a href="/iot/reportes/">← Informes</a> · <a href="/">Dashboards</a> · <a href="/iot/">Panel de control</a>
+  <nav><a href="/iot/gemelo/?p=informes">← Informes</a> · <a href="/iot/gemelo/">Centro de datos</a> · <a href="/iot/gemelo/?p=panel">Panel de control</a></nav>
   <h1>Informe AgroCraft</h1>
   <p>{generated} (hora Colombia) · ventana de las últimas {hours} h</p>
 </div></header>
@@ -173,10 +178,9 @@ td {{ border-bottom:1px solid var(--line); padding:4px 6px; font-variant-numeric
 (function () {{
   const data = JSON.parse(document.getElementById("data").textContent);
   if (!window.Chart || !Object.keys(data.series).length) return;
-  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-  Chart.defaults.color = dark ? "#aab3c2" : "#5b6475";
-  Chart.defaults.borderColor = dark ? "#2a2f3a" : "#e3e7ef";
-  Chart.defaults.font.family = "Segoe UI, Roboto, system-ui, sans-serif";
+  Chart.defaults.color = "#9fb3a5";
+  Chart.defaults.borderColor = "rgba(255,255,255,.08)";
+  Chart.defaults.font.family = "Inter, system-ui, sans-serif";
   const box = document.getElementById("charts");
   for (const chart of data.charts) {{
     const items = chart.items.filter(i => data.series[i.key]);

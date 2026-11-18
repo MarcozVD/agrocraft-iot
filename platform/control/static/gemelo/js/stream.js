@@ -1,4 +1,4 @@
-// Página «Mensajes»: los mensajes tal como pasan por el bróker, en el momento en que llegan, con su tema,
+// Mensajes en crudo de un dispositivo (detalle del Panel de control): tal como pasan por el bróker, en el momento en que llegan, con su tema,
 // protocolo, tamaño y contenido JSON, y una explicación en palabras de qué significa cada uno.
 
 import { DEVICES, CLASSES, fieldLabel, formatValue } from "./catalog.js";
@@ -39,8 +39,9 @@ function highlight(json) {
 }
 
 export class Stream {
-  constructor(root, describeEvent) {
+  constructor(root, describeEvent, device = null) {
     this.root = root;
+    this.device = device;            // solo los mensajes de este dispositivo
     this.describeEvent = describeEvent;
     this.messages = [];
     this.paused = false;
@@ -57,14 +58,11 @@ export class Stream {
   build() {
     this.root.innerHTML = `
       <div class="st-head">
-        <div><h2>Mensajes en vivo</h2>
-          <p>Cada fila es un mensaje real que acaba de pasar por el bróker. <b class="up">↑ Sube</b>: del dispositivo a la nube.
+        <div><p>Cada fila es un mensaje real de este dispositivo, en el momento en que pasa por el bróker. <b class="up">↑ Sube</b>: del dispositivo a la nube.
           <b class="down">↓ Baja</b>: de la nube al dispositivo (órdenes). Haz clic en un mensaje para verlo completo y explicado en palabras.</p></div>
         <div class="st-counters" id="stCounters"></div>
       </div>
       <div class="st-tools">
-        <select id="stCls" aria-label="Filtrar por clase"><option value="">Todas las clases</option>
-          ${["twin", "api", "dataset", "real", "sim", "platform"].map((c) => `<option value="${c}">${CLASSES[c].label}</option>`).join("")}</select>
         <select id="stCh" aria-label="Filtrar por tipo de mensaje"><option value="">Todos los tipos</option>
           ${Object.entries(CHANNELS).map(([k, [label]]) => `<option value="${k}">${label} (${k})</option>`).join("")}</select>
         <input id="stQ" type="search" placeholder="Buscar dispositivo, tema o valor" aria-label="Buscar en los mensajes">
@@ -74,7 +72,6 @@ export class Stream {
       <div class="st-cols" aria-hidden="true"><span>Hora</span><span>Sentido</span><span>Tipo</span><span>Dispositivo · tema</span><span>Contenido (JSON)</span><span>Tamaño</span></div>
       <ol class="st-list" id="stList"></ol>`;
     const $ = (s) => this.root.querySelector(s);
-    $("#stCls").addEventListener("change", (e) => { this.filter.cls = e.target.value; this.render(); });
     $("#stCh").addEventListener("change", (e) => { this.filter.channel = e.target.value; this.render(); });
     $("#stQ").addEventListener("input", (e) => { this.filter.q = e.target.value.trim().toLowerCase(); this.render(); });
     $("#stPause").addEventListener("click", () => this.togglePause());
@@ -104,6 +101,7 @@ export class Stream {
   }
 
   add({ cls, device, channel, data, at }, old = false) {
+    if (this.device && device !== this.device) return;
     const json = typeof data === "string" ? JSON.stringify(data) : JSON.stringify(data ?? null);
     const msg = { id: ++this.seq, cls, device, channel, data, json, t: at || Date.now(), size: encoder.encode(json).length, old };
     if (old) {                                   // lecturas previas: van al final, se dibujan con render()
@@ -210,7 +208,7 @@ export class Stream {
     const list = this.root.querySelector("#stList");
     const rows = this.messages.filter((m) => this.matches(m)).slice(0, MAX_ROWS);
     list.innerHTML = rows.map((m) => this.row(m)).join("")
-      || `<li class="st-empty">Esperando mensajes… Los gemelos envían cada 30 s, las API cada 5 a 15 min y el medidor de energía cada minuto.</li>`;
+      || `<li class="st-empty">Esperando mensajes… Los gemelos envían cada 30 s, las API cada 5 a 15 min, el medidor de energía cada minuto y el PC cada 30 s.</li>`;
     this.counters();
   }
 
@@ -220,7 +218,6 @@ export class Stream {
     const cut = Date.now() - 60000;
     this.stamps = this.stamps.filter((t) => t > cut);
     el.innerHTML = `<span><b>${this.stamps.length}</b> por minuto</span><span><b>${this.total}</b> desde que abriste</span>
-      <span class="proto mqtt">MQTT ${this.byProtocol.mqtt}</span><span class="proto amqp">AMQP ${this.byProtocol.amqp}</span><span class="proto https">HTTPS ${this.byProtocol.https}</span>
       ${this.paused ? `<span class="paused">En pausa · ${this.pending} nuevos</span>` : ""}`;
   }
 }

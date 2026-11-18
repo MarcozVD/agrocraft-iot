@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AgroCraft · Gemelo 3D</title>
-<meta name="description" content="Gemelo digital de AgroCraft en 3D, 2.5D y 2D con los sensores en vivo, reproducción de las últimas 24 horas e informes del analista con IA.">
+<title>AgroCraft · Centro de datos</title>
+<meta name="description" content="Centro de datos de AgroCraft: granja 3D con los sensores en vivo, panel de control, informes del analista con IA y mapa del mundo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -19,10 +19,8 @@
 } }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" defer></script>
 </head>
-<body>
+<body class="page-granja">
 <div id="stage" class="stage"></div>
 
 <header class="topbar">
@@ -31,12 +29,13 @@
     <div><b>AgroCraft</b><span>Centro de datos</span></div>
   </div>
   <nav class="segmented pages" role="tablist" aria-label="Pantalla">
-    <button data-page="granja" class="on" title="Mapa 3D de la granja con los sensores en vivo">Granja 3D</button>
-    <button data-page="graficas" title="Gráficas que se actualizan con cada dato">Gráficas</button>
-    <button data-page="mensajes" title="Mensajes en crudo tal como llegan">Mensajes</button>
+    <button data-page="granja" class="on" title="La granja en 3D con los sensores en vivo">Granja 3D</button>
+    <button data-page="panel" title="Todos los dispositivos, estadísticas y órdenes">Panel de control</button>
+    <button data-page="informes" title="Informes diarios del analista con IA">Informes IA</button>
+    <button data-page="mapa" title="Mapa del mundo de Minecraft">Mapa del mundo</button>
   </nav>
   <div class="pill live" id="live"><i></i><span>Conectando…</span></div>
-  <div class="weather" id="weather" aria-live="polite"></div>
+  <div class="weather only-granja" id="weather" aria-live="polite"></div>
   <div class="spacer"></div>
   <div class="segmented only-granja" role="tablist" aria-label="Vista">
     <button data-view="3d" class="on" title="Vista 3D libre (1)">3D</button>
@@ -55,23 +54,31 @@
   <div class="tools">
     <button id="t-labels" class="on only-granja" title="Etiquetas (L)">Etiquetas</button>
     <button id="t-flow" class="on only-granja" title="Paquetes de datos hacia la nube (F)">Flujo de datos</button>
-    <button id="t-tour" class="only-granja" title="Recorrido automático (T)">Recorrido</button>
-    <button id="t-home" class="only-granja" title="Volver a la vista general (H)">Inicio</button>
+    <button id="t-tour" class="only-granja" title="Recorrido guiado por la granja (T)">Recorrido</button>
+    <button id="t-home" class="only-granja" title="Ver toda la granja (H)">Inicio</button>
     <button id="t-guide" class="guide-btn" title="Guía para entender la pantalla (G)">¿Qué estoy viendo?</button>
-    <button id="t-reports" class="accent" title="Informes del analista con IA (R)">Informes IA</button>
     <details class="links">
       <summary>Más</summary>
       <nav>
-        <a href="/" target="_blank" rel="noopener">Grafana</a>
-        <a href="/iot/" target="_blank" rel="noopener">Panel de control</a>
-        <a href="/iot/reportes/" target="_blank" rel="noopener">Informes (página)</a>
-        <a href="/map/" target="_blank" rel="noopener">Mapa del mundo</a>
+        <a href="/" target="_blank" rel="noopener">Grafana (dashboards)</a>
+        <a href="/map/" target="_blank" rel="noopener">Mapa en pestaña aparte</a>
       </nav>
     </details>
   </div>
 </header>
 
 <div class="sim-banner" id="simBanner" hidden></div>
+
+<div class="tourbar" id="tourBar" hidden>
+  <div class="tour-text"><span class="tour-count" id="tourCount"></span><b id="tourName"></b><p id="tourAbout"></p></div>
+  <div class="tour-btns">
+    <button id="tourPrev" title="Anterior (←)">‹ Anterior</button>
+    <button id="tourPause" title="Pausar o seguir">❚❚ Pausar</button>
+    <button id="tourNext" class="primary" title="Siguiente (→)">Siguiente ›</button>
+    <button id="tourExit" title="Terminar recorrido (Esc)">Salir</button>
+  </div>
+  <div class="tour-progress"><i id="tourProgress"></i></div>
+</div>
 
 <aside class="devices" id="devices" aria-label="Dispositivos">
   <div class="panel-head">
@@ -108,8 +115,8 @@
     <h3>Última actividad</h3>
     <div class="activity" id="dActivity"></div>
     <div class="actions">
+      <a id="dPanel" href="#">Ver en el panel de control</a>
       <a id="dGrafana" target="_blank" rel="noopener">Abrir en Grafana</a>
-      <a href="/iot/" target="_blank" rel="noopener">Controlar en el panel</a>
     </div>
   </div>
 </aside>
@@ -137,26 +144,28 @@
   </select>
 </footer>
 
-<div class="modal" id="reports" hidden role="dialog" aria-modal="true" aria-labelledby="rTitle">
-  <div class="modal-card">
-    <div class="modal-head">
-      <h2 id="rTitle">Informes del analista con IA</h2>
-      <div class="segmented small">
-        <button data-tab="reports" class="on">Informes</button>
-        <button data-tab="anomalies">Anomalías</button>
-        <button data-tab="rules">Reglas</button>
-      </div>
-      <button class="icon" id="rClose" aria-label="Cerrar" title="Cerrar (Esc)">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="r-list" id="rList"></div>
-      <article class="r-content" id="rContent"><p class="muted">Elige un informe.</p></article>
-    </div>
-  </div>
-</div>
+<main class="page" id="pagePanel" hidden aria-label="Panel de control"></main>
 
-<main class="page" id="pageCharts" hidden aria-label="Gráficas en vivo"></main>
-<main class="page" id="pageStream" hidden aria-label="Mensajes en vivo"></main>
+<main class="page page-split" id="pageReports" hidden aria-label="Informes del analista con IA">
+  <div class="p-head"><div><h2>Informes del analista con IA</h2>
+    <p>Cada día a las 7:00 la plataforma junta las estadísticas de 24 horas y una IA redacta qué pasó, qué relación hubo entre el clima y la granja, las anomalías y qué hacer. Aquí también están las anomalías detectadas y las reglas en la nube.</p></div>
+    <div class="segmented small" id="rTabs">
+      <button data-tab="reports" class="on">Informes</button>
+      <button data-tab="anomalies">Anomalías</button>
+      <button data-tab="rules">Reglas</button>
+    </div></div>
+  <div class="r-body">
+    <div class="r-list" id="rList"></div>
+    <div class="r-content" id="rContent"><p class="muted">Elige un informe.</p></div>
+  </div>
+</main>
+
+<main class="page page-split" id="pageMap" hidden aria-label="Mapa del mundo">
+  <div class="p-head"><div><h2>Mapa del mundo</h2>
+    <p>Vista desde arriba del mundo de Minecraft, dibujada bloque por bloque por el servidor (squaremap). Se ve la granja real y, 200 bloques al este, la granja de simulación. Arrastra para moverte y usa la rueda para acercar.</p></div>
+    <div class="ctl-row"><button class="btn" data-map="real">Ir a la granja real</button><button class="btn" data-map="sim">Ir a la granja de simulación</button></div></div>
+  <div class="map-frame"><iframe id="mapFrame" title="Mapa del mundo de Minecraft" loading="lazy"></iframe></div>
+</main>
 
 <div class="modal" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gTitle">
   <div class="modal-card guide-card">

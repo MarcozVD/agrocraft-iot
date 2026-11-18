@@ -1,13 +1,12 @@
-// Une la escena con los datos: lista de dispositivos, detalle con historial, actividad, línea de tiempo
-// para reproducir las últimas 24 h, granja de simulación, recorrido automático e informes con IA.
+// Centro de datos: une la escena 3D con los datos (lista, detalle, actividad, reproducción de 24 h,
+// granja de simulación y recorrido guiado) y las otras pantallas: panel de control, informes y mapa.
 
 import { loadFarm, buildWorld } from "./world.js";
 import { Stage } from "./scene.js";
 import { Twins } from "./twins.js";
 import { Live, Replay, getJSON } from "./data.js";
 import { CLASSES, DEVICES, fieldLabel, formatValue, ticksToClock, baseId } from "./catalog.js";
-import { Charts } from "./charts.js";
-import { Stream } from "./stream.js";
+import { Panel } from "./panel.js";
 import { HELP, assess, GLOSSARY } from "./glossary.js";
 
 const $ = (s) => document.querySelector(s);
@@ -31,7 +30,8 @@ const ui = {
   farm: "real", mode: "live", replay: null, replayT: 0, playing: false, selected: null, range: 6,
   history: null, tour: null, events: [], anomalies: {}, dirty: true, lastApply: 0, values: {}, hover: null,
 };
-let stage, twins, live, charts, stream;
+let stage, twins, live, panel;
+const raw = [];                          // últimos mensajes en crudo (para el detalle del panel)
 
 // ------------------------------------------------------------------------------------- arranque
 async function boot() {
@@ -49,14 +49,16 @@ async function boot() {
     throw error;
   }
   buildList();
-  charts = new Charts($("#pageCharts"), getJSON);
-  stream = new Stream($("#pageStream"), describeEvent);
+  panel = new Panel($("#pagePanel"), { live: null, getJSON, describeEvent, toast, raw,
+    navigate: (id) => setPage("panel", id), openInFarm: (id) => { setPage("granja"); select(id); } });
   buildGuide();
   bindUI();
   live = new Live();
   live.on(onLive);
+  panel.ctx.live = live;
   live.start();
-  setPage(new URLSearchParams(location.search).get("p") || "granja");
+  const params = new URLSearchParams(location.search);
+  setPage(params.get("p") || "granja", params.get("d"));
   loadEvents();
   refreshAnomalies();
   setInterval(refreshAnomalies, 120000);
@@ -162,12 +164,14 @@ function onLive(kind, payload) {
   if (kind === "snapshot") {
     ui.dirty = true;
     setPill();
+    if (ui.page === "panel") panel.renderRules();
     return;
   }
   const { device, channel, data, cls, at } = payload;
   ui.dirty = true;
-  stream.add(payload);
-  if (channel === "telemetry" && data && typeof data === "object") charts.push(device, data, data.ts || at);
+  raw.unshift(payload);
+  if (raw.length > 3000) raw.length = 3000;
+  panel.onMessage(payload);
   const id = ui.farm === "sim" ? (device.startsWith("sim-") ? baseId(device) : null) : device;
   if (ui.mode === "live" && id && DEVICES[id]) {
     if (channel === "telemetry") {
@@ -216,9 +220,10 @@ function tick(time, dt) {
   if (ui.page !== "granja") {
     if (time - (ui.lastFlush || 0) > 1) {
       ui.lastFlush = time;
-      charts.flush(ui.page === "graficas");
-      if (ui.page === "graficas") renderSummary();
-      else stream.counters();
+      if (ui.page === "panel") {
+        panel.tick();
+        renderSummary();
+      }
     }
     return;
   }
@@ -243,8 +248,11 @@ function applyAll() {
     const row = document.querySelector(`.dev[data-id="${id}"]`);
     if (row) {
       row.querySelector(".val").textContent = formatValue(DEVICES[id].main, v[DEVICES[id].main]);
-      const dot = row.querySelector(".dot");
-      dot.className = `dot ${status === "online" ? "online" : ""} ${alertOf(id, v) ? "alert" : ""}`;
+      const alert = alertOf(id, v);
+      row.classList.toggle("off", status !== "online");
+      row.classList.toggle("alert", alert);
+      row.querySelector(".rst").textContent = status !== "online" ? (status === "apagado" ? " · envío apagado" : " · sin conexión")
+        : alert ? " · revisar" : "";
     }
   }
   renderWeather(weather);
@@ -271,7 +279,7 @@ function renderSimBanner() {
   const scenario = SCENARIOS[st.scenario] || st.scenario || "—";
   banner.innerHTML = running
     ? `Granja de simulación · <b>${esc(scenario)}</b> a <b>${formatValue("speed", st.speed ?? t.speed)}</b> · ${formatValue("sim_hours", t.sim_hours)} simuladas`
-    : `Granja de simulación <b>en pausa</b> · escenario ${esc(scenario)} · iníciala desde el <a href="/iot/" target="_blank" rel="noopener" style="color:#fff">panel de control</a>`;
+    : `Granja de simulación <b>en pausa</b> · escenario ${esc(scenario)} · iníciala desde el <a href="?p=panel" data-goto="panel" style="color:#fff">panel de control</a>`;
 }
 
 // ------------------------------------------------------------------------------- lista lateral
@@ -289,7 +297,7 @@ function buildList() {
       const row = document.createElement("button");
       row.className = "dev";
       row.dataset.id = id;
-      row.innerHTML = `<span class="dot"></span><b>${esc(DEVICES[id].name)}</b><span class="val">—</span><code>${id}</code>`;
+      row.innerHTML = `<span class="dot" style="background:${CLASSES[cls].color}"></span><b>${esc(DEVICES[id].name)}</b><span class="val">—</span><code>${id}<em class="rst"></em></code>`;
       row.addEventListener("click", () => select(id));
       row.addEventListener("mouseenter", () => hover(id, true));
       row.addEventListener("mouseleave", () => hover(null, true));
@@ -297,7 +305,7 @@ function buildList() {
     }
   }
   $("#devCount").textContent = `${IDS.length}`;
-  $("#legend").innerHTML = ORDER.map((c) => `<span><i style="background:${CLASSES[c].color}"></i>${CLASSES[c].label}</span>`).join("");
+  $("#legend").innerHTML = `<span class="muted">El color indica el tipo:</span>` + ORDER.map((c) => `<span><i style="background:${CLASSES[c].color}"></i>${CLASSES[c].label}</span>`).join("");
 }
 
 function filterList() {
@@ -332,7 +340,7 @@ function hover(id, fromList = false) {
 
 // ----------------------------------------------------------------------------------- detalle
 async function select(id, fromTour = false) {
-  if (!fromTour) stopTour();
+  if (!fromTour && ui.tour) pauseTour(true);
   if (ui.farm === "sim" && !SIM_TWINS.has(id)) return toast("Ese dispositivo no existe en la granja de simulación.");
   ui.selected = id;
   stage.select(id);
@@ -592,40 +600,73 @@ function syncSlider() {
 }
 
 // ------------------------------------------------------------------------------ recorrido
+// Recorrido guiado con controles: anterior, pausar o seguir, siguiente y salir. Avanza solo cada 9 s.
+const TOUR_MS = 9000;
+
+function tourIds() {
+  return TOUR.filter((id) => ui.farm === "real" || SIM_TWINS.has(id));
+}
+
 function startTour() {
   stopTour();
-  let i = 0;
-  const step = () => {
-    const ids = TOUR.filter((id) => ui.farm === "real" || SIM_TWINS.has(id));
-    select(ids[i % ids.length], true);
-    i++;
-  };
-  step();
-  ui.tour = setInterval(step, 7000);
+  ui.tourIndex = -1;
+  ui.tourPaused = false;
+  $("#tourBar").hidden = false;
   $("#t-tour").classList.add("on");
+  ui.tour = setInterval(() => { if (!ui.tourPaused) tourStep(1); }, TOUR_MS);
+  tourStep(1);
+}
+
+function tourStep(dir) {
+  if (!ui.tour) return;
+  const ids = tourIds();
+  ui.tourIndex = (ui.tourIndex + dir + ids.length) % ids.length;
+  const id = ids[ui.tourIndex];
+  select(id, true);
+  const spec = DEVICES[id];
+  $("#tourCount").textContent = `Parada ${ui.tourIndex + 1} de ${ids.length}`;
+  $("#tourName").textContent = spec.name;
+  $("#tourAbout").textContent = spec.about;
+  clearInterval(ui.tour);
+  ui.tour = setInterval(() => { if (!ui.tourPaused) tourStep(1); }, TOUR_MS);
+  const bar = $("#tourProgress");
+  bar.classList.remove("run");
+  void bar.offsetWidth;
+  if (!ui.tourPaused) bar.classList.add("run");
+}
+
+function pauseTour(paused = !ui.tourPaused) {
+  if (!ui.tour) return;
+  ui.tourPaused = paused;
+  $("#tourPause").textContent = paused ? "▶ Seguir" : "❚❚ Pausar";
+  $("#tourBar").classList.toggle("paused", paused);
+  if (!paused) tourStep(0);
 }
 
 function stopTour() {
   if (ui.tour) clearInterval(ui.tour);
   ui.tour = null;
+  ui.tourPaused = false;
+  $("#tourBar").hidden = true;
+  $("#tourBar").classList.remove("paused");
+  $("#tourPause").textContent = "❚❚ Pausar";
   $("#t-tour").classList.remove("on");
 }
 
 // ------------------------------------------------------------------------------- informes
 async function openReports(tab = "reports") {
-  $("#reports").hidden = false;
-  for (const b of document.querySelectorAll("#reports [data-tab]")) b.classList.toggle("on", b.dataset.tab === tab);
+  for (const b of document.querySelectorAll("#rTabs [data-tab]")) b.classList.toggle("on", b.dataset.tab === tab);
   const list = $("#rList"), content = $("#rContent");
   list.hidden = tab !== "reports";
-  $("#reports .modal-body").style.gridTemplateColumns = tab === "reports" ? "" : "1fr";
+  $("#pageReports").classList.toggle("wide", tab !== "reports");
   if (tab === "reports") {
     list.innerHTML = `<p class="muted">Cargando…</p>`;
     try {
       const { reports } = await getJSON("/reports");
-      list.innerHTML = reports.map((r, i) => `<button class="r-card ${i === 0 ? "on" : ""}" data-name="${esc(r.name)}">
+      list.innerHTML = reports.map((r) => `<button class="r-card" data-name="${esc(r.name)}">
         <b>${esc(r.name.slice(0, 10))} · ${esc(r.name.slice(11, 13))}:${esc(r.name.slice(13, 15))}</b>
         <p>${esc(r.summary || "Informe estadístico")}</p>
-        <small>${esc(r.model || "sin IA")} · ${r.hours || 24} h · ${r.anomalies} anomalías · ${r.alerts} alertas</small></button>`).join("")
+        <small>${r.model ? "Análisis con IA" : "Solo estadísticas (IA no disponible)"} · ${r.anomalies} anomalías · ${r.alerts} alertas</small></button>`).join("")
         || `<p class="muted">Aún no hay informes.</p>`;
       for (const card of list.querySelectorAll(".r-card")) card.addEventListener("click", () => showReport(card.dataset.name));
       if (reports[0]) showReport(reports[0].name);
@@ -636,44 +677,45 @@ async function openReports(tab = "reports") {
     await refreshAnomalies();
     const rows = Object.entries(ui.anomalies).sort((a, b) => Math.abs(b[1].z) - Math.abs(a[1].z));
     const open = ui.openAnomalies || [];
-    content.innerHTML = `<h2>Anomalías por patrón diario</h2>
-      <p class="muted">Cada 10 minutos se compara el promedio de 30 minutos de cada variable con la media y la desviación de esa misma hora en los días anteriores. Con |z| ≥ 3 dos veces seguidas se abre una anomalía; con |z| &lt; 2 se cierra.</p>
+    content.innerHTML = `<div class="r-pad"><h3>Anomalías por patrón diario</h3>
+      <p class="muted">Cada 10 minutos se compara el promedio de 30 minutos de cada variable con la media y la desviación de esa misma hora en los días anteriores. Con |z| ≥ 3 dos veces seguidas se abre una anomalía; con |z| &lt; 2 se cierra. La barra muestra qué tan lejos está cada variable de lo normal para esta hora.</p>
       <h3>Abiertas ahora: ${open.length}</h3>
-      ${open.map((a) => `<div class="anom-row"><code>${esc(a.device)}/${esc(a.variable)}</code><span>${esc(a.valor)}</span><span>esperado ${esc(a.esperado)}</span><span class="z hot">z ${esc(a.z)}</span></div>`).join("") || `<p class="muted">Ninguna: todo dentro de su patrón diario.</p>`}
+      ${open.map((a) => `<div class="anom-row"><code>${esc(DEVICES[a.device]?.name || a.device)} · ${esc(fieldLabel(a.variable))}</code><span>${esc(a.valor)}</span><span>esperado ${esc(a.esperado)}</span><span class="z hot">z ${esc(a.z)}</span></div>`).join("") || `<p class="muted">Ninguna: todo dentro de su patrón diario.</p>`}
       <h3>Última revisión por variable</h3>
       ${rows.map(([key, a]) => {
+        const [dev, field] = key.split("/");
         const w = Math.min(50, Math.abs(a.z) / 4 * 50);
-        return `<div class="anom-row"><code>${esc(key)}</code><span>${esc(a.actual)} (esperado ${esc(a.esperado)})</span>
+        return `<div class="anom-row"><code>${esc(DEVICES[dev]?.name || dev)} · ${esc(fieldLabel(field))}</code><span>${esc(formatValue(field, a.actual))} (esperado ${esc(formatValue(field, a.esperado))})</span>
           <div class="bar"><i class="${Math.abs(a.z) >= 3 ? "hot" : ""}" style="${a.z >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`}"></i></div>
           <span class="z ${Math.abs(a.z) >= 3 ? "hot" : ""}">z ${a.z > 0 ? "+" : ""}${esc(a.z)}</span></div>`;
-      }).join("")}`;
+      }).join("")}</div>`;
   } else {
     let rules = live?.rules || [];
     try { rules = (await getJSON("/rules")).rules; } catch { /* usa las del snapshot */ }
-    content.innerHTML = `<h2>Reglas en la nube</h2><p class="muted">Corren en el servicio de control y envían comandos por MQTT sin intervención humana.</p>
+    content.innerHTML = `<div class="r-pad"><h3>Reglas en la nube</h3><p class="muted">Corren en el servicio de control y envían órdenes por MQTT sin intervención humana. Se activan o desactivan desde el Panel de control (como operador).</p>
       ${rules.map((r) => `<div class="anom-row" style="grid-template-columns:1fr auto"><div><code>${esc(r.id)}</code><p style="margin:4px 0 0">${esc(r.description)}</p>
         ${r.last ? `<p class="muted" style="margin:2px 0 0">Última decisión: ${esc(typeof r.last === "string" ? r.last : JSON.stringify(r.last))}</p>` : ""}</div>
-        <span class="z ${r.enabled ? "" : "hot"}">${r.enabled ? "activa" : "inactiva"}</span></div>`).join("")}`;
+        <span class="lvl ${r.enabled ? "ok" : "warn"}">${r.enabled ? "Activa" : "Inactiva"}</span></div>`).join("")}</div>`;
   }
 }
 
-async function showReport(name) {
+// El informe completo (gráficas, análisis, alertas, órdenes, anomalías y estadísticas) embebido con el mismo diseño
+function showReport(name) {
   for (const c of document.querySelectorAll(".r-card")) c.classList.toggle("on", c.dataset.name === name);
-  const content = $("#rContent");
-  content.innerHTML = `<p class="muted">Cargando…</p>`;
-  try {
-    const r = await getJSON(`/reports/${encodeURIComponent(name)}`);
-    const md = window.marked ? window.marked.parse(r.analysis || "") : `<pre>${esc(r.analysis)}</pre>`;
-    const safe = window.DOMPurify ? window.DOMPurify.sanitize(md) : esc(r.analysis);
-    content.innerHTML = `<p class="meta">${esc(r.generated || name)} · ${esc(r.model || "sin IA")} · <a href="/iot/reportes/${encodeURIComponent(name)}" target="_blank" rel="noopener" style="color:var(--leaf)">ver con gráficas</a></p>${safe}`;
-  } catch {
-    content.innerHTML = `<p class="muted">No se pudo abrir el informe.</p>`;
-  }
+  $("#rContent").innerHTML = `<iframe class="r-frame" title="Informe ${esc(name)}" src="/iot/reportes/${encodeURIComponent(name)}?embed=1"></iframe>`;
+}
+
+// ------------------------------------------------------------------------------------- mapa
+const MAP_URL = (x) => `/map/?world=minecraft_overworld&zoom=5&x=${x}&z=0`;
+
+function openMap(where) {
+  const frame = $("#mapFrame");
+  const url = MAP_URL(where === "sim" ? 212 : 12);
+  if (where || !frame.getAttribute("src")) frame.src = url;
 }
 
 // ---------------------------------------------------------------------------------- controles
 function setView(mode) {
-  stopTour();
   stage.setView(mode);
   twins.setView(mode);
   for (const b of document.querySelectorAll("[data-view]")) b.classList.toggle("on", b.dataset.view === mode);
@@ -719,37 +761,34 @@ function layoutTop() {
 }
 
 // ---------------------------------------------------------------------------------- páginas
-function setPage(page) {
-  if (!["granja", "graficas", "mensajes"].includes(page)) page = "granja";
+function setPage(page, device = null) {
+  if (page === "graficas" || page === "mensajes") page = "panel";
+  if (!["granja", "panel", "informes", "mapa"].includes(page)) page = "granja";
+  if (page !== "granja") stopTour();
+  const changed = page !== ui.page;
   ui.page = page;
   document.body.classList.toggle("page-granja", page === "granja");
   for (const b of document.querySelectorAll("[data-page]")) b.classList.toggle("on", b.dataset.page === page);
-  $("#pageCharts").hidden = page !== "graficas";
-  $("#pageStream").hidden = page !== "mensajes";
-  if (page !== "granja") stopTour();
-  if (page === "graficas") {
-    if (!charts.built) charts.load().then(renderSummary);
-    else charts.resize();
+  $("#pagePanel").hidden = page !== "panel";
+  $("#pageReports").hidden = page !== "informes";
+  $("#pageMap").hidden = page !== "mapa";
+  if (page === "panel") {
+    panel.show(device);
+    renderSummary();
   }
-  if (page === "mensajes" && !stream.built) {
-    stream.build();
-    const known = [...(live?.devices.values() || [])].sort((a, b) => (b.telemetry_ts || 0) - (a.telemetry_ts || 0));
-    for (const d of known) {
-      if (d.telemetry && Object.keys(d.telemetry).length) {
-        stream.add({ cls: d.class, device: d.device, channel: "telemetry", data: { ts: d.telemetry_ts, ...d.telemetry }, at: d.telemetry_ts }, true);
-      }
-    }
-    stream.render();
-  }
+  if (page === "informes" && changed) openReports();
+  if (page === "mapa") openMap();
   const url = new URL(location.href);
+  url.searchParams.delete("d");
   if (page === "granja") url.searchParams.delete("p");
   else url.searchParams.set("p", page);
+  if (page === "panel" && device) url.searchParams.set("d", device);
   history.replaceState(null, "", url);
   layoutTop();
   ui.dirty = true;
 }
 
-// Resumen en palabras arriba de las gráficas
+// Resumen en palabras arriba del panel de control
 function renderSummary() {
   const host = document.getElementById("chSummary");
   if (!host) return;
@@ -796,14 +835,14 @@ function buildGuide() {
         <div><b>2. Enviar</b>El dispositivo publica un mensaje (MQTT, AMQP o HTTPS) con un tema como <code>agro/twin/mc-tanque/telemetry</code>.</div>
         <div><b>3. Repartir</b>El bróker en Azure lo recibe, revisa que el dispositivo tenga permiso y lo entrega a quien lo pidió.</div>
         <div><b>4. Guardar</b>Se guarda en una base de datos de series de tiempo (InfluxDB) para las gráficas e informes.</div>
-        <div><b>5. Mostrar</b>Llega a esta página en menos de un segundo: mapa, gráficas y mensajes cambian solos.</div>
+        <div><b>5. Mostrar</b>Llega a esta página en menos de un segundo: la granja, los valores y las gráficas cambian solos.</div>
       </div>
-      <p class="flow-back"><b>Y de vuelta (retroceso):</b> desde el panel de control, una regla automática o una alerta, la nube manda una <b>orden</b> al dispositivo (apagar, calibrar, regar…). El dispositivo la cumple y responde con una <b>confirmación</b>. En la pantalla «Mensajes» se ven las dos.</p></section>
-    <section><h3>Las tres pantallas</h3>
+      <p class="flow-back"><b>Y de vuelta (retroceso):</b> desde el panel de control, una regla automática o una alerta, la nube manda una <b>orden</b> al dispositivo (apagar, calibrar, regar…). El dispositivo la cumple y responde con una <b>confirmación</b>. En el Panel de control, dentro de cada dispositivo, se ven las dos en «Mensajes en crudo».</p></section>
+    <section><h3>Las cuatro pantallas (arriba a la izquierda)</h3>
       <div class="screens">
-        <div><b>Granja 3D</b>La granja tal como está construida en el mundo. Cada figura flotante es un dispositivo con su valor en vivo; haz clic para ver qué mide y su historia. Las bolitas que viajan hacia la nube son mensajes reales llegando. Abajo puedes reproducir las últimas 24 horas. Se ve en 3D, 2.5D (isométrico) y 2D (plano).</div>
-        <div><b>Gráficas</b>Un resumen en palabras y gráficas por tema que crecen con cada dato. Las líneas punteadas amarillas son umbrales: el valor en que el sistema actúa solo. Debajo de cada gráfica: valor actual, si está bien, promedio, mínimo y máximo.</div>
-        <div><b>Mensajes</b>Los datos «en crudo»: cada mensaje tal como viaja, con su hora, tema, protocolo, tamaño y contenido. Haz clic en uno para verlo completo y explicado en palabras.</div>
+        <div><b>Granja 3D</b>La granja tal como está construida en el mundo. Cada figura flotante es un dispositivo con su valor en vivo; haz clic para ver qué mide y su historia. Las bolitas que viajan hacia la nube son mensajes reales llegando. Abajo puedes reproducir las últimas 24 horas. Se ve en 3D, 2.5D (isométrico) y 2D (plano). «Recorrido» te lleva por cada equipo con su explicación.</div>
+        <div><b>Panel de control</b>Todos los dispositivos con su último dato y cómo se han comportado en 6 horas. Entra a uno para ver una gráfica en vivo por variable, sus mensajes en crudo explicados en palabras y los botones para darle órdenes (como operador).</div>
+        <div><b>Informes IA y Mapa del mundo</b>Los informes diarios que escribe la IA, con gráficas, anomalías y reglas; y el mapa del mundo de Minecraft visto desde arriba, para ubicar la granja real y la de simulación.</div>
       </div></section>
     <section><h3>Colores</h3>
       <div class="legend-row">${classes}</div>
@@ -813,6 +852,7 @@ function buildGuide() {
         <span><kbd>Arrastrar</kbd>girar (3D) o mover (2.5D y 2D)</span><span><kbd>Rueda</kbd>acercar y alejar</span>
         <span><kbd>Clic derecho</kbd>mover el mapa en 3D</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>vista 3D, 2.5D, 2D</span>
         <span><kbd>T</kbd>recorrido automático</span><span><kbd>Espacio</kbd>reproducir 24 h</span>
+        <span><kbd>←</kbd><kbd>→</kbd>parada anterior o siguiente del recorrido</span><span><kbd>H</kbd>ver toda la granja</span>
         <span><kbd>R</kbd>informes de la IA</span><span><kbd>G</kbd>esta guía</span>
       </div></section>
     <section><h3>Palabras que vas a ver</h3>
@@ -841,11 +881,23 @@ function bindUI() {
   $("#t-labels").addEventListener("click", (e) => document.body.classList.toggle("hide-labels", !toggle(e.currentTarget)));
   $("#t-flow").addEventListener("click", (e) => { stage.showFlow = toggle(e.currentTarget) && ui.mode === "live"; });
   $("#t-tour").addEventListener("click", () => (ui.tour ? stopTour() : startTour()));
-  $("#t-home").addEventListener("click", () => { stopTour(); closeDrawer(); stage.home(); });
-  $("#t-reports").addEventListener("click", () => openReports());
-  $("#rClose").addEventListener("click", () => ($("#reports").hidden = true));
-  $("#reports").addEventListener("click", (e) => { if (e.target.id === "reports") $("#reports").hidden = true; });
-  for (const b of document.querySelectorAll("#reports [data-tab]")) b.addEventListener("click", () => openReports(b.dataset.tab));
+  $("#t-home").addEventListener("click", goHome);
+  $("#tourPrev").addEventListener("click", () => tourStep(-1));
+  $("#tourNext").addEventListener("click", () => tourStep(1));
+  $("#tourPause").addEventListener("click", () => pauseTour());
+  $("#tourExit").addEventListener("click", stopTour);
+  for (const b of document.querySelectorAll("#rTabs [data-tab]")) b.addEventListener("click", () => openReports(b.dataset.tab));
+  for (const b of document.querySelectorAll("[data-map]")) b.addEventListener("click", () => openMap(b.dataset.map));
+  document.addEventListener("click", (e) => {
+    const go = e.target.closest("[data-goto]");
+    if (!go) return;
+    e.preventDefault();
+    setPage(go.dataset.goto);
+  });
+  $("#dPanel").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (ui.selected) setPage("panel", sourceId(ui.selected));
+  });
   $("#dClose").addEventListener("click", closeDrawer);
   for (const b of document.querySelectorAll("#dRange button")) {
     b.addEventListener("click", () => {
@@ -872,12 +924,15 @@ function bindUI() {
   });
   $("#tlLive").addEventListener("click", goLive);
   $("#tlPlay").addEventListener("click", togglePlay);
-  $("#stage").addEventListener("pointerdown", () => stopTour());
   window.addEventListener("keydown", (e) => {
     if (e.target.matches("input, select, textarea")) return;
     const k = e.key.toLowerCase();
     if (k === "g") return openGuide();
-    if (ui.page !== "granja" && k !== "escape") return;
+    if (k === "escape" && !$("#guide").hidden) return closeGuide();
+    if (k === "r") return setPage("informes");
+    if (ui.page !== "granja") return;
+    if (ui.tour && k === "arrowright") return tourStep(1);
+    if (ui.tour && k === "arrowleft") return tourStep(-1);
     if (k === "1") setView("3d");
     else if (k === "2") setView("25d");
     else if (k === "3") setView("2d");
@@ -885,10 +940,19 @@ function bindUI() {
     else if (k === "f") $("#t-flow").click();
     else if (k === "t") $("#t-tour").click();
     else if (k === "h") $("#t-home").click();
-    else if (k === "r") openReports();
     else if (k === " ") { e.preventDefault(); togglePlay(); }
-    else if (k === "escape") { if (!$("#guide").hidden) closeGuide(); else if (!$("#reports").hidden) $("#reports").hidden = true; else closeDrawer(); }
+    else if (k === "escape") { if (ui.tour) stopTour(); else closeDrawer(); }
   });
+}
+
+// «Inicio»: toda la granja a la vista, sin selección, sin filtro en la lista y en vivo
+function goHome() {
+  stopTour();
+  closeDrawer();
+  $("#devSearch").value = "";
+  filterList();
+  if (ui.mode === "replay") goLive();
+  stage.home();
 }
 
 async function togglePlay() {

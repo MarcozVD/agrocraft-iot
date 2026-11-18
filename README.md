@@ -7,16 +7,17 @@ bloques son sensores y actuadores que publican telemetría por MQTT y obedecen c
 de Bucaramanga (Open-Meteo) gobierna el clima, el secado del suelo y la temperatura del gemelo.
 
 - **Dashboards (Grafana, lectura sin login):** https://agrocraft.northcentralus.cloudapp.azure.com
-- **Panel de control (retroceso):** https://agrocraft.northcentralus.cloudapp.azure.com/iot/
-- **Centro de datos (gemelo 3D, gráficas en vivo y mensajes en crudo):** https://agrocraft.northcentralus.cloudapp.azure.com/iot/gemelo/
-  (`?p=graficas` y `?p=mensajes` abren directo esas pantallas)
+- **Panel de control (retroceso):** https://agrocraft.northcentralus.cloudapp.azure.com/iot/ (abre el centro de datos en «Panel de control»)
+- **Centro de datos:** https://agrocraft.northcentralus.cloudapp.azure.com/iot/gemelo/ — Granja 3D (3D/2.5D/2D, recorrido guiado,
+  reproducción de 24 h), Panel de control (`?p=panel`, detalle `&d=<id>` con gráficas en vivo, mensajes en crudo y órdenes),
+  Informes IA (`?p=informes`) y Mapa del mundo (`?p=mapa`), todo con el mismo diseño
   (lectura pública; los comandos piden usuario `operador` y la clave `CONTROL_PASS` de `platform/.env` en la VM)
 - **Plan y estado del proyecto:** [PLAN.md](PLAN.md)
 
 | Ruta | Servicio |
 |---|---|
 | `/` | Grafana: 5 dashboards (Resumen, Cultivo y riego, Clima, Operación y salud, Por dispositivo) y 6 alertas |
-| `/iot/` | Panel de control: comandos a cualquier dispositivo, reglas en la nube |
+| `/iot/` | Redirige al Panel de control del centro de datos: comandos a cualquier dispositivo, reglas en la nube, simulación |
 | `/iot/gemelo/` | Gemelo 3D: la granja real del mundo (bloques exportados con `scripts/export_world.py`) con los sensores en vivo, vistas 3D/2.5D/2D, reproducción de 24 h, granja de simulación e informes con IA |
 | `/iot/api/devices` · `/iot/api/cmd` · `/iot/api/rules` | API REST del servicio de control |
 | `/iot/api/stream` · `/latest` · `/history/<id>` · `/series` · `/replay` · `/events` · `/reports` | API de lectura del gemelo 3D (Server-Sent Events y consultas a InfluxDB) |
