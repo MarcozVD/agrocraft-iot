@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AgroCraft · Gemelo 3D</title>
+<meta name="description" content="Gemelo digital de AgroCraft en 3D, 2.5D y 2D con los sensores en vivo, reproducción de las últimas 24 horas e informes del analista con IA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="/iot/static/gemelo/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314231B'/%3E%3Cpath d='M8 22h16M10 22c0-6 3-10 6-12 3 2 6 6 6 12' stroke='%237BC86C' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" defer></script>
+</head>
+<body>
+<div id="stage" class="stage"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#14231B"/><path d="M8 22h16M10 22c0-6 3-10 6-12 3 2 6 6 6 12" stroke="#7BC86C" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+    <div><b>AgroCraft</b><span>Gemelo 3D</span></div>
+  </div>
+  <div class="pill live" id="live"><i></i><span>Conectando…</span></div>
+  <div class="weather" id="weather" aria-live="polite"></div>
+  <div class="spacer"></div>
+  <div class="segmented" role="tablist" aria-label="Vista">
+    <button data-view="3d" class="on" title="Vista 3D libre (1)">3D</button>
+    <button data-view="25d" title="Vista isométrica (2)">2.5D</button>
+    <button data-view="2d" title="Plano cenital (3)">2D</button>
+  </div>
+  <div class="rotate" id="rotate" hidden>
+    <button data-rot="-1" title="Girar a la izquierda" aria-label="Girar a la izquierda">⟲</button>
+    <button data-rot="1" title="Girar a la derecha" aria-label="Girar a la derecha">⟳</button>
+  </div>
+  <div class="segmented farm" role="tablist" aria-label="Granja">
+    <button data-farm="real" class="on">Granja real</button>
+    <button data-farm="sim">Simulación</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="tools">
+    <button id="t-labels" class="on" title="Etiquetas (L)">Etiquetas</button>
+    <button id="t-flow" class="on" title="Paquetes de datos hacia la nube (F)">Flujo de datos</button>
+    <button id="t-tour" title="Recorrido automático (T)">Recorrido</button>
+    <button id="t-home" title="Volver a la vista general (H)">Inicio</button>
+    <button id="t-reports" class="accent" title="Informes del analista con IA (R)">Informes IA</button>
+    <details class="links">
+      <summary>Más</summary>
+      <nav>
+        <a href="/" target="_blank" rel="noopener">Grafana</a>
+        <a href="/iot/" target="_blank" rel="noopener">Panel de control</a>
+        <a href="/iot/reportes/" target="_blank" rel="noopener">Informes (página)</a>
+        <a href="/map/" target="_blank" rel="noopener">Mapa del mundo</a>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<div class="sim-banner" id="simBanner" hidden></div>
+
+<aside class="devices" id="devices" aria-label="Dispositivos">
+  <div class="panel-head">
+    <h2>Dispositivos <small id="devCount"></small></h2>
+    <button class="icon" id="devToggle" aria-label="Contraer lista" title="Contraer">‹</button>
+  </div>
+  <input type="search" id="devSearch" placeholder="Buscar sensor o variable" aria-label="Buscar dispositivo">
+  <div class="legend" id="legend"></div>
+  <div class="dev-list" id="devList"></div>
+</aside>
+
+<aside class="drawer" id="drawer" hidden aria-label="Detalle del dispositivo">
+  <div class="drawer-head">
+    <div>
+      <span class="cls" id="dCls"></span>
+      <h2 id="dName"></h2>
+      <p id="dKind"></p>
+    </div>
+    <button class="icon" id="dClose" aria-label="Cerrar detalle" title="Cerrar (Esc)">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="status-line" id="dStatus"></div>
+    <p class="about" id="dAbout"></p>
+    <dl class="facts" id="dFacts"></dl>
+    <div class="section-head">
+      <h3>Variables</h3>
+      <div class="range" id="dRange">
+        <button data-h="1">1 h</button><button data-h="6" class="on">6 h</button><button data-h="24">24 h</button>
+      </div>
+    </div>
+    <div class="vars" id="dVars"></div>
+    <h3>Configuración</h3>
+    <div class="config" id="dConfig"></div>
+    <h3>Última actividad</h3>
+    <div class="activity" id="dActivity"></div>
+    <div class="actions">
+      <a id="dGrafana" target="_blank" rel="noopener">Abrir en Grafana</a>
+      <a href="/iot/" target="_blank" rel="noopener">Controlar en el panel</a>
+    </div>
+  </div>
+</aside>
+
+<section class="feed" id="feed" aria-label="Actividad">
+  <div class="panel-head">
+    <h2>Actividad</h2>
+    <button class="icon" id="feedToggle" aria-label="Contraer actividad" title="Contraer">▾</button>
+  </div>
+  <ol id="feedList"></ol>
+</section>
+
+<footer class="timeline" id="timeline">
+  <button id="tlLive" class="on" title="Volver a datos en vivo">● En vivo</button>
+  <button id="tlPlay" class="icon" aria-label="Reproducir" title="Reproducir las últimas 24 h (espacio)">▶</button>
+  <div class="track" id="tlTrack">
+    <div class="marks" id="tlMarks"></div>
+    <input type="range" id="tlRange" min="0" max="1000" value="1000" aria-label="Momento a mostrar">
+  </div>
+  <span class="tl-time" id="tlTime">Ahora</span>
+  <select id="tlSpeed" aria-label="Velocidad de reproducción">
+    <option value="600">600×</option>
+    <option value="1800" selected>1800×</option>
+    <option value="3600">3600×</option>
+  </select>
+</footer>
+
+<div class="modal" id="reports" hidden role="dialog" aria-modal="true" aria-labelledby="rTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="rTitle">Informes del analista con IA</h2>
+      <div class="segmented small">
+        <button data-tab="reports" class="on">Informes</button>
+        <button data-tab="anomalies">Anomalías</button>
+        <button data-tab="rules">Reglas</button>
+      </div>
+      <button class="icon" id="rClose" aria-label="Cerrar" title="Cerrar (Esc)">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="r-list" id="rList"></div>
+      <article class="r-content" id="rContent"><p class="muted">Elige un informe.</p></article>
+    </div>
+  </div>
+</div>
+
+<div class="loading" id="loading"><div class="spinner"></div><p>Cargando la granja…</p></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="/iot/static/gemelo/js/main.js"></script>
+</body>
+</html>

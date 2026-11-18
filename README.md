@@ -8,6 +8,7 @@ de Bucaramanga (Open-Meteo) gobierna el clima, el secado del suelo y la temperat
 
 - **Dashboards (Grafana, lectura sin login):** https://agrocraft.northcentralus.cloudapp.azure.com
 - **Panel de control (retroceso):** https://agrocraft.northcentralus.cloudapp.azure.com/iot/
+- **Gemelo 3D en vivo (3D, 2.5D y 2D):** https://agrocraft.northcentralus.cloudapp.azure.com/iot/gemelo/
   (lectura pública; los comandos piden usuario `operador` y la clave `CONTROL_PASS` de `platform/.env` en la VM)
 - **Plan y estado del proyecto:** [PLAN.md](PLAN.md)
 
@@ -15,7 +16,9 @@ de Bucaramanga (Open-Meteo) gobierna el clima, el secado del suelo y la temperat
 |---|---|
 | `/` | Grafana: 5 dashboards (Resumen, Cultivo y riego, Clima, Operación y salud, Por dispositivo) y 6 alertas |
 | `/iot/` | Panel de control: comandos a cualquier dispositivo, reglas en la nube |
+| `/iot/gemelo/` | Gemelo 3D: la granja real del mundo (bloques exportados con `scripts/export_world.py`) con los sensores en vivo, vistas 3D/2.5D/2D, reproducción de 24 h, granja de simulación e informes con IA |
 | `/iot/api/devices` · `/iot/api/cmd` · `/iot/api/rules` | API REST del servicio de control |
+| `/iot/api/stream` · `/latest` · `/history/<id>` · `/replay` · `/events` · `/reports` | API de lectura del gemelo 3D (Server-Sent Events y consultas a InfluxDB) |
 | `/iot/api/ingest/<device>?token=…` | Ingesta HTTPS para dispositivos sin MQTT (celular) |
 | `/iot/api/alert?token=…` | Webhook de Grafana Alerting (puede ejecutar un comando por alerta) |
 | `/mqtt` · `:8883` | MQTT sobre WebSocket / sobre TLS |

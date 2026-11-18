@@ -1,6 +1,8 @@
 # Entrada pública de AgroCraft. Caddy obtiene y renueva el certificado TLS por su cuenta.
 {$SITE_HOST} {
-	encode zstd gzip
+	# Todo comprimido salvo el flujo en vivo del gemelo 3D (Server-Sent Events: cada mensaje sale al instante)
+	@comprimible not path /iot/api/stream
+	encode @comprimible zstd gzip
 
 	# Mapa web del mundo (squaremap, dentro del servidor de Minecraft)
 	redir /map /map/

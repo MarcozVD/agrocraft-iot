@@ -8,6 +8,7 @@ de la demo: 8 minutos.
 1. Abrir en pestañas:
    - Grafana Resumen: https://agrocraft.northcentralus.cloudapp.azure.com (rango: últimos 7 días)
    - Panel de control: https://agrocraft.northcentralus.cloudapp.azure.com/iot/ (iniciar sesión como operador)
+   - Gemelo 3D: https://agrocraft.northcentralus.cloudapp.azure.com/iot/gemelo/
    - Mapa: https://agrocraft.northcentralus.cloudapp.azure.com/map/?world=minecraft_overworld&zoom=5&x=12&z=0
    - Informes IA: https://agrocraft.northcentralus.cloudapp.azure.com/iot/reportes/
    - Repositorio en GitHub
@@ -26,6 +27,7 @@ de la demo: 8 minutos.
 | 6-7 | Simulación: iniciar "ola de calor" a 360× desde el panel | Dashboard Simulación: invernadero > 38 °C, THI > 78, aspersores; datos en medición aparte |
 | 7-8 | En el juego: `/agro tour` (visita guiada de 11 paradas) | Hologramas con el valor en vivo sobre cada dispositivo = mismo número que en Grafana |
 | 8-9 | Informe con IA → sección "Anomalías" | Detección por patrón diario (z ≥ 3 frente a la misma hora de días anteriores) |
+| 9-10 | Gemelo 3D (`/iot/gemelo/`): vista 3D → 2.5D → 2D, clic en un sensor, «Flujo de datos», reproducir 24 h | Los bloques son los del mundo real; cada paquete que vuela a la nube es un mensaje MQTT/AMQP real recibido por Server-Sent Events |
 
 ## Preguntas probables
 

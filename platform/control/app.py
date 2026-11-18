@@ -13,6 +13,7 @@
   POST /iot/api/notify/test        mensaje de prueba a Telegram/Discord   (requiere usuario operador)
   GET  /iot/api/notify/chats       chats que escribieron al bot de Telegram (requiere usuario operador)
   GET  /iot/api/health
+  GET  /iot/gemelo/                gemelo 3D en vivo (vistas 3D, 2.5D y 2D; API de lectura en live_api.py)
 
 Caddy publica este servicio bajo https://<host>/iot/ (Grafana ya ocupa /api/).
 Habla con los dispositivos solo por MQTT: publica en `cmd` y escucha `ack`, `state`, `status`, `telemetry`.
@@ -38,6 +39,7 @@ from base import MQTT_HOST, MQTT_PORT, now_ms
 from http_devices import PhoneProxy
 from amqp_live import AmqpLive
 from anomaly import Anomalies
+import live_api
 from notifier import Notifier, format_alert
 import report
 import report_page
@@ -181,6 +183,10 @@ def token_ok(request: web.Request, expected: str) -> bool:
 
 async def index(request):
     return web.FileResponse(STATIC / "index.html")
+
+
+async def gemelo(request):
+    return web.FileResponse(STATIC / "gemelo" / "index.html", headers={"Cache-Control": "no-cache"})
 
 
 async def devices(request):
@@ -393,6 +399,8 @@ async def on_startup(app):
     proxies = {"phone-01": PhoneProxy("phone-01")}
     rules = Rules(hub)
     hub.listeners.append(rules.on_message)
+    app["broadcaster"] = live_api.Broadcaster()
+    hub.listeners.append(app["broadcaster"].on_message)
     hub.start()
     if os.environ.get("AMQP_PASS"):
         app["amqp"] = AmqpLive(hub)
@@ -439,6 +447,9 @@ def main() -> None:
         web.get("/iot/reportes/{name}", show_report),
         web.post("/iot/api/notify/test", notify_test),
         web.get("/iot/api/notify/chats", notify_chats),
+        web.get("/iot/gemelo", lambda r: web.HTTPFound("/iot/gemelo/")),
+        web.get("/iot/gemelo/", gemelo),
+        *live_api.routes(),
         web.static("/iot/static", STATIC),
     ])
     web.run_app(app, host="0.0.0.0", port=8080, access_log=None)
