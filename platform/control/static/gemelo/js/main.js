@@ -6,6 +6,9 @@ import { Stage } from "./scene.js";
 import { Twins } from "./twins.js";
 import { Live, Replay, getJSON } from "./data.js";
 import { CLASSES, DEVICES, fieldLabel, formatValue, ticksToClock, baseId } from "./catalog.js";
+import { Charts } from "./charts.js";
+import { Stream } from "./stream.js";
+import { HELP, assess, GLOSSARY } from "./glossary.js";
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -28,7 +31,7 @@ const ui = {
   farm: "real", mode: "live", replay: null, replayT: 0, playing: false, selected: null, range: 6,
   history: null, tour: null, events: [], anomalies: {}, dirty: true, lastApply: 0, values: {}, hover: null,
 };
-let stage, twins, live;
+let stage, twins, live, charts, stream;
 
 // ------------------------------------------------------------------------------------- arranque
 async function boot() {
@@ -46,10 +49,14 @@ async function boot() {
     throw error;
   }
   buildList();
+  charts = new Charts($("#pageCharts"), getJSON);
+  stream = new Stream($("#pageStream"), describeEvent);
+  buildGuide();
   bindUI();
   live = new Live();
   live.on(onLive);
   live.start();
+  setPage(new URLSearchParams(location.search).get("p") || "granja");
   loadEvents();
   refreshAnomalies();
   setInterval(refreshAnomalies, 120000);
@@ -63,6 +70,9 @@ async function boot() {
   };
   requestAnimationFrame(loop);
   setTimeout(() => $("#loading").classList.add("done"), 300);
+  let seen = false;
+  try { seen = localStorage.getItem("agro-guia") === "1"; } catch { /* sin almacenamiento: se muestra la guía */ }
+  if (!seen) setTimeout(openGuide, 900);
 }
 
 // ---------------------------------------------------------------------------------- datos
@@ -156,6 +166,8 @@ function onLive(kind, payload) {
   }
   const { device, channel, data, cls, at } = payload;
   ui.dirty = true;
+  stream.add(payload);
+  if (channel === "telemetry" && data && typeof data === "object") charts.push(device, data, data.ts || at);
   const id = ui.farm === "sim" ? (device.startsWith("sim-") ? baseId(device) : null) : device;
   if (ui.mode === "live" && id && DEVICES[id]) {
     if (channel === "telemetry") {
@@ -163,12 +175,14 @@ function onLive(kind, payload) {
       stage.sendPacket(id, "up", CLASSES[DEVICES[id].cls].color);
       flashRow(id);
       if (ui.selected === id && ui.history) appendHistory(data, at);
+    } else if (channel === "cmd") {
+      stage.sendPacket(id, "down", "#e8a33d");          // la orden baja
     } else if (channel === "ack") {
-      stage.sendPacket(id, "down", "#e8a33d");
+      stage.sendPacket(id, "up", "#ffd166");            // la confirmación sube
     }
   }
   if (channel === "event" && cls !== "sim") pushEvent({ t: at, device, class: cls, channel, data }, true);
-  if (channel === "ack" && cls !== "sim") pushEvent({ t: at, device, class: cls, channel: "ack", data }, true);
+  if ((channel === "ack" || channel === "cmd") && cls !== "sim") pushEvent({ t: at, device, class: cls, channel, data }, true);
   if (channel === "event" && device === "anomalias") refreshAnomalies();
 }
 
@@ -198,6 +212,15 @@ function tick(time, dt) {
     ui.dirty = false;
     ui.lastApply = time;
     applyAll();
+  }
+  if (ui.page !== "granja") {
+    if (time - (ui.lastFlush || 0) > 1) {
+      ui.lastFlush = time;
+      charts.flush(ui.page === "graficas");
+      if (ui.page === "graficas") renderSummary();
+      else stream.counters();
+    }
+    return;
   }
   twins.tick(time, dt);
   const w = ui.weather || {};
@@ -415,7 +438,10 @@ function renderDrawerValues(force = false) {
       for (const [, x] of pts) { lo = Math.min(lo, x); hi = Math.max(hi, x); sum += x; }
       mm = `<div class="mm"><span>mín ${formatValue(k, lo)}</span><span>prom ${formatValue(k, sum / pts.length)}</span><span>máx ${formatValue(k, hi)}</span></div>`;
     }
+    const st = assess(k, value, id);
+    const help = HELP[k] ? esc(HELP[k]) : "";
     return `<div class="var"><span class="k">${esc(fieldLabel(k))} ${zChip}</span><span class="v">${esc(formatValue(k, value))}</span>
+      ${st.text || help ? `<div class="vhelp">${st.text ? `<span class="lvl ${st.level}">${esc(st.text)}</span>` : ""}<span>${help}</span></div>` : ""}
       ${ui.history ? sparkline(pts, k, ui.mode === "replay" ? ui.replayT : null) : ""}${mm}</div>`;
   }).join("") : `<p class="muted">${ui.farm === "sim" ? "La simulación está en pausa: aún no hay telemetría." : "Sin telemetría todavía."}</p>`;
 
@@ -692,7 +718,121 @@ function layoutTop() {
   document.documentElement.style.setProperty("--top", `${Math.round(bar.bottom + 10)}px`);
 }
 
+// ---------------------------------------------------------------------------------- páginas
+function setPage(page) {
+  if (!["granja", "graficas", "mensajes"].includes(page)) page = "granja";
+  ui.page = page;
+  document.body.classList.toggle("page-granja", page === "granja");
+  for (const b of document.querySelectorAll("[data-page]")) b.classList.toggle("on", b.dataset.page === page);
+  $("#pageCharts").hidden = page !== "graficas";
+  $("#pageStream").hidden = page !== "mensajes";
+  if (page !== "granja") stopTour();
+  if (page === "graficas") {
+    if (!charts.built) charts.load().then(renderSummary);
+    else charts.resize();
+  }
+  if (page === "mensajes" && !stream.built) {
+    stream.build();
+    const known = [...(live?.devices.values() || [])].sort((a, b) => (b.telemetry_ts || 0) - (a.telemetry_ts || 0));
+    for (const d of known) {
+      if (d.telemetry && Object.keys(d.telemetry).length) {
+        stream.add({ cls: d.class, device: d.device, channel: "telemetry", data: { ts: d.telemetry_ts, ...d.telemetry }, at: d.telemetry_ts }, true);
+      }
+    }
+    stream.render();
+  }
+  const url = new URL(location.href);
+  if (page === "granja") url.searchParams.delete("p");
+  else url.searchParams.set("p", page);
+  history.replaceState(null, "", url);
+  layoutTop();
+  ui.dirty = true;
+}
+
+// Resumen en palabras arriba de las gráficas
+function renderSummary() {
+  const host = document.getElementById("chSummary");
+  if (!host) return;
+  const v = currentValues();
+  const card = (title, big, text, st) => `<div class="sum-card"><h4>${title}</h4><b>${big}</b>
+    ${st && st.text ? `<span><span class="lvl ${st.level}">${esc(st.text)}</span></span>` : ""}<span class="txt">${text}</span></div>`;
+  const cl = v["api-clima"] || {}, tk = v["mc-tanque"] || {}, a = v["mc-parcela-a"] || {}, b = v["mc-parcela-b"] || {};
+  const co = v["mc-corral"] || {}, se = v["mc-seguridad"] || {}, gh = v["mc-invernadero"] || {};
+  const online = IDS.filter((id) => statusOf(id) === "online").length;
+  const open = (ui.openAnomalies || []).length;
+  const soilWorst = Math.min(a.soil_pct ?? 100, b.soil_pct ?? 100);
+  host.innerHTML = [
+    card("Clima en Bucaramanga", `${formatValue("temp_c", cl.temp_c)} · ${formatValue("hum_pct", cl.hum_pct)}`,
+      `${(v["mc-estacion"] || {}).raining >= 0.5 ? "Está lloviendo." : "Sin lluvia ahora."} Sol: ${formatValue("radiation_wm2", cl.radiation_wm2)}.`),
+    card("Agua", `Tanque al ${formatValue("level_pct", tk.level_pct)}`,
+      `Hay ${formatValue("volume_l", tk.volume_l)} de 2000 L. La bomba está ${tk.pump >= 0.5 ? "encendida" : "apagada"}.`, assess("level_pct", tk.level_pct)),
+    card("Cultivos", `A ${formatValue("soil_pct", a.soil_pct)} · B ${formatValue("soil_pct", b.soil_pct)}`,
+      `Humedad del suelo de cada parcela. ${a.irrigation >= 0.5 || b.irrigation >= 0.5 ? "Se está regando ahora." : "Sin riego en este momento."}`,
+      assess("soil_pct", soilWorst)),
+    card("Invernadero", formatValue("temp_c", gh.temp_c),
+      `Ventilas ${(gh.vent_open ?? gh.vent) >= 0.5 ? "abiertas" : "cerradas"}, calefacción ${gh.heater >= 0.5 ? "encendida" : "apagada"}.`,
+      assess("temp_c", gh.temp_c, "mc-invernadero")),
+    card("Ganado", `${formatValue("cows_total", co.cows_total)} vacas`,
+      `THI ${formatValue("thi", co.thi)}, bienestar ${formatValue("welfare_pct", co.welfare_pct)}.`, assess("thi", co.thi)),
+    card("Seguridad", se.alarm >= 0.5 ? "Alarma sonando" : "Todo tranquilo",
+      `${formatValue("hostiles_near", se.hostiles_near)} monstruos cerca, portón ${se.gate_open >= 0.5 ? "abierto" : "cerrado"}.`,
+      se.alarm >= 0.5 ? { level: "bad", text: "Revisar" } : { level: "ok", text: "Normal" }),
+    card("Sistema", `${online} de ${IDS.length} en línea`,
+      `${live ? live.rate() : 0} mensajes por minuto. ${open ? `${open} anomalías abiertas.` : "Sin anomalías abiertas."}`,
+      online === IDS.length ? { level: "ok", text: "Todo conectado" } : { level: "warn", text: `${IDS.length - online} sin conexión` }),
+  ].join("");
+}
+
+// ------------------------------------------------------------------------------------ guía
+function buildGuide() {
+  const classes = ["twin", "api", "dataset", "real"]
+    .map((c) => `<span><i style="background:${CLASSES[c].color}"></i><b>${CLASSES[c].label}</b></span>`).join("");
+  $("#guideBody").innerHTML = `
+    <section><h3>AgroCraft en 30 segundos</h3>
+      <p>Es una granja inteligente de práctica. Tiene <b>17 dispositivos</b> que miden cosas (temperatura, humedad de la tierra, agua del tanque, calor de las vacas…) y envían esas lecturas a una plataforma propia en la nube de Azure. La granja existe como <b>gemelo digital</b> dentro de un mundo de Minecraft que sigue el clima real de Bucaramanga: si llueve en la ciudad, llueve en la granja; si hace sol, la tierra se seca.</p></section>
+    <section><h3>Cómo viaja un dato</h3>
+      <div class="flow-diagram">
+        <div><b>1. Medir</b>Un sensor, el celular, una API de clima o un archivo de datos produce una lectura.</div>
+        <div><b>2. Enviar</b>El dispositivo publica un mensaje (MQTT, AMQP o HTTPS) con un tema como <code>agro/twin/mc-tanque/telemetry</code>.</div>
+        <div><b>3. Repartir</b>El bróker en Azure lo recibe, revisa que el dispositivo tenga permiso y lo entrega a quien lo pidió.</div>
+        <div><b>4. Guardar</b>Se guarda en una base de datos de series de tiempo (InfluxDB) para las gráficas e informes.</div>
+        <div><b>5. Mostrar</b>Llega a esta página en menos de un segundo: mapa, gráficas y mensajes cambian solos.</div>
+      </div>
+      <p class="flow-back"><b>Y de vuelta (retroceso):</b> desde el panel de control, una regla automática o una alerta, la nube manda una <b>orden</b> al dispositivo (apagar, calibrar, regar…). El dispositivo la cumple y responde con una <b>confirmación</b>. En la pantalla «Mensajes» se ven las dos.</p></section>
+    <section><h3>Las tres pantallas</h3>
+      <div class="screens">
+        <div><b>Granja 3D</b>La granja tal como está construida en el mundo. Cada figura flotante es un dispositivo con su valor en vivo; haz clic para ver qué mide y su historia. Las bolitas que viajan hacia la nube son mensajes reales llegando. Abajo puedes reproducir las últimas 24 horas. Se ve en 3D, 2.5D (isométrico) y 2D (plano).</div>
+        <div><b>Gráficas</b>Un resumen en palabras y gráficas por tema que crecen con cada dato. Las líneas punteadas amarillas son umbrales: el valor en que el sistema actúa solo. Debajo de cada gráfica: valor actual, si está bien, promedio, mínimo y máximo.</div>
+        <div><b>Mensajes</b>Los datos «en crudo»: cada mensaje tal como viaja, con su hora, tema, protocolo, tamaño y contenido. Haz clic en uno para verlo completo y explicado en palabras.</div>
+      </div></section>
+    <section><h3>Colores</h3>
+      <div class="legend-row">${classes}</div>
+      <p style="margin-top:8px">El estado siempre va con palabras: <span class="lvl ok">Normal / Ideal</span> <span class="lvl warn">Atención</span> <span class="lvl bad">Problema</span> <span class="lvl info">Informativo</span>. Un marcador gris está desconectado; uno rojo tiene algo que revisar.</p></section>
+    <section><h3>Cómo moverse</h3>
+      <div class="keys">
+        <span><kbd>Arrastrar</kbd>girar (3D) o mover (2.5D y 2D)</span><span><kbd>Rueda</kbd>acercar y alejar</span>
+        <span><kbd>Clic derecho</kbd>mover el mapa en 3D</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>vista 3D, 2.5D, 2D</span>
+        <span><kbd>T</kbd>recorrido automático</span><span><kbd>Espacio</kbd>reproducir 24 h</span>
+        <span><kbd>R</kbd>informes de la IA</span><span><kbd>G</kbd>esta guía</span>
+      </div></section>
+    <section><h3>Palabras que vas a ver</h3>
+      <dl class="gloss">${GLOSSARY.map(([t, d]) => `<div><dt>${t}</dt><dd>${d}</dd></div>`).join("")}</dl></section>`;
+}
+
+function openGuide() {
+  $("#guide").hidden = false;
+}
+
+function closeGuide() {
+  $("#guide").hidden = true;
+  try { localStorage.setItem("agro-guia", "1"); } catch { /* sin almacenamiento */ }
+}
+
 function bindUI() {
+  for (const b of document.querySelectorAll("[data-page]")) b.addEventListener("click", () => setPage(b.dataset.page));
+  $("#t-guide").addEventListener("click", openGuide);
+  $("#gClose").addEventListener("click", closeGuide);
+  $("#guide").addEventListener("click", (e) => { if (e.target.id === "guide") closeGuide(); });
   layoutTop();
   window.addEventListener("resize", layoutTop);
   for (const b of document.querySelectorAll("[data-view]")) b.addEventListener("click", () => setView(b.dataset.view));
@@ -736,6 +876,8 @@ function bindUI() {
   window.addEventListener("keydown", (e) => {
     if (e.target.matches("input, select, textarea")) return;
     const k = e.key.toLowerCase();
+    if (k === "g") return openGuide();
+    if (ui.page !== "granja" && k !== "escape") return;
     if (k === "1") setView("3d");
     else if (k === "2") setView("25d");
     else if (k === "3") setView("2d");
@@ -745,7 +887,7 @@ function bindUI() {
     else if (k === "h") $("#t-home").click();
     else if (k === "r") openReports();
     else if (k === " ") { e.preventDefault(); togglePlay(); }
-    else if (k === "escape") { if (!$("#reports").hidden) $("#reports").hidden = true; else closeDrawer(); }
+    else if (k === "escape") { if (!$("#guide").hidden) closeGuide(); else if (!$("#reports").hidden) $("#reports").hidden = true; else closeDrawer(); }
   });
 }
 

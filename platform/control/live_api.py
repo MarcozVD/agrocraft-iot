@@ -4,6 +4,7 @@
                                        del bróker (telemetry, state, status, event, ack) en vivo
   GET /iot/api/latest                  último valor guardado de cada variable (real: 6 h; simulación: 30 d)
   GET /iot/api/history/<device>        series de un dispositivo (?hours=6, agregadas para ~150 puntos)
+  GET /iot/api/series                  varias series a la vez (?keys=dev/campo,dev/campo&minutes=60)
   GET /iot/api/replay                  estado de los gemelos y del clima para reproducir (?hours=24)
   GET /iot/api/events                  últimos eventos, comandos, alertas y anomalías (?hours=24)
   GET /iot/api/reports                 informes del analista con IA (lista)
@@ -26,6 +27,7 @@ import report
 
 log = logging.getLogger("gemelo")
 DEVICE_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
+FIELD_RE = re.compile(r"^[a-z][a-z0-9_]{0,40}$")
 CLIENT_QUEUE = 400
 KEEPALIVE_S = 15
 
@@ -135,6 +137,38 @@ async def history(request: web.Request):
     return web.json_response({"device": device, "hours": hours, "every_min": every, "series": series})
 
 
+async def series(request: web.Request):
+    keys = [k for k in request.query.get("keys", "").split(",") if k][:48]
+    pairs = []
+    for key in keys:
+        device, _, field = key.partition("/")
+        if not DEVICE_RE.match(device) or not FIELD_RE.match(field):
+            raise web.HTTPBadRequest(text=f"serie inválida: {key}")
+        pairs.append((device, field))
+    if not pairs:
+        return web.json_response({"series": {}})
+    try:
+        minutes = max(5, min(int(request.query.get("minutes", "60")), 8 * 24 * 60))
+    except ValueError:
+        minutes = 60
+    every = max(10, round(minutes * 60 / 240))
+    real = [(d, f) for d, f in pairs if not d.startswith("sim-")]
+    sim = [(d, f) for d, f in pairs if d.startswith("sim-")]
+    out = defaultdict(list)
+    for measurement, group in (("telemetry", real), ("simulation", sim)):
+        if not group:
+            continue
+        cond = " or ".join(f'(r.device == "{d}" and r._field == "{f}")' for d, f in group)
+        rows = await _query(f'''from(bucket: "telemetry")
+  |> range(start: -{minutes}m)
+  |> filter(fn: (r) => r._measurement == "{measurement}")
+  |> filter(fn: (r) => {cond})
+  |> aggregateWindow(every: {every}s, fn: mean, createEmpty: false)''')
+        for row in rows:
+            out[f'{row["device"]}/{row["_field"]}'].append([_ms(row["_time"]), round(float(row["_value"]), 3)])
+    return web.json_response({"minutes": minutes, "every_s": every, "series": out})
+
+
 async def replay(request: web.Request):
     hours = _hours(request, 24, 72)
     every = 5 if hours <= 24 else 15
@@ -209,6 +243,7 @@ def routes() -> list:
         web.get("/iot/api/stream", stream),
         web.get("/iot/api/latest", latest),
         web.get("/iot/api/history/{device}", history),
+        web.get("/iot/api/series", series),
         web.get("/iot/api/replay", replay),
         web.get("/iot/api/events", events),
         web.get("/iot/api/reports", reports),

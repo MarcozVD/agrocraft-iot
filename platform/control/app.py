@@ -78,7 +78,8 @@ class Hub:
         if reason_code.is_failure:
             log.error("bróker rechazó la conexión: %s", reason_code)
             return
-        for channel in ("telemetry", "state", "status", "ack", "event"):
+        # cmd: también los comandos (panel, reglas, alertas, CLI) para mostrarlos en el flujo en vivo
+        for channel in ("telemetry", "state", "status", "ack", "event", "cmd"):
             client.subscribe(f"agro/+/+/{channel}", qos=1)
         log.info("conectado al bróker")
 

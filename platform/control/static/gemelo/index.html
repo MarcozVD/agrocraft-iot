@@ -8,7 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.min.css">
 <link rel="stylesheet" href="/iot/static/gemelo/app.css">
+<link rel="stylesheet" href="/iot/static/gemelo/pages.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314231B'/%3E%3Cpath d='M8 22h16M10 22c0-6 3-10 6-12 3 2 6 6 6 12' stroke='%237BC86C' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <script type="importmap">
 { "imports": {
@@ -16,6 +18,7 @@
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
 } }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" defer></script>
 </head>
@@ -25,30 +28,36 @@
 <header class="topbar">
   <div class="brand">
     <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#14231B"/><path d="M8 22h16M10 22c0-6 3-10 6-12 3 2 6 6 6 12" stroke="#7BC86C" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
-    <div><b>AgroCraft</b><span>Gemelo 3D</span></div>
+    <div><b>AgroCraft</b><span>Centro de datos</span></div>
   </div>
+  <nav class="segmented pages" role="tablist" aria-label="Pantalla">
+    <button data-page="granja" class="on" title="Mapa 3D de la granja con los sensores en vivo">Granja 3D</button>
+    <button data-page="graficas" title="Gráficas que se actualizan con cada dato">Gráficas</button>
+    <button data-page="mensajes" title="Mensajes en crudo tal como llegan">Mensajes</button>
+  </nav>
   <div class="pill live" id="live"><i></i><span>Conectando…</span></div>
   <div class="weather" id="weather" aria-live="polite"></div>
   <div class="spacer"></div>
-  <div class="segmented" role="tablist" aria-label="Vista">
+  <div class="segmented only-granja" role="tablist" aria-label="Vista">
     <button data-view="3d" class="on" title="Vista 3D libre (1)">3D</button>
     <button data-view="25d" title="Vista isométrica (2)">2.5D</button>
     <button data-view="2d" title="Plano cenital (3)">2D</button>
   </div>
-  <div class="rotate" id="rotate" hidden>
+  <div class="rotate only-granja" id="rotate" hidden>
     <button data-rot="-1" title="Girar a la izquierda" aria-label="Girar a la izquierda">⟲</button>
     <button data-rot="1" title="Girar a la derecha" aria-label="Girar a la derecha">⟳</button>
   </div>
-  <div class="segmented farm" role="tablist" aria-label="Granja">
+  <div class="segmented farm only-granja" role="tablist" aria-label="Granja">
     <button data-farm="real" class="on">Granja real</button>
     <button data-farm="sim">Simulación</button>
   </div>
   <div class="spacer"></div>
   <div class="tools">
-    <button id="t-labels" class="on" title="Etiquetas (L)">Etiquetas</button>
-    <button id="t-flow" class="on" title="Paquetes de datos hacia la nube (F)">Flujo de datos</button>
-    <button id="t-tour" title="Recorrido automático (T)">Recorrido</button>
-    <button id="t-home" title="Volver a la vista general (H)">Inicio</button>
+    <button id="t-labels" class="on only-granja" title="Etiquetas (L)">Etiquetas</button>
+    <button id="t-flow" class="on only-granja" title="Paquetes de datos hacia la nube (F)">Flujo de datos</button>
+    <button id="t-tour" class="only-granja" title="Recorrido automático (T)">Recorrido</button>
+    <button id="t-home" class="only-granja" title="Volver a la vista general (H)">Inicio</button>
+    <button id="t-guide" class="guide-btn" title="Guía para entender la pantalla (G)">¿Qué estoy viendo?</button>
     <button id="t-reports" class="accent" title="Informes del analista con IA (R)">Informes IA</button>
     <details class="links">
       <summary>Más</summary>
@@ -143,6 +152,19 @@
       <div class="r-list" id="rList"></div>
       <article class="r-content" id="rContent"><p class="muted">Elige un informe.</p></article>
     </div>
+  </div>
+</div>
+
+<main class="page" id="pageCharts" hidden aria-label="Gráficas en vivo"></main>
+<main class="page" id="pageStream" hidden aria-label="Mensajes en vivo"></main>
+
+<div class="modal" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gTitle">
+  <div class="modal-card guide-card">
+    <div class="modal-head">
+      <h2 id="gTitle">¿Qué estoy viendo?</h2>
+      <button class="icon" id="gClose" aria-label="Cerrar" title="Cerrar (Esc)">✕</button>
+    </div>
+    <div class="guide-body" id="guideBody"></div>
   </div>
 </div>
 
