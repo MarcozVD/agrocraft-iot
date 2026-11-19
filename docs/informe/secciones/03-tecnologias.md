@@ -41,6 +41,8 @@ puede publicar en sus propios temas y leer sus propios comandos.
 - **Mensajes retenidos** en `status` y `state`: quien se suscribe recibe de inmediato el último estado.
 - El número de secuencia `seq` permite medir mensajes perdidos (panel de Grafana "huecos en seq").
 
+**Protocolo AMQP 0-9-1 (RabbitMQ 3.13).** Segundo bróker, usado por el medidor de energía: publica cada lectura en el exchange de tipo *topic* `agro.telemetry` con la clave `<clase>.<dispositivo>` y espera la confirmación del bróker (*publisher confirms*); Telegraf la lee de la cola durable `telegraf-telemetry` y el servicio de control la recibe en una cola exclusiva para verla en vivo. Los comandos de ese dispositivo siguen por MQTT.
+
 **HTTPS REST** (servicio de control detrás de Caddy): ingesta del celular (`POST /iot/api/ingest/phone-01`
 con token), comandos (`POST /iot/api/cmd`, espera el `ack` hasta 10 s), webhook de alertas de Grafana.
 **HTTPS GET** hacia Open-Meteo para los dispositivos de API.

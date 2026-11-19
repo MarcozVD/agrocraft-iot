@@ -50,11 +50,10 @@
     </div>
   </div>
   <div class="datos">
-    <div><b>Integrantes</b> [por completar]</div>
-    <div><b>Docente</b> [por completar]</div>
     <div><b>URL del sistema</b> https://agrocraft.northcentralus.cloudapp.azure.com</div>
     <div><b>Repositorio</b> https://github.com/MarcozVD/agrocraft-iot</div>
-    <div><b>Fecha</b> 14 de noviembre de 2026</div>
+    <div><b>Integrantes</b> George Sebastian Makhlouf Ruiz (U00178462)<br>Juan Camilo Gomez Roa (U00177289)<br>Marcos Valera Daza (U00177223)</div>
+    <div><b>Fecha</b> 19 de noviembre de 2026</div>
   </div>
 </section>
 <section class="indice">
@@ -101,7 +100,7 @@ reproducidos como si midieran hoy).</p>
 <li>¿Qué pasaría ante una ola de calor, una sequía, una tormenta o una falla de la bomba?</li>
 </ol>
 <h2 id="14-alcance-de-la-captura">1.4 Alcance de la captura</h2>
-<p>Ventana analizada: <strong>11 Nov 2026 01:10 – 14 Nov 2026 10:43 (hora Colombia)</strong> (3.4 días), <strong>96 036 mensajes de telemetría</strong> de 17
+<p>Ventana analizada: <strong>11 Nov 2026 01:10 – 17 Nov 2026 01:05 (hora Colombia)</strong> (6.0 días), <strong>170 944 mensajes de telemetría</strong> de 17
 dispositivos, más los comandos, respuestas, eventos y alertas de ese periodo.</p>
 <h1 id="2-arquitectura-de-referencia-iot">2. Arquitectura de referencia IoT</h1>
 <p>La arquitectura conserva las cuatro capas vistas en clase (dispositivo, telecomunicaciones, plataforma
@@ -126,17 +125,17 @@ y un servicio de control escrito para el proyecto.</p>
 </tr>
 <tr>
 <td>Telecomunicaciones</td>
-<td>MQTT 3.1.1 (TLS 8883, WebSocket seguro en 443, red interna), HTTPS REST, HTTPS GET a Open-Meteo</td>
+<td>MQTT 3.1.1 (TLS 8883, WebSocket seguro en 443, red interna), AMQP 0-9-1 (RabbitMQ), HTTPS REST, HTTPS GET a Open-Meteo</td>
 <td>Transportar telemetría y comandos con cifrado y autenticación</td>
 </tr>
 <tr>
 <td>Plataforma</td>
-<td>Caddy, Mosquitto, Telegraf, InfluxDB, Grafana, servicio de control, servidor Paper con el plugin AgroCraft</td>
+<td>Caddy, Mosquitto, RabbitMQ, Telegraf, InfluxDB, Grafana, servicio de control (reglas, detector de anomalías, IA), servidor Paper con el plugin AgroCraft</td>
 <td>Recibir, autenticar, almacenar, procesar, decidir</td>
 </tr>
 <tr>
 <td>Operación</td>
-<td>Grafana, panel de control, mapa web, mundo de Minecraft, informes con IA, Telegram y Discord</td>
+<td>Grafana, centro de datos (granja 3D, panel de control, informes, mapa), mundo de Minecraft, informes con IA, Telegram y Discord</td>
 <td>Visualizar, alertar y operar</td>
 </tr>
 </tbody>
@@ -151,7 +150,7 @@ y un servicio de control escrito para el proyecto.</p>
    granja de simulación a una tercera (<code>simulation</code>).</li>
 <li>Grafana consulta InfluxDB con Flux para las gráficas y evalúa las alertas cada minuto.</li>
 </ol>
-<p>El celular no habla MQTT: hace POST por HTTPS al servicio de control, que lo representa ante el bróker
+<p>El medidor de energía (<code>ds-energia</code>) publica su telemetría por <strong>AMQP 0-9-1</strong> en el exchange <code>agro.telemetry</code> de RabbitMQ, con confirmación del bróker; Telegraf la consume de una cola durable. Si RabbitMQ no responde, la lectura sale por MQTT. El celular no habla MQTT: hace POST por HTTPS al servicio de control, que lo representa ante el bróker
 con su propio cliente MQTT. Los dispositivos de API consultan Open-Meteo por HTTPS y publican por MQTT.</p>
 <h2 id="23-flujo-de-recepcion-retroceso">2.3 Flujo de recepción (retroceso)</h2>
 <ol>
@@ -188,8 +187,8 @@ captura</strong> en sus variables principales.</p>
 <td>Real</td>
 <td>PC del operario como gateway de campo</td>
 <td>psutil / netsh (CPU 0-100 %, RAM 0-100 %, latencia TCP)</td>
-<td>cpu_pct: 0.0–100.0<br>ram_pct: 42.7–98.7<br>link_rtt_ms: 89.7–12 177.6</td>
-<td>8267</td>
+<td>cpu_pct: 0.0–100.0<br>ram_pct: 42.7–99.0<br>link_rtt_ms: 89.7–12 177.6</td>
+<td>15 751</td>
 <td>MQTT 3.1.1 / TLS 8883</td>
 </tr>
 <tr>
@@ -197,8 +196,8 @@ captura</strong> en sus variables principales.</p>
 <td>Real</td>
 <td>iPhone del operario (Sensor Logger)</td>
 <td>Barómetro 300-1100 hPa · micrófono -160-0 dBFS · acelerómetro ±8 g</td>
-<td>pressure_hpa: 894.7–900.3<br>sound_dbfs: -160.0–-2.6<br>battery_pct: 20.0–100.0</td>
-<td>3204</td>
+<td>pressure_hpa: 894.7–900.4<br>sound_dbfs: -160.0–-2.4<br>battery_pct: 5.0–100.0</td>
+<td>4522</td>
 <td>HTTPS POST → MQTT</td>
 </tr>
 <tr>
@@ -206,8 +205,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Parcela de trigo</td>
 <td>Sonda capacitiva v1.2: 0-100 % · BH1750: 1-65535 lx</td>
-<td>soil_pct: 29.4–100.0<br>growth_pct: 0.0–100.0</td>
-<td>9939</td>
+<td>soil_pct: 25.0–100.0<br>growth_pct: 0.0–100.0</td>
+<td>17 423</td>
 <td>MQTT (red interna)</td>
 </tr>
 <tr>
@@ -215,8 +214,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Parcela de zanahoria y papa</td>
 <td>Sonda capacitiva v1.2: 0-100 % · BH1750</td>
-<td>soil_pct: 35.0–100.0<br>growth_pct: 0.0–100.0</td>
-<td>9793</td>
+<td>soil_pct: 25.0–100.0<br>growth_pct: 0.0–100.0</td>
+<td>17 277</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -224,8 +223,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Tanque de 2000 L con bomba</td>
 <td>JSN-SR04T: 20-600 cm · YF-S201: 1-30 L/min</td>
-<td>level_pct: 23.3–92.4<br>outflow_lpm: 0.0–7194.9<br>inflow_lpm: 0.0–31.3</td>
-<td>9793</td>
+<td>level_pct: 16.1–92.4<br>outflow_lpm: 0.0–7206.3<br>inflow_lpm: 0.0–31.3</td>
+<td>17 277</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -233,8 +232,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Invernadero de vidrio</td>
 <td>SHT31: -40-125 °C, 0-100 % HR · BH1750</td>
-<td>temp_c: 19.2–33.3<br>hum_pct: 44.3–100.0<br>plant_health_pct: 1.2–100.0</td>
-<td>9793</td>
+<td>temp_c: 19.0–33.3<br>hum_pct: 44.3–100.0<br>plant_health_pct: 1.2–100.0</td>
+<td>17 277</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -242,8 +241,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Silo de cosecha</td>
 <td>Celda de carga HX711 (0-100 %)</td>
-<td>items: 0.0–696.0<br>fill_pct: 0.0–40.3</td>
-<td>4899</td>
+<td>items: 0.0–768.0<br>fill_pct: 0.0–44.4</td>
+<td>8642</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -251,8 +250,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Perímetro</td>
 <td>PIR HC-SR501 (3-7 m) · contacto magnético</td>
-<td>hostiles_near: 0.0–13.0</td>
-<td>9793</td>
+<td>hostiles_near: 0.0–30.0</td>
+<td>17 277</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -261,7 +260,7 @@ captura</strong> en sus variables principales.</p>
 <td>Estación meteorológica del mundo</td>
 <td>Pluviómetro de balancín · piranómetro</td>
 <td>daylight_lvl: 4.0–15.0</td>
-<td>4899</td>
+<td>8642</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -269,8 +268,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Corral automático de vacas</td>
 <td>RFID 134 kHz · nivel de comedero · THI (SHT31)</td>
-<td>cows_total: 4.0–12.0<br>thi: 67.4–77.9<br>welfare_pct: 46.3–100.0</td>
-<td>7774</td>
+<td>cows_total: 4.0–12.0<br>thi: 65.5–77.9<br>welfare_pct: 46.3–100.0</td>
+<td>15 258</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -278,8 +277,8 @@ captura</strong> en sus variables principales.</p>
 <td>Twin</td>
 <td>Salud del servidor del gemelo</td>
 <td>TPS 0-20 · memoria JVM</td>
-<td>tps: 17.3–20.0<br>heap_mb: 260.6–1284.5</td>
-<td>9793</td>
+<td>tps: 15.4–20.0<br>heap_mb: 243.9–1290.3</td>
+<td>17 277</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -287,8 +286,8 @@ captura</strong> en sus variables principales.</p>
 <td>API</td>
 <td>Clima real de Bucaramanga</td>
 <td>Open-Meteo Forecast (modelos ICON/GFS)</td>
-<td>temp_c: 19.1–29.6<br>hum_pct: 49.0–97.0<br>radiation_wm2: 0.0–908.0</td>
-<td>978</td>
+<td>temp_c: 18.8–29.6<br>hum_pct: 49.0–98.0<br>radiation_wm2: 0.0–908.0</td>
+<td>1720</td>
 <td>HTTPS GET → MQTT</td>
 </tr>
 <tr>
@@ -297,7 +296,7 @@ captura</strong> en sus variables principales.</p>
 <td>Calidad del aire</td>
 <td>Open-Meteo Air Quality (CAMS)</td>
 <td>pm2_5: 4.1–31.3<br>us_aqi: 38.0–76.0<br>uv_index: 0.0–9.8</td>
-<td>485</td>
+<td>861</td>
 <td>HTTPS GET → MQTT</td>
 </tr>
 <tr>
@@ -306,7 +305,7 @@ captura</strong> en sus variables principales.</p>
 <td>Suelo y evapotranspiración</td>
 <td>Open-Meteo (ET0 FAO-56)</td>
 <td>et0_mm: 0.0–0.2<br>soil_moist_m3m3: 0.4–0.5<br>soil_temp_c: 18.2–32.5</td>
-<td>490</td>
+<td>862</td>
 <td>HTTPS GET → MQTT</td>
 </tr>
 <tr>
@@ -314,8 +313,8 @@ captura</strong> en sus variables principales.</p>
 <td>API</td>
 <td>Pronóstico operativo de la granja</td>
 <td>Open-Meteo horario + modelo del gemelo</td>
-<td>hours_to_irrigation_a: 1.0–48.0<br>water_need_24h_l: 0.0–1335.5<br>thi_stress_hours_24h: 3.0–9.0</td>
-<td>258</td>
+<td>hours_to_irrigation_a: 1.0–48.0<br>water_need_24h_l: 0.0–1335.5<br>thi_stress_hours_24h: 2.0–9.0</td>
+<td>507</td>
 <td>HTTPS GET → MQTT</td>
 </tr>
 <tr>
@@ -323,8 +322,8 @@ captura</strong> en sus variables principales.</p>
 <td>DataSet</td>
 <td>Invernadero de referencia</td>
 <td>Autonomous Greenhouse Challenge 2019 (5 min)</td>
-<td>temp_c: 17.4–30.1<br>hum_pct: 64.0–93.0<br>co2_ppm: 444.0–1030.0</td>
-<td>981</td>
+<td>temp_c: 17.4–30.1<br>hum_pct: 40.3–93.0<br>co2_ppm: 409.0–1052.0</td>
+<td>1731</td>
 <td>MQTT</td>
 </tr>
 <tr>
@@ -332,15 +331,15 @@ captura</strong> en sus variables principales.</p>
 <td>DataSet</td>
 <td>Medidor eléctrico</td>
 <td>UCI Household Power Consumption (1 min)</td>
-<td>power_kw: 0.2–6.9<br>voltage_v: 228.6–248.6</td>
-<td>4897</td>
+<td>power_kw: 0.2–8.7<br>voltage_v: 225.8–248.9</td>
+<td>8640</td>
 <td>MQTT</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Por qué el rango observado es más estrecho que el del datasheet.</strong> Los sensores de referencia cubren
 condiciones extremas (por ejemplo, el SHT31 mide de −40 a 125 °C), mientras que el clima de Bucaramanga
-en noviembre se movió entre 19.1 y 29.6 °C. Los
+en noviembre se movió entre 18.8 y 29.6 °C. Los
 umbrales operativos (riego bajo 35 % de humedad de suelo, ventilación sobre 28 °C, estrés térmico del
 rebaño sobre THI 72-78) se eligieron dentro del rango del escenario, no del sensor.</p>
 <p><strong>Gemelos con modelo.</strong> Los gemelos no generan números al azar: el plugin calcula su estado cada
@@ -413,9 +412,15 @@ puede publicar en sus propios temas y leer sus propios comandos.</p>
 <li><strong>Mensajes retenidos</strong> en <code>status</code> y <code>state</code>: quien se suscribe recibe de inmediato el último estado.</li>
 <li>El número de secuencia <code>seq</code> permite medir mensajes perdidos (panel de Grafana "huecos en seq").</li>
 </ul>
+<p><strong>Protocolo AMQP 0-9-1 (RabbitMQ 3.13).</strong> Segundo bróker, usado por el medidor de energía: publica cada lectura en el exchange de tipo <em>topic</em> <code>agro.telemetry</code> con la clave <code>&lt;clase&gt;.&lt;dispositivo&gt;</code> y espera la confirmación del bróker (<em>publisher confirms</em>); Telegraf la lee de la cola durable <code>telegraf-telemetry</code> y el servicio de control la recibe en una cola exclusiva para verla en vivo. Los comandos de ese dispositivo siguen por MQTT.</p>
 <p><strong>HTTPS REST</strong> (servicio de control detrás de Caddy): ingesta del celular (<code>POST /iot/api/ingest/phone-01</code>
 con token), comandos (<code>POST /iot/api/cmd</code>, espera el <code>ack</code> hasta 10 s), webhook de alertas de Grafana.
 <strong>HTTPS GET</strong> hacia Open-Meteo para los dispositivos de API.</p>
+<p><strong>Sobre la API de Azure Maps Weather sugerida en el enunciado.</strong> Se probó el 16 de noviembre con la
+clave entregada y con las de la colección de Postman del curso: la primera respondió <code>401 AccountLocked</code>
+(la cuenta asociada está deshabilitada) y las otras <code>401 InvalidKey</code>. Por eso los dispositivos de API usan
+Open-Meteo, que ofrece las mismas variables (condiciones actuales, calidad del aire y pronóstico horario)
+sin clave y con las mismas coordenadas de Bucaramanga.</p>
 <p><strong>Ejemplo real de un ciclo de retroceso</strong> (tomado de la captura):</p>
 <pre><code>agro/twin/mc-parcela-a/cmd  {&quot;cmd_id&quot;: &quot;alerta-b777a742&quot;, &quot;action&quot;: &quot;set_config&quot;, &quot;params&quot;: {&quot;auto&quot;: 1}, &quot;source&quot;: &quot;alerta&quot;}
 agro/twin/mc-parcela-a/ack  {&quot;cmd_id&quot;: &quot;alerta-b777a742&quot;, &quot;action&quot;: &quot;set_config&quot;, &quot;ok&quot;: true, &quot;detail&quot;: &quot;configuración actualizada&quot;}
@@ -566,7 +571,8 @@ registra el evento y avisa por Telegram y Discord.</p>
 </table>
 <p><strong>Reglas en la nube</strong> (servicio de control), que cruzan datos de dispositivos distintos: encender las
 lámparas de crecimiento de las parcelas en días nublados (radiación real &lt; 150 W/m²) y cerrar las
-ventilas del invernadero si el aire exterior es malo (US AQI &gt; 100).</p>
+ventilas del invernadero si el aire exterior es malo (US AQI &gt; 100), y <strong>riego según el pronóstico</strong>: con 5 mm o más de lluvia esperada en 24 h (probabilidad ≥ 70 %) baja el umbral de riego de las parcelas a 25 % y con menos de 2 mm lo devuelve a 35 %.</p>
+<p><strong>Detector de anomalías</strong> (servicio de control): cada 10 minutos compara el promedio de 30 minutos de 14 variables con la media y la desviación de esa misma hora en los días anteriores; con |z| ≥ 3 dos veces seguidas abre una anomalía y con |z| &lt; 2 la cierra. También detecta sensores «pegados» (dos horas sin variación). Cada anomalía se publica como evento, llega a Telegram y Discord y entra al informe diario.</p>
 <p><strong>Control local en los gemelos</strong>, con histéresis: riego entre 35 y 65 % de humedad, bomba entre 25 y 90 %
 del tanque, ventilas entre 25 y 28 °C, calefacción bajo 16 °C, aspersores del corral sobre THI 75,
 comedero bajo 30 %, alarma ante hostiles.</p>
@@ -799,17 +805,288 @@ comedero bajo 30 %, alarma ante hostiles.</p>
 <td><code>mc-seguridad</code></td>
 <td>0 criatura(s) hostil(es) dentro de la cerca</td>
 </tr>
+<tr>
+<td>14 Nov 13:58</td>
+<td>firing</td>
+<td>Dispositivo sin datos</td>
+<td><code>gw-pc-01</code></td>
+<td>gw-pc-01 no envía datos hace 1816 s</td>
+</tr>
+<tr>
+<td>14 Nov 15:16</td>
+<td>resolved</td>
+<td>Dispositivo sin datos</td>
+<td><code>gw-pc-01</code></td>
+<td>gw-pc-01 no envía datos hace 16 s</td>
+</tr>
+<tr>
+<td>14 Nov 18:48</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>2 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 19:04</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 20:09</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 20:17</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 20:32</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 20:40</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 22:53</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 23:01</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 23:35</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>14 Nov 23:45</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 02:15</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 02:23</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 04:42</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 04:50</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 16:00</td>
+<td>firing</td>
+<td>Suelo seco</td>
+<td><code>mc-parcela-b</code></td>
+<td>Humedad del suelo de mc-parcela-b por debajo de 30 %: 29.3 %</td>
+</tr>
+<tr>
+<td>15 Nov 18:38</td>
+<td>resolved</td>
+<td>Suelo seco</td>
+<td><code>mc-parcela-b</code></td>
+<td>Humedad del suelo de mc-parcela-b por debajo de 30 %: 30.0 %</td>
+</tr>
+<tr>
+<td>15 Nov 19:32</td>
+<td>firing</td>
+<td>Tanque bajo</td>
+<td><code>mc-tanque</code></td>
+<td>Tanque al 16.1 % (umbral 20 %): se enciende la bomba</td>
+</tr>
+<tr>
+<td>15 Nov 19:36</td>
+<td>resolved</td>
+<td>Tanque bajo</td>
+<td><code>mc-tanque</code></td>
+<td>Tanque al 21.1 % (umbral 20 %): se enciende la bomba</td>
+</tr>
+<tr>
+<td>15 Nov 20:32</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 20:38</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 22:01</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>15 Nov 22:07</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 00:55</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 01:01</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 01:46</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 01:56</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 03:39</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 03:45</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 08:41</td>
+<td>firing</td>
+<td>Suelo seco</td>
+<td><code>mc-parcela-b</code></td>
+<td>Humedad del suelo de mc-parcela-b por debajo de 30 %: 29.0 %</td>
+</tr>
+<tr>
+<td>16 Nov 09:23</td>
+<td>resolved</td>
+<td>Suelo seco</td>
+<td><code>mc-parcela-b</code></td>
+<td>Humedad del suelo de mc-parcela-b por debajo de 30 %: 32.7 %</td>
+</tr>
+<tr>
+<td>16 Nov 12:29</td>
+<td>firing</td>
+<td>Suelo seco</td>
+<td><code>mc-parcela-a</code></td>
+<td>Humedad del suelo de mc-parcela-a por debajo de 30 %: 29.4 %</td>
+</tr>
+<tr>
+<td>16 Nov 14:03</td>
+<td>resolved</td>
+<td>Suelo seco</td>
+<td><code>mc-parcela-a</code></td>
+<td>Humedad del suelo de mc-parcela-a por debajo de 30 %: 30.6 %</td>
+</tr>
+<tr>
+<td>16 Nov 19:18</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 19:28</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 21:11</td>
+<td>firing</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>1 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
+<tr>
+<td>16 Nov 21:21</td>
+<td>resolved</td>
+<td>Intruso en la granja</td>
+<td><code>mc-seguridad</code></td>
+<td>0 criatura(s) hostil(es) dentro de la cerca</td>
+</tr>
 </tbody>
 </table>
 <h2 id="44-otras-vistas">4.4 Otras vistas</h2>
 <ul>
-<li><strong>Panel de control</strong> (<code>/iot/</code>): estado y últimas lecturas de los 17 dispositivos y todos los comandos
-  de retroceso (requiere usuario de operador).</li>
+<li><strong>Centro de datos</strong> (<code>/iot/gemelo/</code>): una sola página con cuatro pantallas. <em>Granja 3D</em>: los bloques reales del
+  mundo con cada sensor en vivo, en vistas 3D, 2.5D y 2D, reproducción de las últimas 24 h y recorrido guiado.
+  <em>Panel de control</em>: los 17 dispositivos con su último valor, su estado en palabras y estadísticas de 6 h; el
+  detalle de cada uno tiene una gráfica en vivo por variable (umbrales, promedio, mínimo y máximo), sus mensajes
+  en crudo explicados y todos los comandos de retroceso (requiere usuario de operador). <em>Informes IA</em> y <em>Mapa</em>
+  embebidos. Los datos llegan por Server-Sent Events en menos de un segundo.</li>
 <li><strong>Mapa web</strong> (<code>/map/</code>): vista del mundo con un marcador por gemelo, coloreado según su estado.</li>
 <li><strong>Dentro del mundo</strong>: letreros con lecturas en vivo, un tablero con los datos reales y palancas.</li>
-<li><strong>Informes con IA</strong> (<code>/iot/reportes/</code>): análisis diario redactado por Claude a partir de las estadísticas.</li>
+<li><strong>Informes con IA</strong> (<code>/iot/reportes/</code>): análisis diario redactado por un modelo de lenguaje (DeepSeek V4.1 Flash vía TokenHarbor) a partir de las estadísticas.</li>
 </ul>
-<figure><img src="../evidencias/panel-control.png"><figcaption>Figura 5. Panel de control: cada botón publica un comando MQTT y muestra la respuesta (ack) del dispositivo.</figcaption></figure>
+<figure><img src="../evidencias/centro-granja3d.png"><figcaption>Figura 5. Centro de datos, Granja 3D: los bloques reales del mundo con el valor en vivo de cada sensor; las bolitas que viajan a la nube son mensajes recibidos.</figcaption></figure>
+<figure><img src="../evidencias/centro-panel.png"><figcaption>Figura 6. Centro de datos, Panel de control: resumen en palabras, reglas en la nube y una tarjeta por dispositivo con estadísticas de 6 h.</figcaption></figure>
 <h1 id="5-retroceso-control-de-los-dispositivos-desde-la-plataforma">5. Retroceso: control de los dispositivos desde la plataforma</h1>
 <p>Todos los dispositivos, de las cuatro clases, aceptan los mismos comandos básicos:</p>
 <table>
@@ -1086,10 +1363,10 @@ la nube, las alertas de Grafana y las <strong>palancas dentro del mundo</strong>
 </tr>
 </tbody>
 </table>
-<figure><img src="figuras/exp-e1.png"><figcaption>Figura 6. E1: al apagar el envío de api-aire queda un hueco de una hora; la alerta &quot;Dispositivo sin datos&quot; se disparó a los 30 minutos sin datos y se resolvió al reencenderlo.</figcaption></figure>
-<figure><img src="figuras/exp-e2.png"><figcaption>Figura 7. E2: la descalibración de +3 °C produce un escalón en la temperatura reportada del invernadero de referencia, que desaparece al borrar la calibración.</figcaption></figure>
-<figure><img src="figuras/exp-e5.png"><figcaption>Figura 8. E5: con el riego en manual, la humedad de la parcela A cae bajo 30 %; la alerta &quot;Suelo seco&quot; ejecuta set_config auto=1 y el riego arranca solo un segundo después.</figcaption></figure>
-<figure><img src="figuras/exp-calor.png"><figcaption>Figura 9. Invernadero: la alerta de estrés térmico abre las ventilas (11:14 y 14:59); en E9 un jugador las cierra y abre con la palanca del mundo.</figcaption></figure>
+<figure><img src="figuras/exp-e1.png"><figcaption>Figura 7. E1: al apagar el envío de api-aire queda un hueco de una hora; la alerta &quot;Dispositivo sin datos&quot; se disparó a los 30 minutos sin datos y se resolvió al reencenderlo.</figcaption></figure>
+<figure><img src="figuras/exp-e2.png"><figcaption>Figura 8. E2: la descalibración de +3 °C produce un escalón en la temperatura reportada del invernadero de referencia, que desaparece al borrar la calibración.</figcaption></figure>
+<figure><img src="figuras/exp-e5.png"><figcaption>Figura 9. E5: con el riego en manual, la humedad de la parcela A cae bajo 30 %; la alerta &quot;Suelo seco&quot; ejecuta set_config auto=1 y el riego arranca solo un segundo después.</figcaption></figure>
+<figure><img src="figuras/exp-calor.png"><figcaption>Figura 10. Invernadero: la alerta de estrés térmico abre las ventilas (11:14 y 14:59); en E9 un jugador las cierra y abre con la palanca del mundo.</figcaption></figure>
 <h2 id="52-lecciones-de-los-experimentos">5.2 Lecciones de los experimentos</h2>
 <ul>
 <li><strong>Una orden automática no debe dejar al equipo en manual.</strong> La primera alerta de calor abrió las
@@ -1210,7 +1487,7 @@ cada escenario; todos los escenarios cumplen sus criterios:</p>
 </tr>
 </tbody>
 </table>
-<figure><img src="../evidencias/dash-simulacion.png"><figcaption>Figura 10. Dashboard de simulación durante la batería de pruebas: entradas de cada escenario, agua, invernadero, actuadores, cultivo y reloj simulado.</figcaption></figure>
+<figure><img src="../evidencias/dash-simulacion.png"><figcaption>Figura 11. Dashboard de simulación durante la batería de pruebas: entradas de cada escenario, agua, invernadero, actuadores, cultivo y reloj simulado.</figcaption></figure>
 <p><strong>Lo que enseña la simulación.</strong> Con una ola de calor el invernadero llega a 38-40 °C aun con las
 ventilas abiertas y las plantas mueren en un día: las ventilas no bastan y haría falta sombra o
 enfriamiento evaporativo. Con la bomba averiada el tanque se vacía y el suelo se seca por completo en
@@ -1219,13 +1496,13 @@ mismo modelo que corre la granja real, con los mismos umbrales.</p>
 <h1 id="7-analisis-de-graficas-y-comportamiento">7. Análisis de gráficas y comportamiento</h1>
 <blockquote>
 <p>Este análisis fue redactado con asistencia de inteligencia artificial (Claude, de Anthropic) a partir de
-las estadísticas exportadas de InfluxDB para la ventana 11 Nov 2026 01:10 – 14 Nov 2026 10:43 (hora Colombia), y cada afirmación se verificó
+las estadísticas exportadas de InfluxDB para la ventana 11 Nov 2026 01:10 – 17 Nov 2026 01:05 (hora Colombia), y cada afirmación se verificó
 contra su gráfica. Todas las cifras de esta sección se recalculan automáticamente desde los datos.
 Además, el sistema genera cada día un informe automático con IA en <code>/iot/reportes/</code>. Las zonas grises
 de las gráficas son huecos de más de 30 minutos sin datos.</p>
 </blockquote>
 <h2 id="71-vision-general">7.1 Visión general</h2>
-<figure><img src="figuras/disponibilidad.png"><figcaption>Figura 11. Disponibilidad de datos de los 17 dispositivos durante la captura.</figcaption></figure>
+<figure><img src="figuras/disponibilidad.png"><figcaption>Figura 12. Disponibilidad de datos de los 17 dispositivos durante la captura.</figcaption></figure>
 <p>Los nueve gemelos, los dos datasets y las cuatro APIs reportaron de forma continua. Sus únicos cortes
 fueron de alrededor de un minuto, por los reinicios del servidor al instalar nuevas versiones del plugin
 (registrados en la bitácora), y uno intencional: el experimento E1 apagó <code>api-aire</code> durante una hora.
@@ -1244,6 +1521,11 @@ reportar cuando se apaga y el celular solo envía mientras la app está grabando
 <td><code>api-aire</code></td>
 <td>11 Nov 14:30</td>
 <td>70</td>
+</tr>
+<tr>
+<td><code>api-clima</code></td>
+<td>16 Nov 10:30</td>
+<td>20</td>
 </tr>
 <tr>
 <td><code>gw-pc-01</code></td>
@@ -1290,20 +1572,40 @@ reportar cuando se apaga y el celular solo envía mientras la app está grabando
 <td>14 Nov 00:54</td>
 <td>560</td>
 </tr>
+<tr>
+<td><code>phone-01</code></td>
+<td>14 Nov 11:44</td>
+<td>366</td>
+</tr>
+<tr>
+<td><code>phone-01</code></td>
+<td>14 Nov 19:14</td>
+<td>958</td>
+</tr>
+<tr>
+<td><code>phone-01</code></td>
+<td>15 Nov 13:07</td>
+<td>1792</td>
+</tr>
+<tr>
+<td><code>phone-01</code></td>
+<td>16 Nov 19:22</td>
+<td>289</td>
+</tr>
 </tbody>
 </table>
 <h2 id="72-el-clima-real-gobierna-al-gemelo">7.2 El clima real gobierna al gemelo</h2>
-<figure><img src="figuras/cruce-temperatura.png"><figcaption>Figura 12. Temperatura exterior real de Bucaramanga, invernadero gemelo e invernadero de referencia de Wageningen.</figcaption></figure>
-<p>La temperatura exterior siguió un ciclo diario regular entre 19.1 °C (madrugada)
+<figure><img src="figuras/cruce-temperatura.png"><figcaption>Figura 13. Temperatura exterior real de Bucaramanga, invernadero gemelo e invernadero de referencia de Wageningen.</figcaption></figure>
+<p>La temperatura exterior siguió un ciclo diario regular entre 18.8 °C (madrugada)
 y 29.6 °C (primeras horas de la tarde), con un promedio de
-23.7 °C. El invernadero gemelo reproduce ese ciclo con un desfase de minutos y
+23.3 °C. El invernadero gemelo reproduce ese ciclo con un desfase de minutos y
 una <strong>ganancia solar de 3 a 4 °C</strong> en las horas de sol: alcanzó 33.3 °C
 mientras afuera hacía como máximo 29.6 °C. Cuando pasa de 28 °C abre sus ventilas
 y la curva se aplana. De noche, sin radiación, las dos curvas coinciden. El invernadero real de
 Wageningen (dataset) muestra un régimen distinto: calefacción controlada que lo mantiene cerca de
 22-27 °C de día y caídas nocturnas hasta 17.4 °C. Es el comportamiento de
 un invernadero holandés en primavera, que sirve de contraste con el clima tropical de montaña.</p>
-<figure><img src="figuras/cruce-agua.png"><figcaption>Figura 13. Humedad del suelo de las parcelas, nivel del tanque y lluvia real.</figcaption></figure>
+<figure><img src="figuras/cruce-agua.png"><figcaption>Figura 14. Humedad del suelo de las parcelas, nivel del tanque y lluvia real.</figcaption></figure>
 <p>El riego automático mantuvo las parcelas entre 35 y 65 % de humedad. Cada parcela se secó despacio de
 noche y rápido al mediodía, por la evapotranspiración real (ET0 de hasta 0.17 mm
 cada 15 min). Cuando bajaban de 35 % se abría el riego y el tanque bajaba en escalones; la bomba lo
@@ -1311,92 +1613,92 @@ rellenaba al pasar de 25 %. Las lluvias reales de las tardes del 13 y 14 de novi
 0.6 mm cada 15 min) se ven en la gráfica: el suelo subió solo hasta saturarse
 y el tanque se recargó sin bomba. La parcela B, que se seca 25 % más rápido, necesitó más riegos que la A.
 El único momento en que el suelo bajó de 30 % fue el experimento E5 (mínimo
-29.4 %), que terminó con la alerta "Suelo seco" devolviendo el riego a automático.</p>
+25.0 %), que terminó con la alerta "Suelo seco" devolviendo el riego a automático.</p>
 <h2 id="73-dispositivos-de-api-y-pronostico">7.3 Dispositivos de API y pronóstico</h2>
-<figure><img src="figuras/dev-api-clima.png"><figcaption>Figura 14. api-clima: temperatura, humedad, radiación y lluvia de Bucaramanga.</figcaption></figure>
+<figure><img src="figuras/dev-api-clima.png"><figcaption>Figura 15. api-clima: temperatura, humedad, radiación y lluvia de Bucaramanga.</figcaption></figure>
 <p>La humedad relativa fue inversa a la temperatura: entre 49 % a mediodía y
-97 % de madrugada. La radiación solar llegó a 908 W/m²
+98 % de madrugada. La radiación solar llegó a 908 W/m²
 en días despejados y se recortó en las tardes nubladas. La presión se mantuvo estable alrededor de
-907.4 hPa, lo esperable a unos 960 m de altitud.</p>
-<figure><img src="figuras/dev-api-aire.png"><figcaption>Figura 15. api-aire: material particulado, índice de calidad del aire e índice UV.</figcaption></figure>
-<p>La calidad del aire fue buena a moderada: PM2.5 promedio de 11.6 µg/m³ (máximo
+907.9 hPa, lo esperable a unos 960 m de altitud.</p>
+<figure><img src="figuras/dev-api-aire.png"><figcaption>Figura 16. api-aire: material particulado, índice de calidad del aire e índice UV.</figcaption></figure>
+<p>La calidad del aire fue buena a moderada: PM2.5 promedio de 12.2 µg/m³ (máximo
 31.3) y US AQI entre 38 y 76.
 Nunca se activó la regla que cierra las ventilas (AQI &gt; 100). El índice UV llegó a
 9.8 al mediodía. El hueco del 11 de noviembre es el experimento E1.</p>
-<figure><img src="figuras/dev-api-suelo.png"><figcaption>Figura 16. api-suelo: evapotranspiración de referencia, humedad y temperatura del suelo.</figcaption></figure>
-<figure><img src="figuras/dev-api-pronostico.png"><figcaption>Figura 17. api-pronostico: horas al próximo riego de la parcela A, agua prevista y horas de estrés térmico del rebaño.</figcaption></figure>
-<p>El pronóstico anticipó entre 3 y
+<figure><img src="figuras/dev-api-suelo.png"><figcaption>Figura 17. api-suelo: evapotranspiración de referencia, humedad y temperatura del suelo.</figcaption></figure>
+<figure><img src="figuras/dev-api-pronostico.png"><figcaption>Figura 18. api-pronostico: horas al próximo riego de la parcela A, agua prevista y horas de estrés térmico del rebaño.</figcaption></figure>
+<p>El pronóstico anticipó entre 2 y
 9 horas diarias de estrés térmico para el rebaño (THI &gt; 75)
-y máximas de 26.7 a 29.6 °C. Las
+y máximas de 26.4 a 29.6 °C. Las
 horas al próximo riego bajan como una rampa hasta 1 h justo antes de cada riego real, y saltan a 48 h
 (el horizonte) después de las lluvias, cuando el modelo no prevé riego en dos días.</p>
 <h2 id="74-datasets">7.4 Datasets</h2>
-<figure><img src="figuras/dev-ds-invernadero.png"><figcaption>Figura 18. ds-invernadero: invernadero de tomate de Wageningen reproducido en tiempo real.</figcaption></figure>
+<figure><img src="figuras/dev-ds-invernadero.png"><figcaption>Figura 19. ds-invernadero: invernadero de tomate de Wageningen reproducido en tiempo real.</figcaption></figure>
 <p>El invernadero de referencia muestra la operación de un invernadero comercial: CO₂ enriquecido de día
-(hasta 1030 ppm) que baja al ventilar, luz PAR con ciclo diario de hasta
-825 µmol/m²s y humedad alta (promedio 85 %).
+(hasta 1052 ppm) que baja al ventilar, luz PAR con ciclo diario de hasta
+825 µmol/m²s y humedad alta (promedio 80 %).
 El escalón de +3 °C del 11 de noviembre a las 14:37 es la descalibración del experimento E2.</p>
-<figure><img src="figuras/dev-ds-energia.png"><figcaption>Figura 19. ds-energia: consumo eléctrico de la vivienda de la finca (UCI).</figcaption></figure>
-<p>La potencia promedio fue 1.14 kW, con picos de hasta
-6.9 kW en las noches (cocina y calefacción de la vivienda original). Se ve
+<figure><img src="figuras/dev-ds-energia.png"><figcaption>Figura 20. ds-energia: consumo eléctrico de la vivienda de la finca (UCI).</figcaption></figure>
+<p>La potencia promedio fue 1.28 kW, con picos de hasta
+8.7 kW en las noches (cocina y calefacción de la vivienda original). Se ve
 la <strong>caída de tensión ante las cargas altas</strong>: cada pico de potencia coincide con una baja de tensión,
-que llegó a 228.6 V frente a un promedio de 241.8 V.</p>
+que llegó a 225.8 V frente a un promedio de 241.4 V.</p>
 <h2 id="75-dispositivos-reales">7.5 Dispositivos reales</h2>
-<figure><img src="figuras/dev-gw-pc-01.png"><figcaption>Figura 20. gw-pc-01: uso de CPU y RAM del PC del operario y latencia de su enlace con la nube.</figcaption></figure>
-<p>El PC trabajó con CPU promedio de 27 % y RAM de 69 %,
+<figure><img src="figuras/dev-gw-pc-01.png"><figcaption>Figura 21. gw-pc-01: uso de CPU y RAM del PC del operario y latencia de su enlace con la nube.</figcaption></figure>
+<p>El PC trabajó con CPU promedio de 25 % y RAM de 72 %,
 con jornadas de uso intenso y noches de reposo. La latencia hacia la VM en Azure (Estados Unidos) fue
 estable, alrededor de 200 ms, con picos aislados de más de un segundo propios de una conexión
 doméstica. El hueco gris es una noche con el equipo apagado: un dispositivo real deja de reportar cuando
 se apaga, y la alerta "Dispositivo sin datos" lo detecta.</p>
-<figure><img src="figuras/dev-phone-01.png"><figcaption>Figura 21. phone-01: presión barométrica, sonido ambiente y batería del iPhone.</figcaption></figure>
+<figure><img src="figuras/dev-phone-01.png"><figcaption>Figura 22. phone-01: presión barométrica, sonido ambiente y batería del iPhone.</figcaption></figure>
 <p>El celular solo transmite mientras Sensor Logger graba, por eso sus datos llegan en sesiones. La presión
-medida (promedio 897.6 hPa) es unos 10 hPa menor que la de Open-Meteo para
+medida (promedio 898.0 hPa) es unos 10 hPa menor que la de Open-Meteo para
 Bucaramanga: el teléfono está más alto que el punto de referencia del modelo. Los dos sensores siguen la
 misma tendencia. El micrófono distingue silencio (−160 dBFS, el piso del sensor) de actividad, y la
 batería muestra los ciclos de carga y descarga del día.</p>
 <h2 id="76-gemelos-digitales">7.6 Gemelos digitales</h2>
-<figure><img src="figuras/dev-mc-invernadero.png"><figcaption>Figura 22. mc-invernadero: temperatura, humedad, salud de las plantas y ventilas.</figcaption></figure>
+<figure><img src="figuras/dev-mc-invernadero.png"><figcaption>Figura 23. mc-invernadero: temperatura, humedad, salud de las plantas y ventilas.</figcaption></figure>
 <p>El invernadero gemelo abrió sus ventilas cada mediodía al pasar de 28 °C y las cerró al bajar de 25 °C.
 Aun así superó 32 °C varias horas el 11 y el 12 de noviembre; esa tarde la salud de las plantas cayó
 hasta 1 % (los arbustos perdieron sus frutos en el mundo) y se
 recuperó en las noches frescas. Es la misma conclusión que dio la simulación de ola de calor: <strong>las
 ventilas solas no bastan en las horas de mayor radiación</strong>. Las noches lluviosas del 13 y 14 saturaron la
 humedad interior al 100 %.</p>
-<figure><img src="figuras/dev-mc-parcela-a.png"><figcaption>Figura 23. mc-parcela-a: humedad del suelo, crecimiento del trigo y riego.</figcaption></figure>
-<figure><img src="figuras/dev-mc-parcela-b.png"><figcaption>Figura 24. mc-parcela-b: humedad del suelo, crecimiento de zanahoria y papa, y riego.</figcaption></figure>
-<p>Cada parcela completó <strong>2 cosechas</strong> en la ventana: el crecimiento
+<figure><img src="figuras/dev-mc-parcela-a.png"><figcaption>Figura 24. mc-parcela-a: humedad del suelo, crecimiento del trigo y riego.</figcaption></figure>
+<figure><img src="figuras/dev-mc-parcela-b.png"><figcaption>Figura 25. mc-parcela-b: humedad del suelo, crecimiento de zanahoria y papa, y riego.</figcaption></figure>
+<p>Cada parcela completó <strong>4 cosechas</strong> en la ventana: el crecimiento
 sube como rampa, más rápido con suelo húmedo y sol, y vuelve a cero al cosechar. Los pulsos azules son
 los riegos automáticos, más frecuentes en la parcela B.</p>
-<figure><img src="figuras/dev-mc-tanque.png"><figcaption>Figura 25. mc-tanque: nivel, salida a riego y entrada por bomba y lluvia.</figcaption></figure>
-<p>El tanque osciló entre 23 % y 92 %. Cada
+<figure><img src="figuras/dev-mc-tanque.png"><figcaption>Figura 26. mc-tanque: nivel, salida a riego y entrada por bomba y lluvia.</figcaption></figure>
+<p>El tanque osciló entre 16 % y 92 %. Cada
 riego se ve como una salida de 20 L/min y cada arranque de la bomba como una entrada de 30 L/min. Las
 lluvias reales aportaron entradas menores sin bomba.</p>
-<figure><img src="figuras/dev-mc-silo.png"><figcaption>Figura 26. mc-silo: unidades de cosecha almacenadas y porcentaje de llenado.</figcaption></figure>
+<figure><img src="figuras/dev-mc-silo.png"><figcaption>Figura 27. mc-silo: unidades de cosecha almacenadas y porcentaje de llenado.</figcaption></figure>
 <p>El silo recibió las cosechas de trigo y zanahoria y entregó trigo al comedero del corral. Llegó a
-696 unidades (40 % de su capacidad) sin alcanzar el 80 %
+768 unidades (44 % de su capacidad) sin alcanzar el 80 %
 que dispara la descarga automática.</p>
-<figure><img src="figuras/dev-mc-corral.png"><figcaption>Figura 27. mc-corral: rebaño, índice THI, bienestar y comedero.</figcaption></figure>
-<figure><img src="figuras/cruce-corral.png"><figcaption>Figura 28. Corral: THI calculado con el clima real y bienestar del rebaño.</figcaption></figure>
-<p>El rebaño creció de 4 a 12 vacas (10
+<figure><img src="figuras/dev-mc-corral.png"><figcaption>Figura 28. mc-corral: rebaño, índice THI, bienestar y comedero.</figcaption></figure>
+<figure><img src="figuras/cruce-corral.png"><figcaption>Figura 29. Corral: THI calculado con el clima real y bienestar del rebaño.</figcaption></figure>
+<p>El rebaño creció de 4 a 12 vacas (23
 nacimientos). Al superar el objetivo de 8 adultas, la planta de proceso entregó
-6 unidades de carne asada a la cámara. El THI siguió el ciclo del clima
-real, entre 67.4 y 77.9: todas las tardes entró en zona de
+51 unidades de carne asada a la cámara. El THI siguió el ciclo del clima
+real, entre 65.5 y 77.9: todas las tardes entró en zona de
 alerta (&gt; 72) y rozó la de peligro (78). El bienestar bajó en esas tardes y se recuperó de noche.</p>
 <p>La caída más fuerte (a 46 %) ocurrió la madrugada del 12 de noviembre:
 el comedero se vació porque en el silo todavía no había trigo. El análisis de los eventos reveló además
 un error: mientras el silo estaba vacío, el comedero publicaba un evento de reintento cada segundo
 (más de 30 000 en la ventana). Se corrigió en la versión 0.6.1 del plugin: ahora usa zanahoria como
 forraje y avisa una sola vez.</p>
-<figure><img src="figuras/dev-mc-seguridad.png"><figcaption>Figura 29. mc-seguridad: criaturas hostiles en la granja, alarma y personas en la zona.</figcaption></figure>
-<p>Hubo 12 intrusiones simuladas, todas detectadas, con alarma
+<figure><img src="figuras/dev-mc-seguridad.png"><figcaption>Figura 30. mc-seguridad: criaturas hostiles en la granja, alarma y personas en la zona.</figcaption></figure>
+<p>Hubo 25 intrusiones simuladas, todas detectadas, con alarma
 automática y alerta "Intruso en la granja". El pico de 11 hostiles del 11 de noviembre coincide con la
 visita de un jugador: en Minecraft las criaturas aparecen cerca de los jugadores. Las dos que quedaron
 esa noche mantuvieron la alarma encendida hasta el amanecer, cuando el sol las eliminó.</p>
-<figure><img src="figuras/dev-mc-estacion.png"><figcaption>Figura 30. mc-estacion: lluvia en el mundo (sincronizada con la lluvia real) y luz del cielo.</figcaption></figure>
-<figure><img src="figuras/dev-mc-server.png"><figcaption>Figura 31. mc-server: rendimiento (TPS) y memoria del servidor del gemelo.</figcaption></figure>
+<figure><img src="figuras/dev-mc-estacion.png"><figcaption>Figura 31. mc-estacion: lluvia en el mundo (sincronizada con la lluvia real) y luz del cielo.</figcaption></figure>
+<figure><img src="figuras/dev-mc-server.png"><figcaption>Figura 32. mc-server: rendimiento (TPS) y memoria del servidor del gemelo.</figcaption></figure>
 <p>El servidor del gemelo mantuvo <strong>20.0 TPS de promedio</strong> (el máximo es 20), con un
-mínimo de 17.3 durante un reinicio. La memoria osciló entre
-261 y 1284 MB por la recolección de basura de
+mínimo de 15.4 durante un reinicio. La memoria osciló entre
+244 y 1290 MB por la recolección de basura de
 Java. La VM de 4 GiB alcanza para las dos granjas, la plataforma y los servicios.</p>
 <h1 id="8-conclusiones">8. Conclusiones</h1>
 <ol>

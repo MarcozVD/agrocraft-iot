@@ -20,7 +20,7 @@ ssh -o BatchMode=yes -i "$KEY" "$HOST" "cat ~/agrocraft/experiments/experimentos
 # Capturas de los dashboards con el rango exacto de la ventana
 FROM_MS=$(( $(date -d "$START" +%s) * 1000 )); TO_MS=$(( $(date -d "$STOP" +%s) * 1000 ))
 SITE="https://agrocraft.northcentralus.cloudapp.azure.com"
-playwright-cli open "$SITE/d/agro-resumen?orgId=1&kiosk" >/dev/null
+playwright-cli open --browser=msedge "$SITE/d/agro-resumen?orgId=1&kiosk" >/dev/null
 playwright-cli resize 1600 1500 >/dev/null
 for d in resumen cultivo clima operacion dispositivo ganaderia; do
   playwright-cli goto "$SITE/d/agro-$d?orgId=1&kiosk&from=$FROM_MS&to=$TO_MS" >/dev/null
@@ -36,7 +36,7 @@ playwright-cli close >/dev/null
 SERVER=$!
 trap 'kill $SERVER 2>/dev/null; powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.Name -eq \"python.exe\" -and $_.CommandLine -match \"http.server 8765\" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" || true' EXIT
 sleep 2
-playwright-cli open "http://127.0.0.1:8765/informe/informe.html" >/dev/null
+playwright-cli open --browser=msedge "http://127.0.0.1:8765/informe/informe.html" >/dev/null
 playwright-cli run-code "async page => { await page.waitForLoadState('networkidle'); await page.waitForTimeout(1500); await page.pdf({ path: '$(cygpath -m "$PWD")/AgroCraft-informe.pdf', format: 'A4', printBackground: true, displayHeaderFooter: true, headerTemplate: '<div></div>', footerTemplate: '<div style=\"font-size:7pt;width:100%;text-align:center;color:#888\">AgroCraft · Proyecto final IoT · <span class=pageNumber></span> / <span class=totalPages></span></div>', margin: { top: '16mm', bottom: '16mm', left: '14mm', right: '14mm' } }); }" >/dev/null
 playwright-cli close >/dev/null
 rm -rf .playwright-cli

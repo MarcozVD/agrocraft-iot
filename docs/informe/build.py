@@ -409,11 +409,14 @@ def main():
     for part in sorted((HERE / "secciones").glob("*.md")):
         body += render(part.read_text(encoding="utf-8"), figures) + "\n"
     template = (HERE / "plantilla.html").read_text(encoding="utf-8")
+    INTEGRANTES = ("George Sebastian Makhlouf Ruiz (U00178462)<br>Juan Camilo Gomez Roa (U00177289)<br>"
+                   "Marcos Valera Daza (U00177223)")
     months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
               "noviembre", "diciembre"]
     today = datetime.now()
     out = (template.replace("{{contenido}}", body)
-           .replace("{{fecha}}", f"{today.day} de {months[today.month - 1]} de {today.year}"))
+           .replace("{{fecha}}", f"{today.day} de {months[today.month - 1]} de {today.year}")
+           .replace("{{integrantes}}", INTEGRANTES))
     (HERE / "informe.html").write_text(out, encoding="utf-8", newline="\n")
     print(f"informe.html: {len(figures)} figuras, ventana {T0} – {T1}")
 
