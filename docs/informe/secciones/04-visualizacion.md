@@ -51,7 +51,7 @@ comedero bajo 30 %, alarma ante hostiles.
 
 ## 4.4 Otras vistas
 
-- **Centro de datos** (`/iot/gemelo/`): una sola página con cuatro pantallas. *Granja 3D*: los bloques reales del
+- **Centro de datos** ([https://agrocraft.northcentralus.cloudapp.azure.com/iot/gemelo/](https://agrocraft.northcentralus.cloudapp.azure.com/iot/gemelo/)): una sola página con cuatro pantallas. *Granja 3D*: los bloques reales del
   mundo con cada sensor en vivo, en vistas 3D, 2.5D y 2D, reproducción de las últimas 24 h y recorrido guiado.
   *Panel de control*: los 17 dispositivos con su último valor, su estado en palabras y estadísticas de 6 h; el
   detalle de cada uno tiene una gráfica en vivo por variable (umbrales, promedio, mínimo y máximo), sus mensajes
