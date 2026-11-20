@@ -68,3 +68,6 @@ experiments/
 # Informe: entorno y datos regenerables
 docs/informe/.venv/
 docs/informe/datos/series.csv
+
+# Accesos directos locales (p. ej. el de inicio automático del agente del PC)
+*.lnk
