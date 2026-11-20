@@ -338,7 +338,10 @@ async def notify_chats(request):
 
 
 async def daily_reports(app):
-    """Informe diario a las 07:00 hora Colombia."""
+    """Informe diario a las 07:00 hora Colombia (DAILY_REPORT=0 lo desactiva, p. ej. con la captura cerrada)."""
+    if os.environ.get("DAILY_REPORT", "1") == "0":
+        log.info("informe diario desactivado (DAILY_REPORT=0)")
+        return
     while True:
         now = datetime.now(report.TZ)
         target = now.replace(hour=7, minute=0, second=0, microsecond=0)

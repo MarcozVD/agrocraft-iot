@@ -21,6 +21,7 @@ services:
       SITE_HOST: ${SITE_HOST}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../data/minecraft/plugins/squaremap/web:/srv/map:ro    # mapa del mundo (estático)
       - ../data/caddy:/data
       - caddy-config:/config
     mem_limit: 128m

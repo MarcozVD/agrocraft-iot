@@ -2,7 +2,7 @@
 
   GET /iot/api/stream                  Server-Sent Events: foto inicial de la flota y luego cada mensaje
                                        del bróker (telemetry, state, status, event, ack) en vivo
-  GET /iot/api/latest                  último valor guardado de cada variable (real: 6 h; simulación: 30 d)
+  GET /iot/api/latest                  último valor guardado de cada variable (30 días)
   GET /iot/api/history/<device>        series de un dispositivo (?hours=6, agregadas para ~150 puntos)
   GET /iot/api/series                  varias series a la vez (?keys=dev/campo,dev/campo&minutes=60)
   GET /iot/api/replay                  estado de los gemelos y del clima para reproducir (?hours=24)
@@ -105,7 +105,7 @@ def _ms(stamp: str) -> int:
 
 async def latest(request: web.Request):
     rows = await _query('''from(bucket: "telemetry")
-  |> range(start: -6h)
+  |> range(start: -30d)
   |> filter(fn: (r) => r._measurement == "telemetry" and r._field != "seq")
   |> last()''')
     rows += await _query('''from(bucket: "telemetry")
