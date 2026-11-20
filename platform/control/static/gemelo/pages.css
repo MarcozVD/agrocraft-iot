@@ -19,6 +19,14 @@ body:not(.page-granja) .labels, body:not(.page-granja) .tourbar { display: none 
 .lvl.bad { background: rgba(255, 93, 77, .2); color: #ffb2a8; }
 .lvl.info { background: rgba(255, 255, 255, .07); color: var(--muted); }
 
+/* aviso de captura terminada */
+.archive-banner { position: fixed; left: 50%; transform: translateX(-50%); bottom: 96px; z-index: 30; width: min(920px, calc(100% - 24px));
+                  padding: 12px 16px; border-radius: 14px; background: rgba(40, 28, 6, .94); border: 1px solid rgba(232, 163, 61, .6);
+                  color: #ffe6b8; font-size: 13.5px; line-height: 1.5; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+.archive-banner b { color: #fff; }
+.archive-banner button { margin-left: 10px; padding: 4px 10px; border-radius: 8px; background: var(--wheat); color: #2a1a02; font-weight: 600; font-size: 12.5px; }
+body:not(.page-granja) .archive-banner { bottom: 24px; }
+
 /* botones y formularios comunes */
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--line-strong);
        background: var(--raise); color: var(--ink); font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; cursor: pointer; }

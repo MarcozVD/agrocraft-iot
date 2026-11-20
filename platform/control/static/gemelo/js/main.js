@@ -197,8 +197,9 @@ function setPill() {
     cls = "replay";
     text = ui.playing ? "Reproduciendo" : "Pasado (pausa)";
   } else if (live?.status === "en vivo") {
-    cls = "ok";
-    text = ui.farm === "sim" ? "En vivo · simulación" : "En vivo";
+    // Captura cerrada el 19 nov 2026: los valores son los últimos guardados, no lecturas en vivo
+    cls = "replay";
+    text = "Datos recopilados · 11–19 nov";
   } else if (live?.status === "sin conexión") cls = "bad";
   pill.className = `pill live ${cls}`;
   pill.querySelector("span").textContent = text[0].toUpperCase() + text.slice(1);
@@ -869,6 +870,7 @@ function closeGuide() {
 }
 
 function bindUI() {
+  $("#archiveClose").addEventListener("click", () => { $("#archive").hidden = true; layoutTop(); });
   for (const b of document.querySelectorAll("[data-page]")) b.addEventListener("click", () => setPage(b.dataset.page));
   $("#t-guide").addEventListener("click", openGuide);
   $("#gClose").addEventListener("click", closeGuide);
